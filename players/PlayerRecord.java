@@ -8,7 +8,7 @@ package players;
 public class PlayerRecord {
 	private int street;
 	private int avenue;
-	private final int playerID;
+	private final Player player;
 	
 	/**
 	 * Constructor of PlayerRecord
@@ -16,8 +16,8 @@ public class PlayerRecord {
 	 * @param street - street of city
 	 * @param avenue - avenue of city
 	 */
-	public PlayerRecord(int playerID, int street, int avenue) {
-		this.playerID = playerID;
+	public PlayerRecord(Player player, int street, int avenue) {
+		this.player = player;
 		this.street = street;
 		this.avenue = avenue;
 	}
@@ -58,8 +58,7 @@ public class PlayerRecord {
 	 * Gets playerID
 	 * @return - ID of player
 	 */
-	public int getPlayerID() {
-		return playerID;
+	public Player getPlayer() {
+		return this.player;
 	}
-	
 }

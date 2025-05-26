@@ -51,7 +51,7 @@ public abstract class Player extends EnhancedBot{
 			Player.playerList.get(playerID).setStreet(this.getStreet());
 			Player.playerList.get(playerID).setAvenue(this.getAvenue());
 		} else {
-			Player.playerList.add(new PlayerRecord(this.playerID, this.getStreet(), this.getAvenue()));
+			Player.playerList.add(new PlayerRecord(this, this.getStreet(), this.getAvenue()));
 			Player.nextID++; // Iterates playerID to create a unique player identification number
 		}
 	}
