@@ -1,4 +1,4 @@
-
+package players;
 import java.util.*;
 import becker.robots.*;
 
