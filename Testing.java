@@ -1,5 +1,5 @@
 
-public class Attacker {
+public class Testing {
 	public static void main(String[] args) {
 		System.out.println("Bon anus");
 	}	
