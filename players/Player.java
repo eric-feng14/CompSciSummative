@@ -9,7 +9,7 @@ import becker.robots.*;
  */
 public abstract class Player extends EnhancedBot{
 	private static int nextID = 0; // Next playerID of next created player; corresponds with index of playerList
-	private static List<PlayerRecord> playerList = new ArrayList<PlayerRecord>();
+	private static ArrayList<PlayerRecord> playerList = new ArrayList<PlayerRecord>();
 	
 	protected int playerID; // Used to identify player - unique to each Player object
 	
