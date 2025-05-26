@@ -1,4 +1,4 @@
-package players;
+
 import becker.robots.*;
 
 /**
