@@ -8,9 +8,8 @@ import becker.robots.*;
  * @version 5/25/2025
  */
 public abstract class Player extends EnhancedBot{
-	private static final int PLAYER_INDEX_LENGTH = 3; // Length of each index of playerList
 	private static int nextID = 0; // Next playerID of next created player; corresponds with index of playerList
-	private static List<int[]> playerList = new ArrayList<int[]>();
+	private static List<PlayerRecord> playerList = new ArrayList<PlayerRecord>();
 	
 	private int playerID; // Used to identify player - unique to each Player object
 	
@@ -29,13 +28,19 @@ public abstract class Player extends EnhancedBot{
 	}
 	
 	/**
+	 * makes robot do the thing it is supposed to do
+	 */
+	public void doThing() {
+		performAction();
+		recordPlayer();
+	}
+	
+	/**
 	 * The player's function is performed when this method is called
 	 * pre: It is called upon in the application class
 	 * post: The action determined by helper methods will be performed
 	 */
-	public void performAction() {
-		this.recordPlayer();
-	}
+	protected abstract void performAction();
 	
 	/**
 	 * Records all player information
@@ -43,9 +48,10 @@ public abstract class Player extends EnhancedBot{
 	private void recordPlayer() {
 		// Adds player info or sets player info on playerList
 		if(playerID < nextID) {
-			Player.playerList.set(playerID, new int[]{playerID, this.getStreet(), this.getAvenue()});
+			Player.playerList.get(playerID).setStreet(this.getStreet());
+			Player.playerList.get(playerID).setAvenue(this.getAvenue());
 		} else {
-			Player.playerList.add(new int[]{playerID, this.getStreet(), this.getAvenue()});
+			Player.playerList.add(new PlayerRecord(this.playerID, this.getStreet(), this.getAvenue()));
 			Player.nextID++; // Iterates playerID to create a unique player identification number
 		}
 	}
