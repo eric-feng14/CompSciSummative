@@ -7,14 +7,14 @@ import java.util.ArrayList;
  * @author tuojs
  * @version 4/9/2025 
  */
-public class TuoWallCreator {
+public class WallCreator {
 	private ArrayList<Wall> walls;
 	private City city;
 	/**
 	 * Constructor - initializes empty wall List
 	 * @param city - City
 	 */
-	public TuoWallCreator(City city) {
+	public WallCreator(City city) {
 		this.city = city;
 		this.walls = new ArrayList<Wall>();
 	}
