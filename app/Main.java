@@ -2,6 +2,7 @@
 package app;
 import players.*;
 import becker.robots.*;
+import tools.*;
 
 /**
  * A friendly game of tag
@@ -12,7 +13,7 @@ public class Main {
 	public static void main(String[] args) {
 		City city = new City(13, 24);
 
-		tools.WallCreator creator = new tools.WallCreator(city);
+		WallCreator creator = new WallCreator(city);
 		creator.createWallRect(0, 0, 24, 13);
 		
 		Player attacker = new Attacker(city, 0, 0, Direction.EAST);
