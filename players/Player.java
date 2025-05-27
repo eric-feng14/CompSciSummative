@@ -75,8 +75,6 @@ public abstract class Player extends EnhancedBot{
 		return Player.playerList;
 	}
 	
-	
-	
 	/**
 	 * Gets the next step's direction 
 	 * @return - Direction of its next step
