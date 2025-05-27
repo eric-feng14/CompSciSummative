@@ -10,6 +10,10 @@ public class Attacker extends Player{
 		// TODO Auto-generated constructor stub
 	}
 
+	public Attacker getClass() {
+		return this;
+	}
+
 	@Override
 	protected void performAction() {
 		// TODO Auto-generated method stub

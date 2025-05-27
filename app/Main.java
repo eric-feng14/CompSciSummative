@@ -26,7 +26,7 @@ public class Main {
 			walls[walls.length - 1][i] = new Wall(city, i, walls.length - 1, Direction.EAST);
 		}
 		
-		Attacker attacker = new Attacker(city, 0, 0, Direction.EAST);
+		Player attacker = new Attacker(city, 0, 0, Direction.EAST);
 		String nameOfClass = Player.getPlayerRecord(0).getPlayer().getClass().getSimpleName();
 		System.out.println(nameOfClass);
 	}

@@ -24,7 +24,8 @@ public abstract class Player extends EnhancedBot{
 	public Player(City city, int s, int a, Direction d) {
 		super(city, s, a, d);
 		this.playerID = Player.nextID;
-		this.recordPlayer();
+		Player.playerList.add(new PlayerRecord(this, this.getStreet(), this.getAvenue()));
+		Player.nextID++; // Iterates playerID to create a unique player identification number
 	}
 	
 	/**
@@ -46,14 +47,8 @@ public abstract class Player extends EnhancedBot{
 	 * Records all player information
 	 */
 	private void recordPlayer() {
-		// Adds player info or sets player info on playerList
-		if(playerID < nextID) {
 			Player.playerList.get(playerID).setStreet(this.getStreet());
 			Player.playerList.get(playerID).setAvenue(this.getAvenue());
-		} else {
-			Player.playerList.add(new PlayerRecord(this, this.getStreet(), this.getAvenue()));
-			Player.nextID++; // Iterates playerID to create a unique player identification number
-		}
 	}
 	
 	/**
