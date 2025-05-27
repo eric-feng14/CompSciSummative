@@ -1,4 +1,5 @@
 package app;
+import tools.WallCreator;
 import players.*;
 import becker.robots.*;
 
@@ -12,18 +13,9 @@ public class Main {
 		City city = new City(13, 24);
 		
 		Wall [][] walls = new Wall[24][13];
-
-		// creates horizontal walls
-		for (int i = 0; i < walls.length; i ++) {
-			walls[i][0] = new Wall(city, 0, i, Direction.NORTH);
-			walls[i][walls[0].length - 1] = new Wall(city, walls[0].length - 1, i, Direction.SOUTH);
-		}
-
-		// creates vertical walls
-		for (int i = 0; i < walls[0].length; i ++) {
-			walls[0][i] = new Wall(city, i, 0, Direction.WEST);
-			walls[walls.length - 1][i] = new Wall(city, i, walls.length - 1, Direction.EAST);
-		}
+		
+		WallCreator creator = new WallCreator(city);
+		creator.createWallRect(0, 0, 24, 13);
 		
 		Attacker attacker = new Attacker(city, 0, 0, Direction.EAST);
 		String nameOfClass = Player.getPlayerRecord(0).getPlayer().getClass().getSimpleName();
