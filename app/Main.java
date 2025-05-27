@@ -9,7 +9,7 @@ import becker.robots.*;
  */
 public class Main {
 	public static void main(String[] args) {
-		City city = new City();
+		City city = new City(13, 24);
 		
 		Wall [][] walls = new Wall[24][13];
 
