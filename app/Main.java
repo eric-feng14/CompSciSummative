@@ -17,7 +17,7 @@ public class Main {
 		creator.createWallRect(0, 0, 24, 13);
 		
 		Player attacker = new Attacker(city, 0, 0, Direction.EAST);
-		String nameOfClass = Player.getPlayerRecord(0).getPlayer().getClass().getSimpleName();
+		String nameOfClass = Player.getPlayerRecord(0).getID();
 		System.out.println(nameOfClass);
 		
 		EnhancedBot thisRobot = new EnhancedBot(city, 0, 0, Direction.EAST);
