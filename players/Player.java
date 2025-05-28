@@ -11,7 +11,8 @@ public abstract class Player extends EnhancedBot{
 	private static int nextID = 0; // Next playerID of next created player; corresponds with index of playerList
 	private static List<PlayerRecord> playerList = new ArrayList<PlayerRecord>();
 	
-	protected int playerID; // Used to identify player - unique to each Player object
+	protected PlayerRecord[] priorityList;
+	private int speed, stamina, playerID;
 	
 	/**
 	 * Constructor of player
@@ -21,10 +22,14 @@ public abstract class Player extends EnhancedBot{
 	 * @param a - avenue of player
 	 * @param d - Direction of player
 	 */
-	public Player(City city, int s, int a, Direction d) {
+	public Player(City city, int s, int a, Direction d, int speed, int stamina, String type) {
 		super(city, s, a, d);
-		this.playerID = Player.nextID;
-		Player.playerList.add(new PlayerRecord(this, this.getStreet(), this.getAvenue()));
+		this.playerID = nextID;
+		this.speed = speed;
+		this.stamina = stamina;
+		this.updateList();
+		
+		Player.playerList.add(new PlayerRecord(type + ";" + speed + ";" + playerID, this.getStreet(), this.getAvenue()));
 		Player.nextID++; // Iterates playerID to create a unique player identification number
 	}
 	
@@ -32,9 +37,27 @@ public abstract class Player extends EnhancedBot{
 	 * makes robot do the thing it is supposed to do
 	 */
 	public void doThing() {
+		updateList();
 		performAction();
 		recordPlayer();
 	}
+	
+	/**
+	 * Updates the priorityList of player
+	 */
+	private void updateList() {
+		this.priorityList = new PlayerRecord[playerList.size()];
+		// Sets all playerList Records to priorityList
+		for (int i = 0; i < Player.playerList.size(); i++) {
+			this.priorityList[i] = Player.playerList.get(i);
+		}
+		this.sortPriority();
+	}
+	
+	/**
+	 * Sorts the priority list of the player
+	 */
+	protected abstract void sortPriority();
 	
 	/**
 	 * The player's function is performed when this method is called
@@ -67,6 +90,38 @@ public abstract class Player extends EnhancedBot{
 	}
 	
 	/**
+	 * Getter for speed
+	 * @return - speed of robot in turn
+	 */
+	public int acquireSpeed() {
+		return speed;
+	}
+
+	/**
+	 * Sets speed of robot 
+	 * @param speed - speed of robot
+	 */
+	public void setSpeed(int speed) {
+		this.speed = speed;
+	}
+	
+	/**
+	 * Gets stamina of robot
+	 * @return - stamina of robot
+	 */
+	public int getStamina() {
+		return stamina;
+	}
+
+	/**
+	 * Sets stamina of robot
+	 * @param stamina - stamina of robot
+	 */
+	public void setStamina(int stamina) {
+		this.stamina = stamina;
+	}
+
+	/**
 	 * Getter for the player list
 	 * pre: accessed by other player classes
 	 * @return - the list of player records
@@ -86,4 +141,5 @@ public abstract class Player extends EnhancedBot{
 	 * @return - the number of moves the player is required to make
 	 */
 	protected abstract int getNextMovement();
+	
 }

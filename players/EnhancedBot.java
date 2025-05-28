@@ -9,7 +9,7 @@ import becker.robots.*;
 public class EnhancedBot extends RobotSE {
 	
 	/**
-	 * Constructor for TuoBot
+	 * Constructor for EnhancedBot
 	 * @param city - city of the robot
 	 * @param s - street of the city
 	 * @param a - avenue of the city

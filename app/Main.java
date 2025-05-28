@@ -19,5 +19,7 @@ public class Main {
 		Player attacker = new Attacker(city, 0, 0, Direction.EAST);
 		String nameOfClass = Player.getPlayerRecord(0).getPlayer().getClass().getSimpleName();
 		System.out.println(nameOfClass);
+		
+		EnhancedBot thisRobot = new EnhancedBot(city, 0, 0, Direction.EAST);
 	}
 }

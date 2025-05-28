@@ -6,12 +6,8 @@ import becker.robots.Direction;
 public class Attacker extends Player{
 
 	public Attacker(City city, int s, int a, Direction d) {
-		super(city, s, a, d);
+		super(city, s, a, d, 10, 5, "Attacker");
 		// TODO Auto-generated constructor stub
-	}
-
-	public Attacker getClass() {
-		return this;
 	}
 
 	@Override
@@ -30,6 +26,11 @@ public class Attacker extends Player{
 	protected int getNextMovement() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+	
+	@Override
+	protected void sortPriority() {
+		
 	}
 	
 }
