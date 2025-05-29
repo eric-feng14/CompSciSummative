@@ -30,9 +30,6 @@ public abstract class Player extends EnhancedBot{
 		this.stamina = stamina;
 		
 		Player.playerList.add(new PlayerRecord(type + ";" + speed + ";" + PLAYER_ID, this.getStreet(), this.getAvenue()));
-		Player.nextID++; // Iterates PLAYER_ID to create a unique player identification number
-
-		Player.playerList.add(new PlayerRecord(type + ";" + speed + ";" + playerID, this.getStreet(), this.getAvenue()));
 		this.updateList();
 		
 		Player.nextID++; // Iterates playerID to create a unique player identification number
