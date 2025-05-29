@@ -1,14 +1,15 @@
 package players;
+import java.awt.Color;
 import becker.robots.*;
 
 public class Runner extends Player{
 	public Runner(City c, int s, int a, Direction d) {
 		super(c, s, a, d, 5, 5, "Runner");
+		this.setColor(Color.GREEN);
 	}
 
 	@Override
 	protected void sortPriority() {
-		// TODO Auto-generated method stub
 		
 	}
 
