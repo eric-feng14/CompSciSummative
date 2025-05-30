@@ -6,9 +6,17 @@ package players;
  * @version 5/26/2025
  */
 public class PlayerRecord {
-	private int street;
-	private int avenue;
-	private int speed;
+	private int street, avenue;
+	private int speed, PLAYER_ID;
+	
+	public int getPLAYER_ID() {
+		return PLAYER_ID;
+	}
+
+	public void setPLAYER_ID(int pLAYER_ID) {
+		PLAYER_ID = pLAYER_ID;
+	}
+
 	private final String TYPE;
 	
 	/**

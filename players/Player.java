@@ -1,5 +1,7 @@
 package players;
 import java.util.*;
+
+import app.Main;
 import becker.robots.*;
 
 /**
@@ -9,9 +11,8 @@ import becker.robots.*;
  */
 public abstract class Player extends EnhancedBot{
 	private static int nextID = 0; // Next PLAYER_ID of next created player; corresponds with index of playerList
-	private static List<PlayerRecord> playerList = new ArrayList<PlayerRecord>();
 	
-	protected PlayerRecord[] priorityList;
+	protected PlayerRecord[] priorityList = new PlayerRecord[Main.numOfPlayers];
 	private int speed, stamina;
 	private final int PLAYER_ID;
 	
@@ -29,31 +30,17 @@ public abstract class Player extends EnhancedBot{
 		this.speed = speed;
 		this.stamina = stamina;
 		
-		Player.playerList.add(new PlayerRecord(type, -1, this.getStreet(), this.getAvenue()));
-		this.updateList();
-		
+		this.priorityList[nextID] = new PlayerRecord(type, s, a, speed);
 		Player.nextID++; // Iterates playerID to create a unique player identification number
+		this.sortPriority();
 	}
 	
 	/**
 	 * makes robot do the thing it is supposed to do
 	 */
 	public void doThing() {
-		updateList();
 		performAction();
 		recordPlayer();
-	}
-	
-	/**
-	 * Updates the priorityList of player
-	 */
-	private void updateList() {
-		this.priorityList = new PlayerRecord[playerList.size()];
-		// Sets all playerList Records to priorityList
-		for (int i = 0; i < Player.playerList.size(); i++) {
-			this.priorityList[i] = Player.playerList.get(i);
-		}
-		this.sortPriority();
 	}
 	
 	/**
@@ -68,27 +55,20 @@ public abstract class Player extends EnhancedBot{
 	 */
 	protected abstract void performAction();
 	
+	public PlayerRecord getPlayerRecord(int PLAYER_ID){
+		// Checks if index is out of bounds or not
+		if (PLAYER_ID >= 0 && PLAYER_ID < this.priorityList.length) {
+			return priorityList[PLAYER_ID];
+		}
+		System.out.println("ERROR");
+		return new PlayerRecord(null, -1, 0, 0);
+	}
 	/**
 	 * Records all player information
 	 */
 	private void recordPlayer() {
-			Player.playerList.get(PLAYER_ID).setStreet(this.getStreet());
-			Player.playerList.get(PLAYER_ID).setAvenue(this.getAvenue());
-	}
-	
-	/**
-	 * Getter for PlayerRecord in the ArrayList
-	 * @param PLAYER_ID - ID of the player
-	 * @return - PlayerRecord ID references
-	 */
-	public static PlayerRecord getPlayerRecord(int PLAYER_ID){
-		// Checks if index is out of bounds or not
-		if (PLAYER_ID >= 0 && PLAYER_ID < playerList.size()) {
-			return playerList.get(PLAYER_ID);
-		} else {
-			System.out.println("ERROR");
-			return new PlayerRecord(null, -1, 0, 0);
-		}
+		this.priorityList[PLAYER_ID].setStreet(this.getStreet());
+		this.priorityList[PLAYER_ID].setAvenue(this.getAvenue());
 	}
 	
 	/**
@@ -129,15 +109,6 @@ public abstract class Player extends EnhancedBot{
 	 */
 	public int getPLAYER_ID() {
 		return this.PLAYER_ID;
-	}
-
-	/**
-	 * Getter for the player list
-	 * pre: accessed by other player classes
-	 * @return - the list of player records
-	 */
-	protected static List<PlayerRecord> getPlayerList(){
-		return Player.playerList;
 	}
 	
 	/**
