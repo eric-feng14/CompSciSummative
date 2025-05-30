@@ -9,16 +9,16 @@ public class PlayerRecord {
 	private int street;
 	private int avenue;
 	private int speed;
-	private final String ID;
+	private final String TYPE;
 	
 	/**
 	 * Constructor of PlayerRecord
-	 * @param playerID - ID of player
+	 * @param playerTYPE - TYPE of player
 	 * @param street - street of city
 	 * @param avenue - avenue of city
 	 */
-	public PlayerRecord(String ID, int speed, int street, int avenue) {
-		this.ID = ID;
+	public PlayerRecord(String TYPE, int speed, int street, int avenue) {
+		this.TYPE = TYPE;
 		this.street = street;
 		this.avenue = avenue;
 		this.speed = speed;
@@ -73,10 +73,10 @@ public class PlayerRecord {
 	}
 
 	/**
-	 * Gets playerID
-	 * @return - ID of player
+	 * Gets playerTYPE
+	 * @return - TYPE of player
 	 */
-	public String getID() {
-		return this.ID;
+	public String getTYPE() {
+		return this.TYPE;
 	}
 }
