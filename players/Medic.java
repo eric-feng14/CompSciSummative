@@ -13,7 +13,7 @@ public class Medic extends Player{
 		PlayerRecord[] newList = this.priorityList;
 		for (int i = 0; i < newList.length; i++) {
 			for (int j = i; i < newList.length; i++) {
-				if ()
+				
 			}
 		}
 	}
