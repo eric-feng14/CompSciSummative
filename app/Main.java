@@ -40,7 +40,7 @@ public class Main {
 		
 		int idx = 0;
 		while (!gameEnd()) {
-		    players[idx].doThing();
+		    players[idx].doThing(players);
 		    idx = (idx + 1) % players.length;
 		}
 

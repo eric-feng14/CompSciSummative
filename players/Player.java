@@ -30,16 +30,14 @@ public abstract class Player extends EnhancedBot{
 		this.speed = speed;
 		this.isDefeated = defeated;
 		
-		this.priorityList[nextID] = new PlayerRecord(type, s, a, speed);
 		Player.nextID++; // Iterates playerID to create a unique player identification number
-		this.sortPriority();
 	}
 	
 	/**
 	 * makes robot do the thing it is supposed to do
 	 */
-	public void doThing() {
-		this.sortPriority(); //update other player priority
+	public void doThing(Player[] players) {
+		this.sortPriority(players); //update other player priority
 		this.performAction(); //do what the robot is supposed to do
 		this.recordPlayer(); //update player location information
 	}
@@ -47,7 +45,7 @@ public abstract class Player extends EnhancedBot{
 	/**
 	 * Sorts the priority list of the player
 	 */
-	protected abstract void sortPriority();
+	protected abstract void sortPriority(Player[] players);
 	
 	/**
 	 * The player's function is performed when this method is called
@@ -62,7 +60,7 @@ public abstract class Player extends EnhancedBot{
 			return priorityList[PLAYER_ID];
 		}
 		System.out.println("ERROR");
-		return new PlayerRecord(null, -1, 0, 0);
+		return new PlayerRecord(null, -1, 0, 0, 0);
 	}
 	/**
 	 * Records all player information
