@@ -5,20 +5,34 @@ import becker.robots.*;
 public class Attacker extends Player{
 	
 	private int numOfEnemiesDefeated = 0;
-	private static ArrayList<PlayerRecord> targetList = new ArrayList<PlayerRecord>();
+	private static ArrayList<PlayerRecord> commonTargets = new ArrayList<PlayerRecord>();
 	private PlayerRecord currentTarget;
 
 	public Attacker(City city, int s, int a, Direction d) {
-		super(city, s, a, d, 10, 5, "Attacker");
+		super(city, s, a, d, 10, "Attacker", true);
 		// TODO Auto-generated constructor stub
 	}
 
-	@Override
+	@Override 
 	protected void performAction() {
-		// TODO Auto-generated method stub
-		sortPriority();
+		if (currentTarget == null) { //If there is currently no target
+			currentTarget = getTarget();
+		}
+		chaseTarget(currentTarget);
+	}
+	
+	private void chaseTarget(PlayerRecord currentTarget) {
 		
-		this.moveTo(this.priorityList[0].getStreet(), this.priorityList[0].getAvenue());
+	}
+	
+	private PlayerRecord getTarget() {
+		for (PlayerRecord rec : this.priorityList) {
+			if (! commonTargets.contains(rec)) { //target was not found in the common target list
+				commonTargets.add(rec); //add target to the common target list
+				return rec;
+			}
+		}
+		return null; //all targets are being chased -> implement code later
 	}
 
 	@Override

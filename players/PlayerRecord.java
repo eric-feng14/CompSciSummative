@@ -8,24 +8,16 @@ package players;
 public class PlayerRecord {
 	private int street, avenue;
 	private int speed, PLAYER_ID;
-	
-	public int getPLAYER_ID() {
-		return PLAYER_ID;
-	}
-
-	public void setPLAYER_ID(int pLAYER_ID) {
-		PLAYER_ID = pLAYER_ID;
-	}
 
 	private final String TYPE;
 	
 	/**
-	 * Constructor of PlayerRecord
+	 * Constructor of PlayerRecod
 	 * @param playerTYPE - TYPE of player
 	 * @param street - street of city
 	 * @param avenue - avenue of city
 	 */
-	public PlayerRecord(String TYPE, int speed, int street, int avenue) {
+	public PlayerRecord(String TYPE, int street, int avenue, int speed) {
 		this.TYPE = TYPE;
 		this.street = street;
 		this.avenue = avenue;
@@ -79,7 +71,14 @@ public class PlayerRecord {
 	public void setSpeed(int speed) {
 		this.speed = speed;
 	}
+	
+	public int getPLAYER_ID() {
+		return PLAYER_ID;
+	}
 
+	public void setPLAYER_ID(int PLAYER_ID) {
+		this.PLAYER_ID = PLAYER_ID;
+	}
 	/**
 	 * Gets playerTYPE
 	 * @return - TYPE of player

@@ -1,5 +1,4 @@
 package players;
-import java.util.*;
 
 import app.Main;
 import becker.robots.*;
@@ -13,8 +12,9 @@ public abstract class Player extends EnhancedBot{
 	private static int nextID = 0; // Next PLAYER_ID of next created player; corresponds with index of playerList
 	
 	protected PlayerRecord[] priorityList = new PlayerRecord[Main.numOfPlayers];
-	private int speed, stamina;
+	private int speed;
 	private final int PLAYER_ID;
+	public  boolean isDefeated;
 	
 	/**
 	 * Constructor of player
@@ -24,11 +24,11 @@ public abstract class Player extends EnhancedBot{
 	 * @param a - avenue of player
 	 * @param d - Direction of player
 	 */
-	public Player(City city, int s, int a, Direction d, int speed, int stamina, String type) {
+	public Player(City city, int s, int a, Direction d, int speed, String type, boolean defeated) {
 		super(city, s, a, d);
 		this.PLAYER_ID = nextID;
 		this.speed = speed;
-		this.stamina = stamina;
+		this.isDefeated = defeated;
 		
 		this.priorityList[nextID] = new PlayerRecord(type, s, a, speed);
 		Player.nextID++; // Iterates playerID to create a unique player identification number
@@ -39,8 +39,9 @@ public abstract class Player extends EnhancedBot{
 	 * makes robot do the thing it is supposed to do
 	 */
 	public void doThing() {
-		performAction();
-		recordPlayer();
+		this.sortPriority(); //update other player priority
+		this.performAction(); //do what the robot is supposed to do
+		this.recordPlayer(); //update player location information
 	}
 	
 	/**
@@ -71,36 +72,21 @@ public abstract class Player extends EnhancedBot{
 		this.priorityList[PLAYER_ID].setAvenue(this.getAvenue());
 	}
 	
-	/**
-	 * Getter for speed
-	 * @return - speed of robot in turn
-	 */
-	public int acquireSpeed() {
-		return speed;
-	}
-
-	/**
-	 * Sets speed of robot 
-	 * @param speed - speed of robot
-	 */
-	public void setSpeed(int speed) {
-		this.speed = speed;
-	}
 	
 	/**
 	 * Gets stamina of robot
 	 * @return - stamina of robot
 	 */
-	public int getStamina() {
-		return stamina;
+	public int obtainSpeed() {
+		return this.speed;
 	}
 
 	/**
 	 * Sets stamina of robot
 	 * @param stamina - stamina of robot
 	 */
-	public void setStamina(int stamina) {
-		this.stamina = stamina;
+	public void setStamina(int speed) {
+		this.speed = speed;
 	}
 	
 	/**

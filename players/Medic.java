@@ -13,7 +13,7 @@ public class Medic extends Player{
 	 * @param d - direction
 	 */
 	public Medic (City c, int s, int a, Direction d) {
-		super(c, s, a, d, 3, 4, "Medic");
+		super(c, s, a, d, 3, 4, "Medic", false);
 		this.setColor(new Color(133, 248, 108));
 		this.previousPriority = this.priorityList;
 	}
@@ -21,14 +21,6 @@ public class Medic extends Player{
 	@Override
 	protected void sortPriority() {
 		
-		for (int i = 0; i < priorityList.length; i++) {
-			int smallestIndex = i;
-			for (int j = i; i < priorityList.length; i++) {
-				int street = this.priorityList[j].getStreet();
-				int avenue = this.priorityList[j].getAvenue();
-				if (street + avenue )
-			}
-		}
 	}
 
 	@Override
