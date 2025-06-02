@@ -3,17 +3,30 @@ import java.awt.Color;
 import becker.robots.*;
 
 public class Medic extends Player{
+	PlayerRecord[] previousPriority;
+	
+	/**
+	 * PlayerRecord constructor
+	 * @param c - city
+	 * @param s - street
+	 * @param a - avenue
+	 * @param d - direction
+	 */
 	public Medic (City c, int s, int a, Direction d) {
 		super(c, s, a, d, 3, 4, "Medic");
 		this.setColor(new Color(133, 248, 108));
+		this.previousPriority = this.priorityList;
 	}
 
 	@Override
 	protected void sortPriority() {
-		PlayerRecord[] newList = this.priorityList;
-		for (int i = 0; i < newList.length; i++) {
-			for (int j = i; i < newList.length; i++) {
-				if ()
+		
+		for (int i = 0; i < priorityList.length; i++) {
+			int smallestIndex = i;
+			for (int j = i; i < priorityList.length; i++) {
+				int street = this.priorityList[j].getStreet();
+				int avenue = this.priorityList[j].getAvenue();
+				if (street + avenue )
 			}
 		}
 	}
