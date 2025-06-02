@@ -38,7 +38,7 @@ public abstract class Player extends EnhancedBot{
 	/**
 	 * makes robot do the thing it is supposed to do
 	 */
-	public void doThing(Player[] players) {
+	public void doThing(PlayerRecord[] players) {
 		this.sortPriority(players); //update other player priority
 		this.performAction(); //do what the robot is supposed to do
 		this.recordPlayer(); //update player location information
@@ -47,7 +47,7 @@ public abstract class Player extends EnhancedBot{
 	/**
 	 * Sorts the priority list of the player
 	 */
-	protected abstract void sortPriority(Player[] players);
+	protected abstract void sortPriority(PlayerRecord[] players);
 	
 	/**
 	 * The player's function is performed when this method is called

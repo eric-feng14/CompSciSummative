@@ -38,16 +38,23 @@ public class Main {
 		players[0] = new Attacker(city, 0, 0, Direction.EAST);
 		players[1] = new Medic(city, 0, 1, Direction.EAST);
 		players[2] = new Runner(city, 1, 0, Direction.EAST);
-		
-		for (int i = 0; i < players.length; i++) {
-			playerRecords[i] = new PlayerRecord(players[i]);
-		}
-		
+		updatePlayerRecord();
 		int idx = 0;
+		// Game loop
 		while (!gameEnd()) {
-		    players[idx].doThing(players);
+			updatePlayerRecord();
+		    players[idx].doThing(playerRecords);
 		    idx = (idx + 1) % players.length;
 		}
 
+	}
+	
+	/**
+	 * Updates Player records
+	 */
+	public static void updatePlayerRecord() {
+		for (int i = 0; i < Main.players.length; i++) {
+			Main.playerRecords[i] = new PlayerRecord(players[i]);
+		}
 	}
 }
