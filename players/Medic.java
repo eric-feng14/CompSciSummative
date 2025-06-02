@@ -4,7 +4,7 @@ import becker.robots.*;
 
 public class Medic extends Player{
 	public Medic (City c, int s, int a, Direction d) {
-		super(c, s, a, d, 3, 4, "Medic");
+		super(c, s, a, d, 3, 4, "Medic", false);
 		this.setColor(new Color(133, 248, 108));
 	}
 

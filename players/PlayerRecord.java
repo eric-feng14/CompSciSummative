@@ -13,8 +13,8 @@ public class PlayerRecord {
 		return PLAYER_ID;
 	}
 
-	public void setPLAYER_ID(int pLAYER_ID) {
-		PLAYER_ID = pLAYER_ID;
+	public void setPLAYER_ID(int PLAYER_ID) {
+		this.PLAYER_ID = PLAYER_ID;
 	}
 
 	private final String TYPE;

@@ -10,7 +10,7 @@ import tools.*;
  */
 public class Main {
 	
-	final public static int numOfPlayers = 5;
+	final public static int numOfPlayers = 6;
 	private static Player[]  players = new Player[numOfPlayers];
 	
 	/**
@@ -18,12 +18,13 @@ public class Main {
 	 * @param numOfTargets number of runners + number of medics
 	 * @return
 	 */
-	public static boolean gameEnd(int numOfTargets) {
-		int totalEnemiesDefeated = 0;
+	public static boolean gameEnd() {
 		for (Player p : players) {
-			return true;
+			if (! p.isDefeated) { //if there is a player that hasn't been the defeated, the game continues
+				return false;
+			}
 		}
-		return false;
+		return true; //all enemies have been defeated, game should end
 	}
 	
 	public static void main(String[] args) {
@@ -39,9 +40,10 @@ public class Main {
 		players[2] = new Runner(city, 1, 0, Direction.EAST);
 		
 		int idx = 0;
-		while (idx < players.length) {
-			
-			idx++;
+		while (!gameEnd()) {
+		    players[idx].doThing();
+		    idx = (idx + 1) % players.length;
 		}
+
 	}
 }
