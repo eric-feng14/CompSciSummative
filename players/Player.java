@@ -15,6 +15,7 @@ public abstract class Player extends EnhancedBot{
 	private int speed;
 	private final int PLAYER_ID;
 	public  boolean isDefeated;
+	private final String TYPE;
 	
 	/**
 	 * Constructor of player
@@ -24,11 +25,12 @@ public abstract class Player extends EnhancedBot{
 	 * @param a - avenue of player
 	 * @param d - Direction of player
 	 */
-	public Player(City city, int s, int a, Direction d, int speed, String type, boolean defeated) {
+	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated) {
 		super(city, s, a, d);
 		this.PLAYER_ID = nextID;
 		this.speed = speed;
 		this.isDefeated = defeated;
+		this.TYPE = TYPE;
 		
 		Player.nextID++; // Iterates playerID to create a unique player identification number
 	}
@@ -93,6 +95,10 @@ public abstract class Player extends EnhancedBot{
 	 */
 	public int getPLAYER_ID() {
 		return this.PLAYER_ID;
+	}
+	
+	public String getTYPE() {
+		return this.TYPE;
 	}
 	
 	/**

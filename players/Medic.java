@@ -13,13 +13,13 @@ public class Medic extends Player{
 	 * @param d - direction
 	 */
 	public Medic (City c, int s, int a, Direction d) {
-		super(c, s, a, d, 3, 4, "Medic", false);
+		super(c, s, a, d, 3, "Medic", false);
 		this.setColor(new Color(133, 248, 108));
 		this.previousPriority = this.priorityList;
 	}
 
 	@Override
-	protected void sortPriority() {
+	protected void sortPriority(Player[] players) {
 		
 	}
 

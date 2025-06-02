@@ -12,6 +12,7 @@ public class Main {
 	
 	final public static int numOfPlayers = 6;
 	private static Player[]  players = new Player[numOfPlayers];
+	private static PlayerRecord[] playerRecords = new PlayerRecord[players.length];
 	
 	/**
 	 * 
@@ -37,6 +38,10 @@ public class Main {
 		players[0] = new Attacker(city, 0, 0, Direction.EAST);
 		players[1] = new Medic(city, 0, 1, Direction.EAST);
 		players[2] = new Runner(city, 1, 0, Direction.EAST);
+		
+		for (int i = 0; i < players.length; i++) {
+			playerRecords[i] = new PlayerRecord(players[i]);
+		}
 		
 		int idx = 0;
 		while (!gameEnd()) {

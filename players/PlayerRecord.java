@@ -27,6 +27,14 @@ public class PlayerRecord {
 	}
 	
 	/**
+	 * Player constructor
+	 * @param player - Player
+	 */
+	public PlayerRecord(Player player) {
+		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), player.obtainSpeed());
+	}
+	
+	/**
 	 * Gets the street value
 	 * @return - street number
 	 */
