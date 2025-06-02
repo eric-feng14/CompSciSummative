@@ -8,7 +8,7 @@ public class Runner extends Player{
 	private int agility;
 
 	public Runner(City c, int s, int a, Direction d) {
-		super(c, s, a, d, 5, 5, "Runner", false);
+		super(c, s, a, d, 5, "Runner", false);
 		this.setColor(Color.BLUE);
 		this.agility = 5;
 	}

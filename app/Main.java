@@ -34,7 +34,6 @@ public class Main {
 		creator.createWallRect(0, 0, 24, 13);
 		
 		//Create the robots
-		Player[] players = new Player[numOfPlayers];
 		players[0] = new Attacker(city, 0, 0, Direction.EAST);
 		players[1] = new Medic(city, 0, 1, Direction.EAST);
 		players[2] = new Runner(city, 1, 0, Direction.EAST);

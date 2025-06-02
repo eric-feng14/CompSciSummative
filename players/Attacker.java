@@ -9,7 +9,7 @@ public class Attacker extends Player{
 	private PlayerRecord currentTarget;
 
 	public Attacker(City city, int s, int a, Direction d) {
-		super(city, s, a, d, 10, 5, "Attacker", true);
+		super(city, s, a, d, 10, "Attacker", true);
 		// TODO Auto-generated constructor stub
 	}
 
