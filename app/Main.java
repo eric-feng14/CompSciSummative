@@ -21,7 +21,7 @@ public class Main {
 	 */
 	public static boolean gameEnd() {
 		for (Player p : players) {
-			if (! p.isDefeated) { //if there is a player that hasn't been the defeated, the game continues
+			if (! p.isDefeated()) { //if there is a player that hasn't been the defeated, the game continues
 				return false;
 			}
 		}

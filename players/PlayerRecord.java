@@ -8,6 +8,7 @@ package players;
 public class PlayerRecord {
 	private int street, avenue;
 	private int speed;
+	private boolean isDefeated;
 	
 	private final int PLAYER_ID;
 	private final String TYPE;
@@ -18,12 +19,13 @@ public class PlayerRecord {
 	 * @param street - street of city
 	 * @param avenue - avenue of city
 	 */
-	public PlayerRecord(String TYPE, int PLAYER_ID, int street, int avenue, int speed) {
+	public PlayerRecord(String TYPE, int PLAYER_ID, int street, int avenue, int speed, boolean isDefeated) {
 		this.TYPE = TYPE;
 		this.street = street;
 		this.avenue = avenue;
 		this.speed = speed;
 		this.PLAYER_ID = PLAYER_ID;
+		this.isDefeated = isDefeated;
 	}
 	
 	/**
@@ -31,7 +33,7 @@ public class PlayerRecord {
 	 * @param player - Player
 	 */
 	public PlayerRecord(Player player) {
-		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), player.obtainSpeed());
+		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), player.obtainSpeed(), player.isDefeated());
 	}
 	
 	/**

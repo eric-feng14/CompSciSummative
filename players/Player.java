@@ -12,10 +12,9 @@ public abstract class Player extends EnhancedBot{
 	private static int nextID = 0; // Next PLAYER_ID of next created player; corresponds with index of playerList
 	
 	protected static Random generator = new Random();
-	protected ArrayList<PlayerRecord> priorityList = new ArrayList<PlayerRecord>();
 	private int speed;
 	private final int PLAYER_ID;
-	public  boolean isDefeated;
+	private boolean isDefeated;
 	private final String TYPE;
 	
 	/**
@@ -37,34 +36,28 @@ public abstract class Player extends EnhancedBot{
 	}
 	
 	/**
-	 * makes robot do the thing it is supposed to do
-	 */
-	public void doThing(PlayerRecord[] players) {
-		this.sortPriority(players); //update other player priority
-		this.performAction(); //do what the robot is supposed to do
-	}
-	
-	/**
-	 * Sorts the priority list of the player
-	 */
-	protected abstract void sortPriority(PlayerRecord[] players);
-	
-	/**
 	 * The player's function is performed when this method is called
 	 * pre: It is called upon in the application class
 	 * post: The action determined by helper methods will be performed
 	 */
-	protected abstract void performAction();
+	public abstract void performAction(PlayerRecord[] players);
 	
-	public PlayerRecord getPlayerRecord(int PLAYER_ID){
-		// Checks if index is out of bounds or not
-		if (PLAYER_ID >= 0 && PLAYER_ID < this.priorityList.size()) {
-			return priorityList.get(PLAYER_ID);
-		}
-		System.out.println("ERROR");
-		return new PlayerRecord(null, -1, 0, 0, 0);
+	/**
+	 * Determines if is defeated
+	 * @return - isDefeated
+	 */
+	public boolean isDefeated() {
+		return isDefeated;
 	}
 	
+	/**
+	 * Sets player's defeat status
+	 * @param isDefeated - robot is defeated/tagged
+	 */
+	public void setDefeated(boolean isDefeated) {
+		this.isDefeated = isDefeated;
+	}
+
 	/**
 	 * Gets stamina of robot
 	 * @return - stamina of robot
