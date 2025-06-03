@@ -3,10 +3,9 @@ import java.awt.Color;
 import becker.robots.*;
 
 public class Runner extends Player{
-
-	private boolean isCaught = false;
 	private int agility;
-
+	private PlayerRecord[] priorityList;
+	
 	public Runner(City c, int s, int a, Direction d) {
 		super(c, s, a, d, 5, "Runner", false);
 		this.setColor(Color.BLUE);
@@ -14,7 +13,13 @@ public class Runner extends Player{
 	}
 
 	@Override
-	protected void sortPriority() {
+	public void performAction(PlayerRecord[] players) {
+		this.updateList(players);
+		this.sortPriority(players);
+		this.runAway();
+	}
+	
+	private void sortPriority(PlayerRecord[] players) {
 		for (int i = 1; i < priorityList.length; i ++) {
 			for (int j = i; j > 0; j--) {
 				if ((priorityList[i].getTYPE().compareTo(priorityList[j - 1].getTYPE()) < 0) 
@@ -29,24 +34,19 @@ public class Runner extends Player{
 			}
 		}
 	}
+	private void updateList(PlayerRecord[] players) {
+		this.priorityList = new PlayerRecord[players.length];
+		
+		for(int i = 0; i < this.priorityList.length; i ++) {
+			this.priorityList[i] = players[i];
+		}
+	}
+	
 	private int calcDistance(PlayerRecord r) { 
 		return Math.abs(r.getAvenue() - this.getAvenue()) + Math.abs(r.getStreet() - this.getStreet());
 	}
-
-	@Override
-	protected void performAction() {
+	
+	private void runAway() {
 		
-	}
-
-	@Override
-	protected Direction getNextDirection() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	protected int getNextMovement() {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 }
