@@ -1,17 +1,17 @@
 package players;
-
+import java.util.*;
 import app.Main;
 import becker.robots.*;
 
 /**
  * Abstract class for a player in the tag game
- * @author tuojs
+ * @author Richard Tuo, Eric Feng, Felix Wang
  * @version 5/25/2025
  */
 public abstract class Player extends EnhancedBot{
 	private static int nextID = 0; // Next PLAYER_ID of next created player; corresponds with index of playerList
 	
-	protected PlayerRecord[] priorityList = new PlayerRecord[Main.numOfPlayers];
+	protected ArrayList<PlayerRecord> priorityList = new ArrayList<PlayerRecord>();
 	private int speed;
 	private final int PLAYER_ID;
 	public  boolean isDefeated;
@@ -41,7 +41,6 @@ public abstract class Player extends EnhancedBot{
 	public void doThing(PlayerRecord[] players) {
 		this.sortPriority(players); //update other player priority
 		this.performAction(); //do what the robot is supposed to do
-		this.recordPlayer(); //update player location information
 	}
 	
 	/**
@@ -58,20 +57,12 @@ public abstract class Player extends EnhancedBot{
 	
 	public PlayerRecord getPlayerRecord(int PLAYER_ID){
 		// Checks if index is out of bounds or not
-		if (PLAYER_ID >= 0 && PLAYER_ID < this.priorityList.length) {
-			return priorityList[PLAYER_ID];
+		if (PLAYER_ID >= 0 && PLAYER_ID < this.priorityList.size()) {
+			return priorityList.get(PLAYER_ID);
 		}
 		System.out.println("ERROR");
 		return new PlayerRecord(null, -1, 0, 0, 0);
 	}
-	/**
-	 * Records all player information
-	 */
-	private void recordPlayer() {
-		this.priorityList[PLAYER_ID].setStreet(this.getStreet());
-		this.priorityList[PLAYER_ID].setAvenue(this.getAvenue());
-	}
-	
 	
 	/**
 	 * Gets stamina of robot
@@ -100,17 +91,4 @@ public abstract class Player extends EnhancedBot{
 	public String getTYPE() {
 		return this.TYPE;
 	}
-	
-	/**
-	 * Gets the next step's direction 
-	 * @return - Direction of its next step
-	 */
-	protected abstract Direction getNextDirection();
-	
-	/**
-	 * Determines the depth of next movement of player
-	 * @return - the number of moves the player is required to make
-	 */
-	protected abstract int getNextMovement();
-	
 }
