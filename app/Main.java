@@ -35,22 +35,29 @@ public class Main {
 		creator.createWallRect(0, 0, 24, 13);
 		
 		//Create the robots
-//		players[0] = new Attacker(city, 0, 0, Direction.EAST);
-//		players[1] = new Medic(city, 0, 1, Direction.EAST);
-//		players[2] = new Runner(city, 1, 0, Direction.EAST);
-//		players[3] = new Attacker(city, 13, 24, Direction.WEST);
-//		players[4] = new Medic(city, 4, 4, Direction.SOUTH);
-//		players[5] = new Runner(city, 7, 7, Direction.NORTH);
-		EnhancedBot thisBot = new EnhancedBot(city, 0, 1, Direction.SOUTH);
-//		updatePlayerRecord();
-//		int idx = 0;
-//		// Game loop
-//		while (!gameEnd()) {
-//		    players[idx].doThing(playerRecords);
-//		    idx = (idx + 1) % players.length;
-//		    updatePlayerRecord();
-//		}
+		players[0] = new Attacker(city, 0, 0, Direction.EAST);
+		players[1] = new Medic(city, 0, 1, Direction.EAST);
+		players[2] = new Runner(city, 1, 0, Direction.EAST);
+		players[3] = new Attacker(city, 13, 24, Direction.WEST);
+		players[4] = new Medic(city, 4, 4, Direction.SOUTH);
+		players[5] = new Runner(city, 7, 7, Direction.NORTH);
+		updatePlayerRecord();
+		initializePlayers();
+		
+		int idx = 0;
+		// Game loop
+		while (!gameEnd()) {
+		    players[idx].performAction(playerRecords);
+		    idx = (idx + 1) % players.length;
+		    updatePlayerRecord();
+		}
 
+	}
+	
+	public static void initializePlayers() {
+		for (Player p : Main.players) {
+			p.initialize(playerRecords);
+		}
 	}
 	
 	/**

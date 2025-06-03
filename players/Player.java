@@ -35,6 +35,8 @@ public abstract class Player extends EnhancedBot{
 		Player.nextID++; // Iterates playerID to create a unique player identification number
 	}
 	
+	public void initialize(PlayerRecord[] players) {}
+	
 	/**
 	 * The player's function is performed when this method is called
 	 * pre: It is called upon in the application class

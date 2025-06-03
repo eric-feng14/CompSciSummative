@@ -1,11 +1,11 @@
 package players;
 import java.util.*;
 import becker.robots.*;
-
+import java.awt.*;
 public class Attacker extends Player{
 	
-	private static Random generator = new Random();
 	private static ArrayList<PlayerRecord> commonTargets = new ArrayList<PlayerRecord>();
+	private ArrayList<PlayerRecord> priorityList = new ArrayList<PlayerRecord>();
 	private PlayerRecord currentTarget;
 	private int roundsSpentChasing = 0;
 	private final static int maxChaseTime = 5;
@@ -13,17 +13,12 @@ public class Attacker extends Player{
 
 	public Attacker(City city, int s, int a, Direction d) {
 		super(city, s, a, d, 10, "Attacker", true);
+		this.setColor(new Color(0,0,0)); //attackers are black
 	}
 
-	/**
-	 * Assuming sortPriority() has already been called by doThing().
-	 * Extra notes:
-	 * if an attacker has been chasing an innocent for a specified amount of time, and they have not caught them,
-	 * they will switch to another innocent. Implementation will involve:
-	 * - switching currentTarget, and removing the previous target from commonTargets
-	 */
 	@Override 
-	protected void performAction() { 
+	public void performAction(PlayerRecord[] players) { 
+		this.sortPriority(players);
 		//If there is currently no target, find a new target
 		if (this.roundsSpentChasing == Attacker.maxChaseTime) { //switch to another innocent
 			switchTargets();
@@ -35,9 +30,10 @@ public class Attacker extends Player{
 	
 	private void chaseTarget(PlayerRecord target) {
 		int speed = this.obtainSpeed();
-		//Try moving vertically
-		int verticalDiff = Math.abs(target.getStreet() - this.getStreet()),
-				horizontalDiff = Math.abs(target.getAvenue() - this.getAvenue());
+		int verticalDiff = Math.abs(target.getStreet() - this.getStreet());
+		int horizontalDiff = Math.abs(target.getAvenue() - this.getAvenue());
+		
+		
 		
 	}
 	
@@ -64,21 +60,26 @@ public class Attacker extends Player{
 			}
 		}
 		//all targets are being chased -> pick a random player that's not an attacker to chase. note that we don't add to commonTargets
-		int idx = generator.nextInt(this.priorityList.size());
+		int idx = Player.generator.nextInt(this.priorityList.size());
 		PlayerRecord targetRecord = this.priorityList.get(idx);
 		return targetRecord;
 	}
 	
 	@Override
-	protected void sortPriority(PlayerRecord[] players) {
-		//Filter out all the other types
+	public void initialize(PlayerRecord[] players) {
 		for (int i = 0; i < players.length; i++) {
 			if (!players[i].getTYPE().equals("Attacker")) { //Filter out all the other attackers
-				if (!this.priorityList.contains(players[i])) {
-					this.priorityList.add(players[i]);
-				} else {
-					this.priorityList.set(i, players[i]);
-				}
+				this.priorityList.add(players[i]);
+			}
+		}
+	}
+	
+	private void sortPriority(PlayerRecord[] players) {
+		int idx = 0;
+		for (int i = 0; i < players.length; i++) {
+			if (!players[i].getTYPE().equals("Attacker")) { //Filter out all the other attackers
+				this.priorityList.set(idx, players[i]);
+				idx++;
 			}
 		}
 		
