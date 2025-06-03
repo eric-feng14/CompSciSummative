@@ -19,7 +19,7 @@ public class Medic extends Player{
 	}
 
 	@Override
-	protected void sortPriority(Player[] players) {
+	protected void sortPriority(PlayerRecord[] players) {
 		
 	}
 
