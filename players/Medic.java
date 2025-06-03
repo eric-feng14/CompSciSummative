@@ -28,17 +28,5 @@ public class Medic extends Player{
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	protected Direction getNextDirection() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	protected int getNextMovement() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 	
 }
