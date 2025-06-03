@@ -35,13 +35,17 @@ public class Attacker extends Player{
 	
 	private void chaseTarget(PlayerRecord target) {
 		int speed = this.obtainSpeed();
+		//Try moving vertically
+		int verticalDiff = Math.abs(target.getStreet() - this.getStreet()),
+				horizontalDiff = Math.abs(target.getAvenue() - this.getAvenue());
+		
 	}
 	
 	private void switchTargets() {
 		PlayerRecord oldTarget = this.currentTarget; //save the old target
-		PlayerRecord newTarget = this.newTarget(); //find a new target
+		this.currentTarget = this.newTarget(); //find a new target
 		//if they point to the same thing, don't need to remove it because theres a max of 1 copy of each robot in commonTargets
-		if (oldTarget != newTarget) { 
+		if (oldTarget != this.currentTarget) { 
 			Attacker.commonTargets.remove(oldTarget); //remove the old target
 		}
 		
@@ -59,7 +63,7 @@ public class Attacker extends Player{
 				return rec;
 			}
 		}
-		//all targets are being chased -> pick a random player that's not an attacker to chase
+		//all targets are being chased -> pick a random player that's not an attacker to chase. note that we don't add to commonTargets
 		int idx = generator.nextInt(this.priorityList.size());
 		PlayerRecord targetRecord = this.priorityList.get(idx);
 		return targetRecord;
@@ -70,7 +74,11 @@ public class Attacker extends Player{
 		//Filter out all the other types
 		for (int i = 0; i < players.length; i++) {
 			if (!players[i].getTYPE().equals("Attacker")) { //Filter out all the other attackers
-				this.priorityList.add(players[i]);
+				if (!this.priorityList.contains(players[i])) {
+					this.priorityList.add(players[i]);
+				} else {
+					this.priorityList.set(i, players[i]);
+				}
 			}
 		}
 		

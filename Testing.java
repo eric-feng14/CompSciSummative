@@ -1,7 +1,12 @@
+import java.util.*;
+import players.*;
 
 public class Testing {
 	public static void main(String[] args) {
-		System.out.println("Bon anus");
-		System.out.println("Sample change");
-	}	
+		int speed = 5;
+		while (speed > 0) {
+			System.out.println(speed);
+			speed--;
+		}
+	}
 }

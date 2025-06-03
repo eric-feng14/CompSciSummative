@@ -11,6 +11,7 @@ import becker.robots.*;
 public abstract class Player extends EnhancedBot{
 	private static int nextID = 0; // Next PLAYER_ID of next created player; corresponds with index of playerList
 	
+	protected static Random generator = new Random();
 	protected ArrayList<PlayerRecord> priorityList = new ArrayList<PlayerRecord>();
 	private int speed;
 	private final int PLAYER_ID;
