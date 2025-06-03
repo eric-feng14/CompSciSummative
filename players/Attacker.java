@@ -34,7 +34,6 @@ public class Attacker extends Player{
 		int horizontalDiff = Math.abs(target.getAvenue() - this.getAvenue());
 		
 		
-		
 	}
 	
 	private void switchTargets() {
