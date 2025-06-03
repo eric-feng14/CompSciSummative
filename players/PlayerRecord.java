@@ -99,4 +99,20 @@ public class PlayerRecord {
 	public String getTYPE() {
 		return this.TYPE;
 	}
+
+	/**
+	 * Gets isDefeated
+	 * @return isDefeated
+	 */
+	public boolean isDefeated() {
+		return isDefeated;
+	}
+
+	/**
+	 * Sets isDefeated
+	 * @param isDefeated - robot is defeated
+	 */
+	public void setDefeated(boolean isDefeated) {
+		this.isDefeated = isDefeated;
+	}
 }
