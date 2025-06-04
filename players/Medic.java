@@ -3,7 +3,8 @@ import java.awt.Color;
 import becker.robots.*;
 
 public class Medic extends Player{
-	PlayerRecord[] runnerPriority, attackerPriority, medicPriority;
+	private PlayerRecord[] prevPlayers;
+	private PlayerRecord[] runnerPriority, attackerPriority, medicPriority;
 	
 	/**
 	 * PlayerRecord constructor
@@ -21,6 +22,7 @@ public class Medic extends Player{
 	 * Sorts priorities
 	 */
 	private void sortPriority(PlayerRecord[] players) {
+		players = this.getUpdatedSpeeds(players);
 		PlayerRecord[] prevRunnerPriority = this.runnerPriority.clone();
 		PlayerRecord[] prevAttackerPriority = this.attackerPriority.clone();
 		PlayerRecord[] prevMedicPriority = this.medicPriority.clone();
@@ -28,24 +30,51 @@ public class Medic extends Player{
 		this.runnerPriority = this.getTypeArray("Runner", players);
 		this.attackerPriority = this.getTypeArray("Attacker", players);
 		this.medicPriority = this.getTypeArray("Medic", players);
-		
-		this.updateRunnerSpeeds();
 	}
 	
-	private void updateRunnerSpeeds() {
+	/**
+	 * Returns player records with speeds filled
+	 * @param players - players
+	 * @return - records with speeds filled
+	 */
+	private PlayerRecord[] getUpdatedSpeeds(PlayerRecord[] players){
+		PlayerRecord[] updatedPlayers = new PlayerRecord[players.length];
 	
+		// Sets to default of 1 if no moves have been made
+		if (this.prevPlayers == null) {
+			final int DEFAULT_SET_SPEED = 1;
+			for (int i = 0; i < players.length; i++) {
+				updatedPlayers[i] = players[i];
+				updatedPlayers[i].setSpeed(DEFAULT_SET_SPEED);
+			}
+		} else {
+			// Assumes the maximum speed robot has traveled is its regular speed
+			for (int i = 0; i < players.length; i++) {
+				updatedPlayers[i] = players[i];
+				int newSpeed = Math.abs(players[i].getAvenue() - this.prevPlayers[i].getAvenue()) + 
+						Math.abs(players[i].getStreet() - this.prevPlayers[i].getStreet());
+				
+				// TODO Advanced speed assumption with FATIGUE
+				if (newSpeed > this.prevPlayers[i].getSpeed()) {
+					updatedPlayers[i].setSpeed(newSpeed);
+				}
+			}
+		}
+		
+		return updatedPlayers;
 	}
 	
 	private void getPriorityValues(PlayerRecord[] players) {
 		
 	}
 	
-	private int[] getPredictedProximityValues(PlayerRecord[] players) {
+	private int[] getPredictedAttackerProximities(PlayerRecord[] players) {
 		int[] proximity = getProximityValues(players);
-		int[] speeds = new int[players.length];
+		// Updates proximity 
 		for (int i = 0; i < players.length; i++) {
-			speeds[i] = players[i].getSpeed();
+			proximity[i] = proximity[i] - players[i].getSpeed();
 		}
+		
 	}
 	
 	/**
@@ -74,6 +103,8 @@ public class Medic extends Player{
 		if (!this.isDefeated()) {
 			this.sortPriority(players);
 		}
+		
+		this.prevPlayers = players;
 	}
 	
 	/**
