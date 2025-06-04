@@ -12,7 +12,7 @@ public abstract class Player extends EnhancedBot{
 	private static int nextID = 0; // Next PLAYER_ID of next created player; corresponds with index of playerList
 	
 	protected static Random generator = new Random();
-	private int speed;
+	private int speed, HP = 100;
 	private final int PLAYER_ID;
 	private boolean isDefeated;
 	private final String TYPE;
@@ -37,6 +37,14 @@ public abstract class Player extends EnhancedBot{
 	
 	public void initialize(PlayerRecord[] players) {}
 	
+	public int getHP() {
+		return this.HP;
+	}
+
+	public void setHP(int hP) {
+		this.HP = hP;
+	}
+
 	/**
 	 * The player's function is performed when this method is called
 	 * pre: It is called upon in the application class

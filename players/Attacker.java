@@ -7,9 +7,9 @@ public class Attacker extends Player{
 	private static ArrayList<PlayerRecord> commonTargets = new ArrayList<PlayerRecord>();
 	private PlayerRecord[] priorityList;
 	private PlayerRecord currentTarget;
-	private int roundsSpentChasing = 0;
-	private final static int MAX_CHASE_TIME= 5;
-	private final static int STATE_CHASE = 1, STATE_REST = 2, STATE_SUPPORT = 3;
+	private int roundsSpentChasing = 0, currentState = 1;
+	private final static int MAX_CHASE_TIME = 5;
+	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
 	
 
 	public Attacker(City city, int s, int a, Direction d) {
@@ -36,6 +36,19 @@ public class Attacker extends Player{
 
 	@Override 
 	public void performAction(PlayerRecord[] players) { 
+		switch(this.currentState) { 
+			case 1: //chasing state
+				this.chase(players);
+				break;
+			case 2: //fighting state
+				this.fight();
+				break;
+			case 3: //resting state
+				this.rest();
+		}
+	}
+	
+	public void chase(PlayerRecord[] players) {
 		this.sortPriority(players);
 		
 		//Debugging
@@ -47,13 +60,29 @@ public class Attacker extends Player{
 			switchTargets();
 		}
 		
-		chaseTarget(currentTarget);
+		if (chaseTarget(currentTarget)) {
+			//defeat the target(s) at the current position
+		}
 		this.roundsSpentChasing++;
 	}
 	
-	private void chaseTarget(PlayerRecord target) {
+	public void fight() {}
+	
+	public void rest() {}
+	
+	/**
+	 * chases the target with a set amount of steps
+	 * @param target target is the PlayerRecord info about the target
+	 * @return returns a boolean representing whether or not the target has been reached
+	 */
+	private boolean chaseTarget(PlayerRecord target) {
 		int speed = this.obtainSpeed();
-		this.move();
+		
+		
+		if (target.getStreet() == this.getStreet() && target.getAvenue() == this.getAvenue()) {
+			return true;
+		}
+		return false;
 	}
 	
 	private void switchTargets() {

@@ -7,7 +7,7 @@ package players;
  */
 public class PlayerRecord {
 	private int street, avenue;
-	private int speed;
+	private int speed, HP = 100;
 	private boolean isDefeated;
 	
 	private final int PLAYER_ID;
@@ -36,6 +36,14 @@ public class PlayerRecord {
 		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), player.obtainSpeed(), player.isDefeated());
 	}
 	
+	public int getHP() {
+		return this.HP;
+	}
+
+	public void setHP(int hP) {
+		this.HP = hP;
+	}
+
 	/**
 	 * Gets the street value
 	 * @return - street number
