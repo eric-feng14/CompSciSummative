@@ -33,7 +33,7 @@ public class PlayerRecord {
 	 * @param player - Player
 	 */
 	public PlayerRecord(Player player) {
-		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), player.obtainSpeed(), player.isDefeated());
+		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), -1, player.isDefeated());
 	}
 	
 	/**
