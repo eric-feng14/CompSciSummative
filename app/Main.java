@@ -36,11 +36,13 @@ public class Main {
 		
 		//Create the robots
 		players[0] = new Attacker(city, 0, 0, Direction.EAST);
-		players[1] = new Medic(city, 0, 1, Direction.EAST);
-		players[2] = new Runner(city, 1, 0, Direction.EAST);
-		players[3] = new Attacker(city, 13, 24, Direction.WEST);
-		players[4] = new Medic(city, 4, 4, Direction.SOUTH);
-		players[5] = new Runner(city, 7, 7, Direction.NORTH);
+//		players[1] = new Medic(city, 0, 1, Direction.EAST);
+		players[1] = new Runner(city, 1, 0, Direction.EAST);
+		players[2] = new Attacker(city, 12, 23, Direction.WEST);
+//		players[4] = new Medic(city, 4, 4, Direction.SOUTH);
+		players[3] = new Runner(city, 7, 7, Direction.NORTH);
+		players[4] = new Attacker(city, 0, 1, Direction.EAST);
+		players[5] = new Runner(city, 9, 1, Direction.WEST);
 		updatePlayerRecord();
 		initializePlayers();
 		
@@ -51,7 +53,6 @@ public class Main {
 		    idx = (idx + 1) % players.length;
 		    updatePlayerRecord();
 		}
-
 	}
 	
 	public static void initializePlayers() {

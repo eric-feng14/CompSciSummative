@@ -5,22 +5,45 @@ import java.awt.*;
 public class Attacker extends Player{
 	
 	private static ArrayList<PlayerRecord> commonTargets = new ArrayList<PlayerRecord>();
-	private ArrayList<PlayerRecord> priorityList = new ArrayList<PlayerRecord>();
+	private PlayerRecord[] priorityList;
 	private PlayerRecord currentTarget;
 	private int roundsSpentChasing = 0;
-	private final static int maxChaseTime = 5;
+	private final static int MAX_CHASE_TIME= 5;
+	private final static int STATE_CHASE = 1, STATE_REST = 2, STATE_SUPPORT = 3;
 	
 
 	public Attacker(City city, int s, int a, Direction d) {
 		super(city, s, a, d, 10, "Attacker", true);
 		this.setColor(new Color(0,0,0)); //attackers are black
+		this.setSpeed(Player.generator.nextInt(4) + 1); //different attackers have different speeds
+	}
+	
+	private void printPriorityList() {
+		System.out.println("\nPriority List:");
+		System.out.println(this.getStreet() + " " + this.getAvenue());
+		for (PlayerRecord rec : this.priorityList) {
+			System.out.format("id: %d, type: %s, street: %s, avenue: %s\n", this.getPLAYER_ID(), rec.getTYPE(), rec.getStreet(), rec.getAvenue());
+		}
+	}
+	
+	private void printCommonTargets() {
+		System.out.println("\nCommon Targets:\n");
+		System.out.println(Attacker.commonTargets.size());
+		for (PlayerRecord rec : Attacker.commonTargets) {
+			System.out.format("id: %d, type: %s, street: %s, avenue: %s\n", this.getPLAYER_ID(), rec.getTYPE(), rec.getStreet(), rec.getAvenue());
+		}
 	}
 
 	@Override 
 	public void performAction(PlayerRecord[] players) { 
 		this.sortPriority(players);
+		
+		//Debugging
+		this.printPriorityList();
+		System.out.format("type: %s, id: %d", this.currentTarget.getTYPE(), this.currentTarget.getPLAYER_ID());
+		
 		//If there is currently no target, find a new target
-		if (this.roundsSpentChasing == Attacker.maxChaseTime) { //switch to another innocent
+		if (this.roundsSpentChasing == Attacker.MAX_CHASE_TIME) { //switch to another innocent
 			switchTargets();
 		}
 		
@@ -30,10 +53,7 @@ public class Attacker extends Player{
 	
 	private void chaseTarget(PlayerRecord target) {
 		int speed = this.obtainSpeed();
-		int verticalDiff = Math.abs(target.getStreet() - this.getStreet());
-		int horizontalDiff = Math.abs(target.getAvenue() - this.getAvenue());
-		
-		
+		this.move();
 	}
 	
 	private void switchTargets() {
@@ -59,36 +79,42 @@ public class Attacker extends Player{
 			}
 		}
 		//all targets are being chased -> pick a random player that's not an attacker to chase. note that we don't add to commonTargets
-		int idx = Player.generator.nextInt(this.priorityList.size());
-		PlayerRecord targetRecord = this.priorityList.get(idx);
+		int idx = Player.generator.nextInt(this.priorityList.length);
+		PlayerRecord targetRecord = this.priorityList[idx];
 		return targetRecord;
 	}
 	
 	@Override
 	public void initialize(PlayerRecord[] players) {
-		for (int i = 0; i < players.length; i++) {
-			if (!players[i].getTYPE().equals("Attacker")) { //Filter out all the other attackers
-				this.priorityList.add(players[i]);
+		int size = 0;
+		for (PlayerRecord rec : players) {
+			if (!rec.getTYPE().equals("Attacker")) {
+				size++;
 			}
 		}
+		this.priorityList = new PlayerRecord[size]; //Assign the priorityList a specific size
+		
+		this.sortPriority(players);
+		//Assign the player a target.
+		this.currentTarget = newTarget();
 	}
 	
 	private void sortPriority(PlayerRecord[] players) {
 		int idx = 0;
-		for (int i = 0; i < players.length; i++) {
-			if (!players[i].getTYPE().equals("Attacker")) { //Filter out all the other attackers
-				this.priorityList.set(idx, players[i]);
+		for (PlayerRecord rec : players) {
+			if (!rec.getTYPE().equals("Attacker")) { //filter out all the attackers every time info from the application class comes here
+				this.priorityList[idx] = rec;
 				idx++;
 			}
 		}
 		
 		//Bubble sort
-		int len = this.priorityList.size();
+		int len = this.priorityList.length;
 		for (int i = 0; i < len; i++) {
 			boolean swapped = false;
 			for (int j = 0; j < len-1; j++) {
 				//calculate the two distances
-				int dist1 = calcDistance(this.priorityList.get(j)), dist2 = calcDistance(this.priorityList.get(j+1));
+				int dist1 = calcDistance(this.priorityList[j]), dist2 = calcDistance(this.priorityList[j+1]);
 				if (dist1 > dist2) {
 					swapPlayerRecord(j, j+1);
 					swapped = true;
@@ -101,9 +127,9 @@ public class Attacker extends Player{
 	}
 	
 	private void swapPlayerRecord(int idx1, int idx2) {
-		PlayerRecord temp = this.priorityList.get(idx1);
-		this.priorityList.set(idx1, this.priorityList.get(idx2));
-		this.priorityList.set(idx2, temp);
+		PlayerRecord temp = this.priorityList[idx1];
+		this.priorityList[idx1] = this.priorityList[idx2];
+		this.priorityList[idx2] = temp;
 	}
 	
 	private int calcDistance(PlayerRecord rec) {
