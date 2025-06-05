@@ -7,7 +7,7 @@ public class Runner extends Player{
 	private PlayerRecord[] priorityList;
 
 	public Runner(City c, int s, int a, Direction d) {
-		super(c, s, a, d, 5, "Runner", false);
+		super(c, s, a, d, 2, "Runner", false);
 		this.setColor(Color.BLUE);
 		this.agility = 5;
 	}
@@ -22,10 +22,15 @@ public class Runner extends Player{
 
 
 	private void sortPriority(PlayerRecord[] players) {
-		for (int i = 1; i < priorityList.length; i ++) {
+		PlayerRecord thisRecord = priorityList[this.getPLAYER_ID()];
+		priorityList[this.getPLAYER_ID()] = priorityList[priorityList.length - 1];
+		priorityList[priorityList.length - 1] = thisRecord;
+		
+		for (int i = 1; i < priorityList.length - 1; i ++) {
 			for (int j = i; j > 0; j--) {
-				if ((priorityList[i].getTYPE().compareTo(priorityList[j - 1].getTYPE()) < 0) 
-						&& this.calcDistance(priorityList[i]) < this.calcDistance(priorityList[i-1])) {
+				if ((priorityList[j].getTYPE().compareTo(priorityList[j - 1].getTYPE()) < 0) 
+						|| ((priorityList[j].getTYPE().equals(priorityList[j - 1].getTYPE()) && 
+								this.calcDistance(priorityList[j]) < this.calcDistance(priorityList[j-1])))) {
 					PlayerRecord record = priorityList[j];
 					priorityList[j] = priorityList[j - 1];
 					priorityList[j - 1] = record;
@@ -63,6 +68,9 @@ public class Runner extends Player{
 	}
 
 	private void doThing() {
+		for (PlayerRecord i : this.priorityList) {
+			System.out.println("ME " + i);
+		}
 		int stepTook = 0;
 		if (Math.abs(this.priorityList[0].getAvenue() - this.getAvenue()) > 
 		Math.abs(this.priorityList[0].getStreet() - this.getStreet())) {
@@ -72,10 +80,6 @@ public class Runner extends Player{
 			else {
 				this.turnTo(Direction.WEST);
 			}
-			while (stepTook < this.obtainSpeed()) {
-				this.move();
-				stepTook ++;
-			}
 		}
 		else {
 			if (this.priorityList[0].getAvenue() > this.getAvenue()) {
@@ -84,12 +88,11 @@ public class Runner extends Player{
 			else {
 				this.turnTo(Direction.SOUTH);
 			}
-			while (stepTook < this.obtainSpeed()) {
-				this.move();
-				stepTook ++;
-			}
 		}
-		
+		while (stepTook < this.obtainSpeed()) {
+			this.move();
+			stepTook ++;
+		}
 	}
 
 
