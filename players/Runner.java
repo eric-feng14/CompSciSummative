@@ -67,17 +67,6 @@ public class Runner extends Player{
 		if (Math.abs(this.priorityList[0].getAvenue() - this.getAvenue()) > 
 		Math.abs(this.priorityList[0].getStreet() - this.getStreet())) {
 			if (this.priorityList[0].getStreet() > this.getStreet()) {
-				this.turnTo(Direction.SOUTH);
-			}
-			else {
-				this.turnTo(Direction.NORTH);
-			}
-			while (stepTook < this.obtainSpeed()) {
-				this.move();
-			}
-		}
-		else {
-			if (this.priorityList[0].getAvenue() > this.getAvenue()) {
 				this.turnTo(Direction.WEST);
 			}
 			else {
@@ -85,6 +74,19 @@ public class Runner extends Player{
 			}
 			while (stepTook < this.obtainSpeed()) {
 				this.move();
+				stepTook ++;
+			}
+		}
+		else {
+			if (this.priorityList[0].getAvenue() > this.getAvenue()) {
+				this.turnTo(Direction.SOUTH);
+			}
+			else {
+				this.turnTo(Direction.NORTH);
+			}
+			while (stepTook < this.obtainSpeed()) {
+				this.move();
+				stepTook ++;
 			}
 		}
 		
