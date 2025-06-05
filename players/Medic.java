@@ -64,10 +64,33 @@ public class Medic extends Player{
 		return updatedPlayers;
 	}
 	
-	private void getPriorityValues(PlayerRecord[] players) {
-		
+	/**
+	 * Gets priority values of all for all attackers
+	 */
+	public void getAttackerPriorityValues() {
+		int[] predictedProximity = this.getPredictedAttackerProximities(this.attackerPriority);
+		// Evaluates all attackers and sorts according to immanence of threat
+		for (int i = 0; i < this.attackerPriority.length; i++) {
+			for (int j = i; j > 0; i--) {
+				if (predictedProximity[j] < predictedProximity[j-1]) {
+					int temp = predictedProximity[j-1];
+					predictedProximity[j-1] = predictedProximity[j];
+					predictedProximity[j] = temp;
+					
+					PlayerRecord temp2 = this.attackerPriority[j-1];
+					this.attackerPriority[j-1] = this.attackerPriority[j];
+					this.attackerPriority[j] = temp2;
+				}
+			}
+		}
 	}
 	
+	/**
+	 * Returns predicted proximity of robots that are attacking
+	 * pre: predictions are of attackers
+	 * @param players - players
+	 * @return - updated proximities according to speed.
+	 */
 	private int[] getPredictedAttackerProximities(PlayerRecord[] players) {
 		int[] proximity = getProximityValues(players);
 		// Updates proximity 
@@ -75,6 +98,7 @@ public class Medic extends Player{
 			proximity[i] = proximity[i] - players[i].getSpeed();
 		}
 		
+		return proximity;
 	}
 	
 	/**
