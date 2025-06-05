@@ -3,13 +3,11 @@ import java.awt.Color;
 import becker.robots.*;
 
 public class Runner extends Player{
-	private int agility;
 	private PlayerRecord[] priorityList;
-
+	
 	public Runner(City c, int s, int a, Direction d) {
 		super(c, s, a, d, 2, "Runner", false);
 		this.setColor(Color.BLUE);
-		this.agility = 5;
 	}
 
 	@Override
@@ -17,7 +15,7 @@ public class Runner extends Player{
 		this.priorityList = new PlayerRecord[players.length];
 		this.updateList(players);
 		this.sortPriority(players);
-		this.doThing();
+		this.doStrategy();
 	}
 
 
@@ -67,12 +65,15 @@ public class Runner extends Player{
 		return Math.abs(r1.getAvenue() - r2.getAvenue()) + Math.abs(r1.getStreet() - r2.getStreet());
 	}
 
-	private void doThing() {
+	private void doStrategy() {
 		for (PlayerRecord i : this.priorityList) {
 			System.out.println("ME " + i);
 		}
-		int stepTook = 0;
-		if (Math.abs(this.priorityList[0].getAvenue() - this.getAvenue()) > 
+		if (this.inDanger(this.priorityList[0])) {
+			this.runAway();
+		}
+		int stepUsed = 0;
+		if (Math.abs(this.priorityList[0].getAvenue() - this.getAvenue()) < 
 		Math.abs(this.priorityList[0].getStreet() - this.getStreet())) {
 			if (this.priorityList[0].getStreet() > this.getStreet()) {
 				this.turnTo(Direction.EAST);
@@ -89,12 +90,39 @@ public class Runner extends Player{
 				this.turnTo(Direction.SOUTH);
 			}
 		}
-		while (stepTook < this.obtainSpeed()) {
+		while (stepUsed < this.obtainSpeed()) {
 			this.move();
-			stepTook ++;
+			stepUsed ++;
 		}
 	}
 
+	private boolean inDanger(PlayerRecord record) {
+		if(this.calcDistance(record) <= 5) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	private void runAway() {		
+		PlayerRecord[] dangerList = this.findDangers();;
+		
+	}
+	
+	private PlayerRecord[] findDangers() {
+		int dangerAttacker = 0;
+		for (int i = 0; i < priorityList.length; i ++) {
+			if(this.priorityList[i].getTYPE().equals("Attacker") && this.inDanger(this.priorityList[i])) {
+				dangerAttacker ++;
+			}
+		}
+		PlayerRecord[] dangerList = new PlayerRecord[dangerAttacker];
+		for (int i = 0; i < dangerList.length; i ++) {
+			dangerList[i] = this.priorityList[i];
+		}
+		return dangerList;
+	}
 
 	private void resetPriority() {
 		mergeSort(this.priorityList, 0, priorityList.length - 1);
