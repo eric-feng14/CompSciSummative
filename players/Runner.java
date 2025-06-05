@@ -5,8 +5,7 @@ import becker.robots.*;
 public class Runner extends Player{
 	private int agility;
 	private PlayerRecord[] priorityList;
-	private PlayerRecord currentPriority;
-	
+
 	public Runner(City c, int s, int a, Direction d) {
 		super(c, s, a, d, 5, "Runner", false);
 		this.setColor(Color.BLUE);
@@ -20,11 +19,8 @@ public class Runner extends Player{
 		this.sortPriority(players);
 		this.doThing();
 	}
-	
-	private void comparePriority(PlayerRecord[] players) {
-		int DistanceMoved = this.calcDistance(currentPriority, players[currentPriority.getPLAYER_ID()]);
-	}
-	
+
+
 	private void sortPriority(PlayerRecord[] players) {
 		for (int i = 1; i < priorityList.length; i ++) {
 			for (int j = i; j > 0; j--) {
@@ -41,29 +37,64 @@ public class Runner extends Player{
 		}
 	}
 	private void updateList(PlayerRecord[] players) {
-		for(int i = 0; i < this.priorityList.length; i ++) {
-			this.priorityList[i] = players[i];
+		if (this.priorityList[0] == null) {
+			for(int i = 0; i < this.priorityList.length; i ++) {
+				this.priorityList[i] = players[i];
+			}
+		}
+		else {
+			this.resetPriority();
+			for(int i = 0; i < this.priorityList.length; i ++) {
+				PlayerRecord previous = priorityList[i];
+				this.priorityList[i] = players[i];
+				if (this.calcDistance(this.priorityList[i], previous) > previous.getSpeed()) {
+					this.priorityList[i].setSpeed(this.calcDistance(this.priorityList[i], previous));
+				}
+			}
 		}
 	}
-	
+
 	private int calcDistance(PlayerRecord r) { 
 		return Math.abs(r.getAvenue() - this.getAvenue()) + Math.abs(r.getStreet() - this.getStreet());
 	}
-	
+
 	private int calcDistance(PlayerRecord r1, PlayerRecord r2) { 
 		return Math.abs(r1.getAvenue() - r2.getAvenue()) + Math.abs(r1.getStreet() - r2.getStreet());
 	}
-	
+
 	private void doThing() {
-		this.currentPriority = this.priorityList[0];
+		int stepTook = 0;
+		if (Math.abs(this.priorityList[0].getAvenue() - this.getAvenue()) > 
+		Math.abs(this.priorityList[0].getStreet() - this.getStreet())) {
+			if (this.priorityList[0].getStreet() > this.getStreet()) {
+				this.turnTo(Direction.WEST);
+			}
+			else {
+				this.turnTo(Direction.EAST);
+			}
+			while (stepTook < this.obtainSpeed()) {
+				this.move();
+			}
+		}
+		else {
+			if (this.priorityList[0].getAvenue() > this.getAvenue()) {
+				this.turnTo(Direction.SOUTH);
+			}
+			else {
+				this.turnTo(Direction.NORTH);
+			}
+			while (stepTook < this.obtainSpeed()) {
+				this.move();
+			}
+		}
 		
 	}
-	
-	/*
+
+
 	private void resetPriority() {
 		mergeSort(this.priorityList, 0, priorityList.length - 1);
 	}
-	
+
 	private static void mergeSort(PlayerRecord[] r, int start, int end) {
 		if (start < end) {
 			int mid = (start + end)/2;
@@ -94,5 +125,10 @@ public class Runner extends Player{
 			r[i] = temp[i];
 		}
 	}
-	*/
+	
+	public void move() {
+		if(this.frontIsClear()) {
+			super.move();
+		}
+	}
 }
