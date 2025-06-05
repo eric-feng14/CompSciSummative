@@ -33,7 +33,7 @@ public class PlayerRecord {
 	 * @param player - Player
 	 */
 	public PlayerRecord(Player player) {
-		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), -1, player.isDefeated());
+		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), 0, player.isDefeated());
 	}
 	
 	public int getHP() {
@@ -122,5 +122,9 @@ public class PlayerRecord {
 	 */
 	public void setDefeated(boolean isDefeated) {
 		this.isDefeated = isDefeated;
+	}
+	
+	public String toString() {
+		return "Street: " + this.getStreet() + ", Avenue: " + this.getAvenue() + ", Type: " + this.getTYPE();
 	}
 }

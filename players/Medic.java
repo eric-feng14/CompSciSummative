@@ -15,7 +15,8 @@ public class Medic extends Player{
 	 */
 	public Medic (City c, int s, int a, Direction d) {
 		super(c, s, a, d, 3, "Medic", false);
-		this.setColor(new Color(133, 248, 108));
+//		this.setColor(new Color(133, 248, 108));
+		this.setColor(Color.GREEN);
 	}
 	
 	/**

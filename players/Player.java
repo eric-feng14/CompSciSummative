@@ -77,8 +77,8 @@ public abstract class Player extends EnhancedBot{
 	}
 
 	/**
-	 * Sets stamina of robot
-	 * @param stamina - stamina of robot
+	 * Sets speed of robot
+	 * @param speed - speed of robot
 	 */
 	public void setSpeed(int speed) {
 		this.speed = speed;
