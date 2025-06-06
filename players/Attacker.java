@@ -2,8 +2,14 @@ package players;
 import java.util.*;
 import becker.robots.*;
 import java.awt.*;
+
+/**
+ * Template robot class for the final summative in ICS4U
+ * @author Eric Feng
+ * @version Due date: June 13 2025
+ */
 public class Attacker extends Player{
-	
+
 	private static ArrayList<PlayerRecord> commonTargets = new ArrayList<PlayerRecord>();
 	private PlayerRecord[] priorityList;
 	private PlayerRecord currentTarget;
@@ -20,14 +26,14 @@ public class Attacker extends Player{
 	}
 	
 	private void printPriorityList() {
-		System.out.println("\nPriority List of Attacker " + this.getPLAYER_ID() + ":");
+		System.out.println("\nPriority list of attacker: " + this.getPLAYER_ID());
 		for (PlayerRecord rec : this.priorityList) {
 			System.out.format("type: %s, street: %d, avenue: %d\n", rec.getTYPE(), rec.getStreet(), rec.getAvenue());
 		}
 	}
 	
 	private void printCommonTargets() {
-		System.out.println("\nCommon Targets with length " + Attacker.commonTargets.size() + ":");
+		System.out.println("\nCommon Targets with length " + Attacker.commonTargets.length + ":");
 		for (PlayerRecord rec : Attacker.commonTargets) {
 			System.out.format("type: %s, street: %d, avenue: %d\n", rec.getTYPE(), rec.getStreet(), rec.getAvenue());
 		}
@@ -44,8 +50,8 @@ public class Attacker extends Player{
 		this.sortPriority(players);
 		//Any other random cases, e.g. A runner sacrifices themself
 		switch(this.currentState) { 
-			case 1: //chasing state
-				this.chase(players);
+			case 1: //chasing state -> could have multiple strategies in this case: maybe another switch
+				this.chase();
 				break;
 			case 2: //fighting state
 				this.fight(players);
@@ -55,7 +61,7 @@ public class Attacker extends Player{
 		}
 	}
 	
-	public void chase(PlayerRecord[] players) {
+	public void chase() {
 		//Debugging
 //		this.printPriorityList();
 //		this.printTargetInfo();
@@ -112,7 +118,7 @@ public class Attacker extends Player{
 			return;
 		}
 		if (horizontalDiff != 0) {
-			Direction dir = (horizontalDiff > 0) ? Direction.WEST : Direction.EAST;
+			Direction dir = (horizontalDiff > 0) ? Direction.WEST : Direction.EAST; 
 			this.turnTo(dir);
 			if (absHorizontalDiff >= speed) {
 				this.move(speed);
@@ -162,7 +168,7 @@ public class Attacker extends Player{
 		}
 		this.priorityList = new PlayerRecord[size]; //Assign the priorityList a specific size
 		
-		this.sortPriority(players);
+		this.sortPriority(players); //default sort, could have multiple later
 		//Assign the player a target.
 		this.currentTarget = newTarget();
 	}
@@ -187,6 +193,8 @@ public class Attacker extends Player{
 			}
 		}
 		
+		//Debugging
+		System.out.println("PLAYER " + this.getPLAYER_ID());
 		for (PlayerRecord rec : this.priorityList) {
 			System.out.println(rec);
 		}
@@ -198,6 +206,10 @@ public class Attacker extends Player{
 			if (! record.getTYPE().equals("Attacker")) {
 				this.priorityList[idx] = record;
 				idx++;
+				//Update current target along when new information is passed
+				if (this.currentTarget != null && record.getPLAYER_ID() == this.currentTarget.getPLAYER_ID()) {
+					this.currentTarget = record;
+				}
 			}
 		}
 	}
