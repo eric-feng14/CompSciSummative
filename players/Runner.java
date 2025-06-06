@@ -5,7 +5,7 @@ import becker.robots.*;
 public class Runner extends Player{
 	private PlayerRecord[] priorityList;
 	private int stamina = 10;
-
+	
 	public Runner(City c, int s, int a, Direction d) {
 		super(c, s, a, d, 4, "Runner", false);
 		this.setColor(Color.BLUE);
@@ -73,28 +73,6 @@ public class Runner extends Player{
 		if (this.inDanger(this.priorityList[0])) {
 			this.runAway();
 		}
-		//		int stepUsed = 0;
-		//		if (Math.abs(this.priorityList[0].getAvenue() - this.getAvenue()) < 
-		//		Math.abs(this.priorityList[0].getStreet() - this.getStreet())) {
-		//			if (this.priorityList[0].getStreet() > this.getStreet()) {
-		//				this.turnTo(Direction.EAST);
-		//			}
-		//			else {
-		//				this.turnTo(Direction.WEST);
-		//			}
-		//		}
-		//		else {
-		//			if (this.priorityList[0].getAvenue() > this.getAvenue()) {
-		//				this.turnTo(Direction.NORTH);
-		//			}
-		//			else {
-		//				this.turnTo(Direction.SOUTH);
-		//			}
-		//		}
-		//		while (stepUsed < this.obtainSpeed()) {
-		//			this.move();
-		//			stepUsed ++;
-		//		}
 	}
 
 	private boolean inDanger(PlayerRecord record) {
@@ -105,7 +83,20 @@ public class Runner extends Player{
 			return false;
 		}
 	}
-
+	private PlayerRecord[] findDangers() {
+		int dangerAttacker = 0;
+		for (int i = 0; i < priorityList.length; i ++) {
+			if(this.priorityList[i].getTYPE().equals("Attacker") && this.inDanger(this.priorityList[i])) {
+				dangerAttacker ++;
+			}
+		}
+		PlayerRecord[] dangerList = new PlayerRecord[dangerAttacker];
+		for (int i = 0; i < dangerList.length; i ++) {
+			dangerList[i] = this.priorityList[i];
+		}
+		return dangerList;
+	}
+	
 	private void runAway() {		
 		PlayerRecord[] dangerList = this.findDangers();
 		for (PlayerRecord i : dangerList) {
@@ -121,20 +112,6 @@ public class Runner extends Player{
 			this.move();
 			stepsTaken++;
 		}
-	}
-
-	private PlayerRecord[] findDangers() {
-		int dangerAttacker = 0;
-		for (int i = 0; i < priorityList.length; i ++) {
-			if(this.priorityList[i].getTYPE().equals("Attacker") && this.inDanger(this.priorityList[i])) {
-				dangerAttacker ++;
-			}
-		}
-		PlayerRecord[] dangerList = new PlayerRecord[dangerAttacker];
-		for (int i = 0; i < dangerList.length; i ++) {
-			dangerList[i] = this.priorityList[i];
-		}
-		return dangerList;
 	}
 
 	private Direction findSafestDirection(PlayerRecord[] dangers) {
@@ -181,11 +158,10 @@ public class Runner extends Player{
 					Math.abs(danger.getStreet() - street);
 			switch(distance) {
 			case 0: totalDanger += 1000; break;
-			case 1: totalDanger += 1000; break;
-			case 2: totalDanger += 800; break;
-			case 3: totalDanger += 800; break;
-			case 4: totalDanger += 600; break;
-			case 5: totalDanger += 400; break;
+			case 1: totalDanger += 800; break;
+			case 2: totalDanger += 600; break;
+			case 3: totalDanger += 400; break;
+			case 4: totalDanger += 200; break;
 			}
 		}
 
