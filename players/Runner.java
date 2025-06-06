@@ -4,9 +4,10 @@ import becker.robots.*;
 
 public class Runner extends Player{
 	private PlayerRecord[] priorityList;
-	
+	private int stamina = 10;
+
 	public Runner(City c, int s, int a, Direction d) {
-		super(c, s, a, d, 2, "Runner", false);
+		super(c, s, a, d, 4, "Runner", false);
 		this.setColor(Color.BLUE);
 	}
 
@@ -23,7 +24,7 @@ public class Runner extends Player{
 		PlayerRecord thisRecord = priorityList[this.getPLAYER_ID()];
 		priorityList[this.getPLAYER_ID()] = priorityList[priorityList.length - 1];
 		priorityList[priorityList.length - 1] = thisRecord;
-		
+
 		for (int i = 1; i < priorityList.length - 1; i ++) {
 			for (int j = i; j > 0; j--) {
 				if ((priorityList[j].getTYPE().compareTo(priorityList[j - 1].getTYPE()) < 0) 
@@ -66,50 +67,62 @@ public class Runner extends Player{
 	}
 
 	private void doStrategy() {
-		for (PlayerRecord i : this.priorityList) {
-			System.out.println("ME " + i);
-		}
+		//		for (PlayerRecord i : this.priorityList) {
+		//			System.out.println("ME " + i);
+		//		}
 		if (this.inDanger(this.priorityList[0])) {
 			this.runAway();
 		}
-		int stepUsed = 0;
-		if (Math.abs(this.priorityList[0].getAvenue() - this.getAvenue()) < 
-		Math.abs(this.priorityList[0].getStreet() - this.getStreet())) {
-			if (this.priorityList[0].getStreet() > this.getStreet()) {
-				this.turnTo(Direction.EAST);
-			}
-			else {
-				this.turnTo(Direction.WEST);
-			}
-		}
-		else {
-			if (this.priorityList[0].getAvenue() > this.getAvenue()) {
-				this.turnTo(Direction.NORTH);
-			}
-			else {
-				this.turnTo(Direction.SOUTH);
-			}
-		}
-		while (stepUsed < this.obtainSpeed()) {
-			this.move();
-			stepUsed ++;
-		}
+		//		int stepUsed = 0;
+		//		if (Math.abs(this.priorityList[0].getAvenue() - this.getAvenue()) < 
+		//		Math.abs(this.priorityList[0].getStreet() - this.getStreet())) {
+		//			if (this.priorityList[0].getStreet() > this.getStreet()) {
+		//				this.turnTo(Direction.EAST);
+		//			}
+		//			else {
+		//				this.turnTo(Direction.WEST);
+		//			}
+		//		}
+		//		else {
+		//			if (this.priorityList[0].getAvenue() > this.getAvenue()) {
+		//				this.turnTo(Direction.NORTH);
+		//			}
+		//			else {
+		//				this.turnTo(Direction.SOUTH);
+		//			}
+		//		}
+		//		while (stepUsed < this.obtainSpeed()) {
+		//			this.move();
+		//			stepUsed ++;
+		//		}
 	}
 
 	private boolean inDanger(PlayerRecord record) {
-		if(this.calcDistance(record) <= 5) {
+		if((this.calcDistance(record) <= record.getSpeed()) || (this.calcDistance(record) <= 5)) {
 			return true;
 		}
 		else {
 			return false;
 		}
 	}
-	
+
 	private void runAway() {		
-		PlayerRecord[] dangerList = this.findDangers();;
-		
+		PlayerRecord[] dangerList = this.findDangers();
+		for (PlayerRecord i : dangerList) {
+			System.out.println("ME " + i);
+		}
+
+
+		// Move with available speed
+		int stepsTaken = 0;
+		while (stepsTaken < this.obtainSpeed() && this.frontIsClear()) {
+			Direction bestDirection = findSafestDirection(dangerList);
+			this.turnTo(bestDirection);
+			this.move();
+			stepsTaken++;
+		}
 	}
-	
+
 	private PlayerRecord[] findDangers() {
 		int dangerAttacker = 0;
 		for (int i = 0; i < priorityList.length; i ++) {
@@ -122,6 +135,70 @@ public class Runner extends Player{
 			dangerList[i] = this.priorityList[i];
 		}
 		return dangerList;
+	}
+
+	private Direction findSafestDirection(PlayerRecord[] dangers) {
+		Direction[] possibleDirections = {
+				Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST
+		};
+
+		Direction safestDirection = Direction.NORTH;
+		int lowestDangerScore = Integer.MAX_VALUE;
+
+		for (Direction dir : possibleDirections) {
+			if (!canMoveInDirection(dir)) {
+				continue; // Skip blocked directions
+			}
+
+			// Calculate hypothetical position after moving
+			int newAve = this.getAvenue();
+			int newStr = this.getStreet();
+
+			switch(dir) {
+			case NORTH: newStr--; break;
+			case EAST: newAve++; break;
+			case SOUTH: newStr++; break;
+			case WEST: newAve--; break;
+			}
+
+			// Calculate danger at new position
+			int dangerScore = calculateDangerAt(newAve, newStr, dangers);
+
+			if (dangerScore < lowestDangerScore) {
+				lowestDangerScore = dangerScore;
+				safestDirection = dir;
+			}
+		}
+
+		return safestDirection;
+	}
+
+	private int calculateDangerAt(int avenue, int street, PlayerRecord[] dangers) {
+		int totalDanger = 0;
+
+		for (PlayerRecord danger : dangers) {
+			// Calculate Manhattan distance from hypothetical position to each danger
+			int distance = Math.abs(danger.getAvenue() - avenue) + 
+					Math.abs(danger.getStreet() - street);
+			switch(distance) {
+			case 0: totalDanger += 1000; break;
+			case 1: totalDanger += 1000; break;
+			case 2: totalDanger += 800; break;
+			case 3: totalDanger += 800; break;
+			case 4: totalDanger += 600; break;
+			case 5: totalDanger += 400; break;
+			}
+		}
+
+		return totalDanger;
+	}
+
+	private boolean canMoveInDirection(Direction dir) {
+		Direction currentFacing = this.getDirection();
+		this.turnTo(dir);
+		boolean clear = this.frontIsClear();
+		this.turnTo(currentFacing); // Return to original facing
+		return clear;
 	}
 
 	private void resetPriority() {
@@ -158,7 +235,7 @@ public class Runner extends Player{
 			r[i] = temp[i];
 		}
 	}
-	
+
 	public void move() {
 		if(this.frontIsClear()) {
 			super.move();
