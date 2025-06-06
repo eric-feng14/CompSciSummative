@@ -144,12 +144,11 @@ public class Runner extends Player{
 
 		Direction safestDirection = Direction.NORTH;
 		int lowestDangerScore = Integer.MAX_VALUE;
-
+		
 		for (Direction dir : possibleDirections) {
 			if (!canMoveInDirection(dir)) {
 				continue; // Skip blocked directions
 			}
-
 			// Calculate hypothetical position after moving
 			int newAve = this.getAvenue();
 			int newStr = this.getStreet();
