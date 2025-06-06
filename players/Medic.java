@@ -19,6 +19,21 @@ public class Medic extends Player{
 		this.setColor(Color.GREEN);
 	}
 	
+	
+	/**
+	 * Performs main action
+	 */
+	@Override
+	public void performAction(PlayerRecord[] players) {
+		// Only moves if is defeated
+		if (!this.isDefeated()) {
+			this.sortPriority(players);
+		}
+		
+		this.prevPlayers = players;
+	}
+	
+	
 	/**
 	 * Sorts priorities
 	 */
@@ -31,6 +46,8 @@ public class Medic extends Player{
 		this.runnerPriority = this.getTypeArray("Runner", players);
 		this.attackerPriority = this.getTypeArray("Attacker", players);
 		this.medicPriority = this.getTypeArray("Medic", players);
+		
+		this.getAttackerPriorityValues();
 	}
 	
 	/**
@@ -70,6 +87,17 @@ public class Medic extends Player{
 	 */
 	public void getAttackerPriorityValues() {
 		int[] predictedProximity = this.getPredictedAttackerProximities(this.attackerPriority);
+		// DEBUG MESSAGES
+		for (int i = 0; i < predictedProximity.length; i++) {
+			System.out.print(predictedProximity + " ");
+		}
+		System.out.println();
+		for (int i = 0; i < predictedProximity.length; i++) {
+			System.out.print(this.attackerPriority[i].toString() + " ");
+		}
+		// Debug ends
+		
+		
 		// Evaluates all attackers and sorts according to immanence of threat
 		for (int i = 0; i < this.attackerPriority.length; i++) {
 			for (int j = i; j > 0; i--) {
@@ -115,21 +143,6 @@ public class Medic extends Player{
 					Math.abs(players[i].getStreet() - this.getStreet());
 		}
 		return proximity;
-	}
-	
-	
-
-	/**
-	 * Performs main action
-	 */
-	@Override
-	public void performAction(PlayerRecord[] players) {
-		// Only moves if is defeated
-		if (!this.isDefeated()) {
-			this.sortPriority(players);
-		}
-		
-		this.prevPlayers = players;
 	}
 	
 	/**

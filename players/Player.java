@@ -12,7 +12,7 @@ public abstract class Player extends EnhancedBot{
 	private static int nextID = 0; // Next PLAYER_ID of next created player; corresponds with index of playerList
 	
 	protected static Random generator = new Random();
-	private int speed, HP = 100;
+	private int speed, hp;
 	private final int PLAYER_ID;
 	private boolean isDefeated;
 	private final String TYPE;
@@ -24,25 +24,56 @@ public abstract class Player extends EnhancedBot{
 	 * @param s - street of player
 	 * @param a - avenue of player
 	 * @param d - Direction of player
+	 * @param speed - speed of player
+	 * @param TYPE - type of player
+	 * @param defeated - player isDefeated
+	 * @param hp - Health of player
 	 */
-	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated) {
+	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated, int hp) {
 		super(city, s, a, d);
 		this.PLAYER_ID = nextID;
 		this.speed = speed;
 		this.isDefeated = defeated;
 		this.TYPE = TYPE;
+		this.hp = hp;
 		
 		Player.nextID++; // Iterates playerID to create a unique player identification number
 	}
 	
+	/**
+	 * Constructor with default health
+	 * @param city - city
+	 * @param s - street 
+	 * @param a avenue 
+	 * @param d - Direction
+	 * @param speed - speed of player
+	 * @param TYPE - type of player
+	 * @param defeated - isDefeated
+	 */
+	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated) {
+		this(city, s, a, d, speed, TYPE, defeated, 100);
+	}
+	
+	/**
+	 * Initializes playerRecords
+	 * @param players - players
+	 */
 	public void initialize(PlayerRecord[] players) {}
 	
-	public int getHP() {
-		return this.HP;
+	/**
+	 * Gets health of player
+	 * @return - health
+	 */
+	public int getHp() {
+		return this.hp;
 	}
 
-	public void setHP(int hP) {
-		this.HP = hP;
+	/**
+	 * Sets hp of player
+	 * @param hp - health
+	 */
+	public void setHp(int hp) {
+		this.hp = hp;
 	}
 
 	/**

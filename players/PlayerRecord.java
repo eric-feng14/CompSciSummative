@@ -124,6 +124,11 @@ public class PlayerRecord {
 		this.isDefeated = isDefeated;
 	}
 	
+	/**
+	 * Overridden toString
+	 * @return - Returns the string representation of PlayerRecord
+	 */
+	@Override
 	public String toString() {
 		return "Street: " + this.getStreet() + ", Avenue: " + this.getAvenue() + ", Type: " + this.getTYPE();
 	}
