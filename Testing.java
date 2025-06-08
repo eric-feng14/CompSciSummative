@@ -48,6 +48,8 @@ public class Testing {
 		updateTags();
 		initializePlayers();
 		
+		medic.performAction(playerRecords);
+		
 	}
 	
 	public static void initializePlayers() {
@@ -58,7 +60,7 @@ public class Testing {
 	
 	public static void updateTags() {
 		for (Player p : Testing.players) { 
-			p.setLabel(p.getPLAYER_ID() + " " + p.getHP());
+			p.setLabel(p.getPLAYER_ID() + " " + p.getHp());
 		}
 	}
 	
