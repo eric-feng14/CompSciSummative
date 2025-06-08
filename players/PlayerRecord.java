@@ -9,7 +9,7 @@ public class PlayerRecord {
 	private int street, avenue;
 	private int speed, HP = 100;
 	private boolean isDefeated;
-	
+	private PlayerRecord currentTarget;
 	private final int PLAYER_ID;
 	private final String TYPE;
 	

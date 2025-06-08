@@ -28,6 +28,7 @@ public abstract class Player extends EnhancedBot{
 	 * @param TYPE - type of player
 	 * @param defeated - player isDefeated
 	 * @param hp - Health of player
+	 * @param currentTarget - target of the current player
 	 */
 	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated, int hp) {
 		super(city, s, a, d);

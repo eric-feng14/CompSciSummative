@@ -10,7 +10,7 @@ import tools.*;
  */
 public class Main {
 	
-	final public static int numOfPlayers = 6;
+	final public static int numOfPlayers = 2;
 	private static Player[]  players = new Player[numOfPlayers];
 	private static PlayerRecord[] playerRecords = new PlayerRecord[players.length];
 	
@@ -34,16 +34,8 @@ public class Main {
 		WallCreator creator = new WallCreator(city);
 		creator.createWallRect(0, 0, 24, 13);
 		
-		//Create the robots
-		
-//		players[1] = new Medic(city, 0, 1, Direction.EAST);
-		players[0] = new Runner(city, 1, 0, Direction.EAST);
-		players[1] = new Attacker(city, 0, 0, Direction.EAST);
-		players[2] = new Attacker(city, 12, 23, Direction.WEST);
-//		players[4] = new Medic(city, 4, 4, Direction.SOUTH);
-		players[3] = new Runner(city, 7, 7, Direction.NORTH);
-		players[4] = new Attacker(city, 0, 1, Direction.EAST);
-		players[5] = new Runner(city, 9, 1, Direction.WEST);
+		players[0] = new Runner(city, 4, 4, Direction.EAST);
+		players[1] = new Attacker(city, 6, 6, Direction.WEST);
 		updatePlayerRecord();
 		updateTags();
 		initializePlayers();
@@ -66,7 +58,7 @@ public class Main {
 	
 	public static void updateTags() {
 		for (Player p : Main.players) { 
-			p.setLabel(p.getPLAYER_ID() + " " + p.getHP());
+			p.setLabel(p.getPLAYER_ID() + " " + p.getHp());
 		}
 	}
 	

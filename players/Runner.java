@@ -7,7 +7,7 @@ public class Runner extends Player{
 	private int stamina = 10;
 	
 	public Runner(City c, int s, int a, Direction d) {
-		super(c, s, a, d, 4, "Runner", false);
+		super(c, s, a, d, 2, "Runner", false);
 		this.setColor(Color.BLUE);
 	}
 
@@ -99,9 +99,9 @@ public class Runner extends Player{
 	
 	private void runAway() {		
 		PlayerRecord[] dangerList = this.findDangers();
-		for (PlayerRecord i : dangerList) {
-			System.out.println("ME " + i);
-		}
+//		for (PlayerRecord i : dangerList) {
+//			System.out.println("ME " + i);
+//		}
 
 
 		// Move with available speed

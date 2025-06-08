@@ -10,7 +10,6 @@ import java.awt.*;
  */
 public class Attacker extends Player{
 
-	private static ArrayList<PlayerRecord> commonTargets = new ArrayList<PlayerRecord>();
 	private PlayerRecord[] priorityList;
 	private PlayerRecord currentTarget;
 	private int roundsSpentChasing = 0, currentState = 1;
@@ -32,13 +31,6 @@ public class Attacker extends Player{
 		}
 	}
 	
-	private void printCommonTargets() {
-		System.out.println("\nCommon Targets with length " + Attacker.commonTargets.length + ":");
-		for (PlayerRecord rec : Attacker.commonTargets) {
-			System.out.format("type: %s, street: %d, avenue: %d\n", rec.getTYPE(), rec.getStreet(), rec.getAvenue());
-		}
-	}
-	
 	private void printTargetInfo() {
 		System.out.println("\nTarget information:");
 		System.out.format("type: %s, id: %d, street: %d, avenue: %d\n\n", this.currentTarget.getTYPE(), this.currentTarget.getPLAYER_ID(),
@@ -47,8 +39,7 @@ public class Attacker extends Player{
 
 	@Override 
 	public void performAction(PlayerRecord[] players) { 
-		this.sortPriority(players);
-		//Any other random cases, e.g. A runner sacrifices themself
+		this.updateInfo(players);
 		switch(this.currentState) { 
 			case 1: //chasing state -> could have multiple strategies in this case: maybe another switch
 				this.chase();
@@ -62,10 +53,6 @@ public class Attacker extends Player{
 	}
 	
 	public void chase() {
-		//Debugging
-//		this.printPriorityList();
-//		this.printTargetInfo();
-		
 		//If there is currently no target, find a new target
 //		if (this.roundsSpentChasing == Attacker.MAX_CHASE_TIME) { //switch to another innocent
 //			return; //isolate the following code for now
@@ -100,42 +87,31 @@ public class Attacker extends Player{
 	private void chaseTarget() {
 		int verticalDiff = this.getStreet() - this.currentTarget.getStreet();
 		int horizontalDiff = this.getAvenue() - this.currentTarget.getAvenue();
-		int absVerticalDiff = Math.abs(verticalDiff), absHorizontalDiff = Math.abs(horizontalDiff);
 		int speed = this.obtainSpeed();
-		//Try moving vertically towards the target
+		printPriorityList();
 		if (verticalDiff != 0) {
+			int verticalSteps = Math.min(Math.abs(verticalDiff), speed);
+			//use of ternary operator to make code more readable -> (condition) ? (true assignment) : (false assignment)
 			Direction dir = (verticalDiff > 0) ? Direction.NORTH : Direction.SOUTH;
-			this.turnTo(dir);
-			if (absVerticalDiff >= speed) {
-				System.out.println("Vertical Difference >= speed");
-				this.move(speed);
-			} else {
-				this.move(absVerticalDiff);
-				Direction newDir = (horizontalDiff > 0) ? Direction.WEST : Direction.EAST;
-				this.turnTo(newDir);
-				this.move(Math.min(absHorizontalDiff, speed - absVerticalDiff));
-			}
-			return;
+			this.directedMove(dir, verticalSteps);
+			speed -= verticalSteps; //solves a lot of problems. e.g. if verticalSteps was the full speed, there would be no more horizontal movements
 		}
+		
 		if (horizontalDiff != 0) {
-			Direction dir = (horizontalDiff > 0) ? Direction.WEST : Direction.EAST; 
-			this.turnTo(dir);
-			if (absHorizontalDiff >= speed) {
-				this.move(speed);
-			} else {
-				this.move(absHorizontalDiff);
-			}
-			return;
+			int horizontalSteps = Math.min(Math.abs(horizontalDiff), speed);
+			Direction dir  = (horizontalDiff > 0) ? Direction.WEST : Direction.EAST;
+			this.directedMove(dir, horizontalSteps);
 		}
+	}
+	
+	private void directedMove(Direction dir, int steps) {
+		this.turnTo(dir);
+		this.move(steps);
 	}
 	
 	private void switchTargets() {
 		PlayerRecord oldTarget = this.currentTarget; //save the old target
 		this.currentTarget = this.newTarget(); //find a new target
-		//if they point to the same thing, don't need to remove it because theres a max of 1 copy of each robot in commonTargets
-		if (oldTarget != this.currentTarget) { 
-			Attacker.commonTargets.remove(oldTarget); //remove the old target
-		}
 		
 		this.roundsSpentChasing = 0; //reset the chase time
 	}
@@ -145,19 +121,17 @@ public class Attacker extends Player{
 	 * @return returns a PlayerRecord representing the target of the current attacker
 	 */
 	private PlayerRecord newTarget() {
-		for (PlayerRecord rec : this.priorityList) { //assuming priorityList is already sorted
-			if (! Attacker.commonTargets.contains(rec)) { //target was not found in the common target list
-				Attacker.commonTargets.add(rec);
-				return rec;
-			}
-		}
+		
 		//all targets are being chased -> pick a random player that's not an attacker to chase. note that we don't add to commonTargets
 //		int idx = Player.generator.nextInt(this.priorityList.length);
 //		PlayerRecord targetRecord = this.priorityList[idx];
 //		return targetRecord; <- test later
-		return null;
+		return this.priorityList[0];
 	}
 	
+	/**
+	 * Initial instruction when the game commences
+	 */
 	@Override
 	public void initialize(PlayerRecord[] players) {
 		int size = 0;
@@ -168,39 +142,29 @@ public class Attacker extends Player{
 		}
 		this.priorityList = new PlayerRecord[size]; //Assign the priorityList a specific size
 		
-		this.sortPriority(players); //default sort, could have multiple later
-		//Assign the player a target.
+		this.updateInfo(players);
 		this.currentTarget = newTarget();
 	}
 	
-	private void sortPriority(PlayerRecord[] players) {
-		this.filterAttackers(players);
-		
-		//Bubble sort
+	private void updateInfo(PlayerRecord[] players) {
+		this.updatePriorityListAndTarget(players);
+		this.sortByDistance();
+	}
+	
+	private void sortByDistance() {
+		//Selection sort -> sort the other players by their distance to the current attacker
 		int len = this.priorityList.length;
-		for (int i = 0; i < len; i++) {
-			boolean swapped = false;
-			for (int j = 0; j < len-1; j++) {
-				//calculate the two distances
-				int dist1 = calcDistance(this.priorityList[j]), dist2 = calcDistance(this.priorityList[j+1]);
+		for (int i = 0; i < this.priorityList.length - 1; i++) {
+			for (int j = i + 1; j < this.priorityList.length; j++) {
+				int dist1 = calcDistance(this.priorityList[j]), dist2 = calcDistance(this.priorityList[i]);
 				if (dist1 > dist2) {
-					swapPlayerRecord(j, j+1);
-					swapped = true;
+					swapPlayerRecord(i, j);
 				}
 			}
-			if (!swapped) { //efficiency optimization
-				break;
-			}
-		}
-		
-		//Debugging
-		System.out.println("PLAYER " + this.getPLAYER_ID());
-		for (PlayerRecord rec : this.priorityList) {
-			System.out.println(rec);
 		}
 	}
 	
-	private void filterAttackers(PlayerRecord[] players) {
+	private void updatePriorityListAndTarget(PlayerRecord[] players) {
 		int idx = 0;
 		for (PlayerRecord record : players) {
 			if (! record.getTYPE().equals("Attacker")) {
