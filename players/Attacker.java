@@ -11,19 +11,18 @@ import java.awt.*;
 public class Attacker extends Player{
 
 	private PlayerRecord[] priorityList;
-	private PlayerRecord currentTarget;
-	private int roundsSpentChasing = 0, currentState = 1;
+	private ArrayList<PlayerRecord> targets = new ArrayList<PlayerRecord>();
+	private int roundsSpentChasing = 0, currentState = STATE_CHASE;
 	private final static int MAX_CHASE_TIME = 5;
 	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
 	
 
 	public Attacker(City city, int s, int a, Direction d) {
-		super(city, s, a, d, 10, "Attacker", true);
-		this.setColor(Color.RED); //attackers are black
-		this.setSpeed(3);
-//		this.setSpeed(Player.generator.nextInt(4) + 1); //different attackers have different speeds -> implement random later
+		super(city, s, a, d, 3, "Attacker", true);
+		this.setColor(Color.RED); //attackers are red
 	}
-	
+
+	@SuppressWarnings("unused")
 	private void printPriorityList() {
 		System.out.println("\nPriority list of attacker: " + this.getPLAYER_ID());
 		for (PlayerRecord rec : this.priorityList) {
@@ -31,44 +30,57 @@ public class Attacker extends Player{
 		}
 	}
 	
-	private void printTargetInfo() {
-		System.out.println("\nTarget information:");
-		System.out.format("type: %s, id: %d, street: %d, avenue: %d\n\n", this.currentTarget.getTYPE(), this.currentTarget.getPLAYER_ID(),
-				this.currentTarget.getStreet(), this.currentTarget.getAvenue());
+	private void printTargets() {
+		System.out.println("\nTargets for attacker " + this.getPLAYER_ID());
+		for (PlayerRecord rec : targets) {
+			System.out.format("type: %s, street: %d, avenue %d\n", rec.getTYPE(), rec.getStreet(), rec.getAvenue());
+		}
+	}
+	
+	private void printCurrentTarget() {
+		PlayerRecord ct = this.getCurrentTarget();
+		System.out.println("\nCurrent target of player" + this.getPLAYER_ID());
+		System.out.format("type: %s, street: %d, avenue: %d\n", ct.getTYPE(), ct.getStreet(), ct.getAvenue());
 	}
 
 	@Override 
 	public void performAction(PlayerRecord[] players) { 
 		this.updateInfo(players);
+		if (this.getCurrentTarget() == null) {
+			this.setCurrentTarget(newTarget(players));
+		}
+		printPriorityList();
+		printTargets();
+		printCurrentTarget();
 		switch(this.currentState) { 
-			case 1: //chasing state -> could have multiple strategies in this case: maybe another switch
-				this.chase();
+			case STATE_CHASE: //chasing state -> could have multiple strategies in this case: maybe another switch
+				this.chase(players);
 				break;
-			case 2: //fighting state
+			case STATE_FIGHT: //fighting state
 				this.fight(players);
 				break;
-			case 3: //resting state
+			case STATE_REST: //resting state
 				this.rest();
+				break;
 		}
 	}
 	
-	public void chase() {
+	public void chase(PlayerRecord[] players) {
 		//If there is currently no target, find a new target
-//		if (this.roundsSpentChasing == Attacker.MAX_CHASE_TIME) { //switch to another innocent
-//			return; //isolate the following code for now
-//			this.sortPriority(players);
-//			switchTargets();
-//		}
+		if (this.roundsSpentChasing == Attacker.MAX_CHASE_TIME) { //switch to another innocent
+			this.setCurrentTarget(newTarget(players));
+			this.roundsSpentChasing = 0;
+		}
 		
 		this.chaseTarget();
 		this.roundsSpentChasing++;
 		if (this.targetReached()) {
-			this.currentState = 2; //change to fighting state
+			this.currentState = STATE_FIGHT; //change to fighting state
 		}
 	}
 	
 	private boolean targetReached() {
-		if (this.getStreet() == this.currentTarget.getStreet() && this.getAvenue() == this.currentTarget.getAvenue()) {
+		if (this.getStreet() == this.getCurrentTarget().getStreet() && this.getAvenue() == this.getCurrentTarget().getAvenue()) {
 			System.out.println("Target Reached!");
 			return true;
 		}
@@ -81,14 +93,18 @@ public class Attacker extends Player{
 	
 	/**
 	 * chases the target with a set amount of steps
-	 * @param target target is the PlayerRecord info about the target
-	 * @return returns a boolean representing whether or not the target has been reached
 	 */
 	private void chaseTarget() {
-		int verticalDiff = this.getStreet() - this.currentTarget.getStreet();
-		int horizontalDiff = this.getAvenue() - this.currentTarget.getAvenue();
+		//Safety check
+		if (this.getCurrentTarget() == null) {
+			System.out.println("No current target! Null target!");
+			return;
+		}
+		
+		int verticalDiff = this.getStreet() - this.getCurrentTarget().getStreet();
+		int horizontalDiff = this.getAvenue() - this.getCurrentTarget().getAvenue();
 		int speed = this.obtainSpeed();
-		printPriorityList();
+
 		if (verticalDiff != 0) {
 			int verticalSteps = Math.min(Math.abs(verticalDiff), speed);
 			//use of ternary operator to make code more readable -> (condition) ? (true assignment) : (false assignment)
@@ -104,33 +120,67 @@ public class Attacker extends Player{
 		}
 	}
 	
+	/**
+	 * Helper function for chasing another robot
+	 * @param dir direction is the direction to turn to
+	 * @param steps steps is how far the robot should go
+	 */
 	private void directedMove(Direction dir, int steps) {
 		this.turnTo(dir);
-		this.move(steps);
+		//Safe moving -> prevent walking into a wall
+		for (int i = 0; i < steps; i++) {
+			if (this.frontIsClear()) {
+				this.move();
+			} else {
+				System.out.println("Attacker " + this.getPLAYER_ID() + "cannot move!");
+				return;
+			}
+		}
 	}
 	
-	private void switchTargets() {
-		PlayerRecord oldTarget = this.currentTarget; //save the old target
-		this.currentTarget = this.newTarget(); //find a new target
-		
-		this.roundsSpentChasing = 0; //reset the chase time
+	/**
+	 * Find out who the other attackers are going for and add it to the current robot's "otherTargets" list
+	 * @param players
+	 */
+	private void communicate(PlayerRecord[] players) {
+		this.targets.clear(); //clear it first because other attacker's targets can change
+		for (PlayerRecord rec : players) {
+			//If rec happens to be the playerRecord of itself, we want to add it anyways. since the array contains all targets
+			if (rec.getTYPE().equals("Attacker") && rec.getCurrentTarget() != null) { 
+				this.targets.add(rec.getCurrentTarget());
+			}
+		}
 	}
 	
 	/**
 	 * Returns a PlayerRecord representing the current players target. Note that a target will always be returned.
 	 * @return returns a PlayerRecord representing the target of the current attacker
 	 */
-	private PlayerRecord newTarget() {
-		
-		//all targets are being chased -> pick a random player that's not an attacker to chase. note that we don't add to commonTargets
-//		int idx = Player.generator.nextInt(this.priorityList.length);
-//		PlayerRecord targetRecord = this.priorityList[idx];
-//		return targetRecord; <- test later
-		return this.priorityList[0];
+	private PlayerRecord newTarget(PlayerRecord[] players) {
+		this.communicate(players);
+		//Edge case: first robot gets a target
+		if (this.targets.size() == 0) {
+			return this.priorityList[0];
+		}
+		for (PlayerRecord record : this.priorityList) {
+			boolean found = false;
+			for (PlayerRecord target : this.targets) {
+				if (target.getPLAYER_ID() == record.getPLAYER_ID()) { 
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				return record;
+			}
+		}
+		//everyone is already being chased -> return a random target
+		int idx = generator.nextInt(this.priorityList.length);
+		return this.priorityList[idx];
 	}
 	
 	/**
-	 * Initial instruction when the game commences
+	 * Initial instruction when the game commences -> sets up all of the attackers with their required information
 	 */
 	@Override
 	public void initialize(PlayerRecord[] players) {
@@ -140,30 +190,28 @@ public class Attacker extends Player{
 				size++;
 			}
 		}
-		this.priorityList = new PlayerRecord[size]; //Assign the priorityList a specific size
+		//Edge case -> no other players other than attackers on the field
+		if (size == 0) {
+			System.out.println("No other players!");
+			System.exit(0);
+		}
 		
-		this.updateInfo(players);
-		this.currentTarget = newTarget();
+		this.priorityList = new PlayerRecord[size]; //Assign the priorityList a specific size
 	}
 	
+	/**
+	 * Main update method for gathering the latest information from the application class
+	 * @param players players is the PlayerRecord array with the newest information
+	 */
 	private void updateInfo(PlayerRecord[] players) {
 		this.updatePriorityListAndTarget(players);
 		this.sortByDistance();
 	}
 	
-	private void sortByDistance() {
-		//Selection sort -> sort the other players by their distance to the current attacker
-		int len = this.priorityList.length;
-		for (int i = 0; i < this.priorityList.length - 1; i++) {
-			for (int j = i + 1; j < this.priorityList.length; j++) {
-				int dist1 = calcDistance(this.priorityList[j]), dist2 = calcDistance(this.priorityList[i]);
-				if (dist1 > dist2) {
-					swapPlayerRecord(i, j);
-				}
-			}
-		}
-	}
-	
+	/**
+	 * Updates the current robot's priority list with the latest information from "players". also updates the current target information
+	 * @param players players is the PlayerRecord array with the newest and latest information from the game
+	 */
 	private void updatePriorityListAndTarget(PlayerRecord[] players) {
 		int idx = 0;
 		for (PlayerRecord record : players) {
@@ -171,19 +219,44 @@ public class Attacker extends Player{
 				this.priorityList[idx] = record;
 				idx++;
 				//Update current target along when new information is passed
-				if (this.currentTarget != null && record.getPLAYER_ID() == this.currentTarget.getPLAYER_ID()) {
-					this.currentTarget = record;
+				if (this.getCurrentTarget() != null && record.getPLAYER_ID() == this.getCurrentTarget().getPLAYER_ID()) {
+					this.setCurrentTarget(record);
 				}
 			}
 		}
 	}
 	
+	/**
+	 * Selection sort algorithm that sorts the players in the current robot's priority list by distance
+	 */
+	private void sortByDistance() {
+		int len = this.priorityList.length;
+		for (int i = 0; i < this.priorityList.length - 1; i++) {
+			for (int j = i + 1; j < this.priorityList.length; j++) {
+				int dist1 = calcDistance(this.priorityList[j]), dist2 = calcDistance(this.priorityList[i]);
+				if (dist1 < dist2) {
+					swapPlayerRecord(i, j);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Helper function for sorting the priority list
+	 * @param idx1 idx1 is the index of the first PlayerRecord
+	 * @param idx2 idx2 is the index of the second PlayerRecord
+	 */
 	private void swapPlayerRecord(int idx1, int idx2) {
 		PlayerRecord temp = this.priorityList[idx1];
 		this.priorityList[idx1] = this.priorityList[idx2];
 		this.priorityList[idx2] = temp;
 	}
 	
+	/**
+	 * Calculates the distance between the current robot and the "rec" robot
+	 * @param rec rec is the PlayerRecord of a robot in the current robot's priority list
+	 * @return returns an integer representing their difference in distance
+	 */
 	private int calcDistance(PlayerRecord rec) {
 		return Math.abs(rec.getAvenue() - this.getAvenue()) + Math.abs(rec.getStreet() - this.getStreet());
 	}

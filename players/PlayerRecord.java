@@ -7,11 +7,11 @@ package players;
  */
 public class PlayerRecord {
 	private int street, avenue;
-	private int speed, HP = 100;
-	private boolean isDefeated;
-	private PlayerRecord currentTarget;
+	private int speed, hp;
 	private final int PLAYER_ID;
+	private boolean isDefeated;
 	private final String TYPE;
+	private PlayerRecord currentTarget;
 	
 	/**
 	 * Constructor of PlayerRecod
@@ -19,13 +19,15 @@ public class PlayerRecord {
 	 * @param street - street of city
 	 * @param avenue - avenue of city
 	 */
-	public PlayerRecord(String TYPE, int PLAYER_ID, int street, int avenue, int speed, boolean isDefeated) {
+	public PlayerRecord(String TYPE, int PLAYER_ID, int street, int avenue, int speed, boolean isDefeated, int hp, PlayerRecord currentTarget) {
 		this.TYPE = TYPE;
 		this.street = street;
 		this.avenue = avenue;
 		this.speed = speed;
 		this.PLAYER_ID = PLAYER_ID;
 		this.isDefeated = isDefeated;
+		this.hp = hp;
+		this.currentTarget = currentTarget;
 	}
 	
 	/**
@@ -33,15 +35,23 @@ public class PlayerRecord {
 	 * @param player - Player
 	 */
 	public PlayerRecord(Player player) {
-		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), 0, player.isDefeated());
+		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), 0, player.isDefeated(), player.getHp(), player.getCurrentTarget());
 	}
 	
+	public PlayerRecord getCurrentTarget() {
+		return currentTarget;
+	}
+
+	public void setCurrentTarget(PlayerRecord currentTarget) {
+		this.currentTarget = currentTarget;
+	}
+
 	public int getHP() {
-		return this.HP;
+		return this.hp;
 	}
 
 	public void setHP(int hP) {
-		this.HP = hP;
+		this.hp = hP;
 	}
 
 	/**

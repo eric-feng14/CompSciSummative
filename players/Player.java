@@ -16,6 +16,7 @@ public abstract class Player extends EnhancedBot{
 	private final int PLAYER_ID;
 	private boolean isDefeated;
 	private final String TYPE;
+	private PlayerRecord currentTarget;
 	
 	/**
 	 * Constructor of player
@@ -30,19 +31,19 @@ public abstract class Player extends EnhancedBot{
 	 * @param hp - Health of player
 	 * @param currentTarget - target of the current player
 	 */
-	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated, int hp) {
+	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated, int hp, PlayerRecord currentTarget) {
 		super(city, s, a, d);
 		this.PLAYER_ID = nextID;
 		this.speed = speed;
 		this.isDefeated = defeated;
 		this.TYPE = TYPE;
 		this.hp = hp;
-		
+		this.currentTarget = currentTarget;
 		Player.nextID++; // Iterates playerID to create a unique player identification number
 	}
 	
 	/**
-	 * Constructor with default health
+	 * Constructor with default health and a default target (target is mainly used for attackers)
 	 * @param city - city
 	 * @param s - street 
 	 * @param a avenue 
@@ -52,9 +53,17 @@ public abstract class Player extends EnhancedBot{
 	 * @param defeated - isDefeated
 	 */
 	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated) {
-		this(city, s, a, d, speed, TYPE, defeated, 100);
+		this(city, s, a, d, speed, TYPE, defeated, 100, null);
 	}
 	
+	public PlayerRecord getCurrentTarget() {
+		return currentTarget;
+	}
+
+	public void setCurrentTarget(PlayerRecord currentTarget) {
+		this.currentTarget = currentTarget;
+	}
+
 	/**
 	 * Initializes playerRecords
 	 * @param players - players
