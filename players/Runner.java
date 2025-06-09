@@ -124,9 +124,9 @@ public class Runner extends Player{
 		
 		for (Direction dir : possibleDirections) {
 			if (!canMoveInDirection(dir)) {
-				continue; // Skip blocked directions
+				continue; 
 			}
-			// Calculate hypothetical position after moving
+			
 			int newAve = this.getAvenue();
 			int newStr = this.getStreet();
 
