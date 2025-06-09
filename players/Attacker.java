@@ -145,7 +145,7 @@ public class Attacker extends Player{
 	}
 	
 	/**
-	 * Find out who the other attackers are going for and add it to the current robot's "otherTargets" list
+	 * Find out who the other attackers are going for and add it to the current robot's "targets" list
 	 * @param players
 	 */
 	private void communicate(PlayerRecord[] players) {

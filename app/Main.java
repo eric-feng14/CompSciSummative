@@ -38,7 +38,7 @@ public class Main {
 		players[1] = new Attacker(city, 6, 6, Direction.WEST);
 		players[2] = new Medic(city, 8, 8, Direction.NORTH);
 		players[3] = new Attacker(city, 4, 5, Direction.SOUTH);
-		players[4] = new Attacker(city, 1, 1, Direction.SOUTH);
+		players[4] = new Runner(city, 1, 1, Direction.SOUTH);
 		updatePlayerRecord();
 		updateTags();
 		initializePlayers();
