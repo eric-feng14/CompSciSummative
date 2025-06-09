@@ -5,6 +5,10 @@ import java.awt.*;
 
 /**
  * Template robot class for the final summative in ICS4U
+ * TODO:
+ * - implement the other states (e.g. fighting, resting, etc)
+ * - work on powerups later
+ * - figure out how to make the robots learn (enhance the communicate() method). how to store in memory?
  * @author Eric Feng
  * @version Due date: June 13 2025
  */
@@ -57,7 +61,7 @@ public class Attacker extends Player{
 				this.chase(players);
 				break;
 			case STATE_FIGHT: //fighting state
-				this.fight(players);
+				this.fight();
 				break;
 			case STATE_REST: //resting state
 				this.rest();
@@ -67,7 +71,7 @@ public class Attacker extends Player{
 	
 	public void chase(PlayerRecord[] players) {
 		//If there is currently no target, find a new target
-		if (this.roundsSpentChasing == Attacker.MAX_CHASE_TIME) { //switch to another innocent
+		if (this.roundsSpentChasing == Attacker.MAX_CHASE_TIME) {
 			this.setCurrentTarget(newTarget(players));
 			this.roundsSpentChasing = 0;
 		}
@@ -87,7 +91,9 @@ public class Attacker extends Player{
 		return false;
 	}
 	
-	public void fight(PlayerRecord[] players) {}
+	public void fight() {//assuming we are at the same position as our target
+		
+	}
 	
 	public void rest() {}
 	
@@ -144,12 +150,14 @@ public class Attacker extends Player{
 	 */
 	private void communicate(PlayerRecord[] players) {
 		this.targets.clear(); //clear it first because other attacker's targets can change
+		//Find out the targets
 		for (PlayerRecord rec : players) {
 			//If rec happens to be the playerRecord of itself, we want to add it anyways. since the array contains all targets
 			if (rec.getTYPE().equals("Attacker") && rec.getCurrentTarget() != null) { 
 				this.targets.add(rec.getCurrentTarget());
 			}
 		}
+		//Potentially in the future, the other targets can give information about the players they have already fought -> e.g. the robots learn over time
 	}
 	
 	/**
