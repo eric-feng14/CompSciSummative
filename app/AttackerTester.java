@@ -10,7 +10,7 @@ import tools.*;
  */
 public class AttackerTester {
 	
-	public static int numOfPlayers = 5;
+	public static int numOfPlayers = 2;
 	public static Player[] players = new Player[numOfPlayers];
 	public static PlayerRecord[] playerRecords = new PlayerRecord[players.length];
 	
@@ -36,9 +36,6 @@ public class AttackerTester {
 		
 		players[0] = new Runner(city, 4, 4, Direction.EAST);
 		players[1] = new Attacker(city, 6, 6, Direction.WEST);
-		players[2] = new Medic(city, 8, 8, Direction.NORTH);
-		players[3] = new Attacker(city, 4, 5, Direction.SOUTH);
-		players[4] = new Runner(city, 1, 1, Direction.SOUTH);
 		updatePlayerRecord();
 		updateTags();
 		initializePlayers();
