@@ -5,7 +5,7 @@ import becker.robots.*;
 public class Runner extends Player{
 	private PlayerRecord[] priorityList;
 	private int stamina = 10;
-	
+
 	public Runner(City c, int s, int a, Direction d) {
 		super(c, s, a, d, 3, "Runner", false);
 		this.setColor(Color.BLUE);
@@ -40,7 +40,7 @@ public class Runner extends Player{
 			}
 		}
 	}
-	
+
 	private void updateList(PlayerRecord[] players) {
 		if (this.priorityList[0] == null) {
 			for(int i = 0; i < this.priorityList.length; i ++) {
@@ -68,9 +68,6 @@ public class Runner extends Player{
 	}
 
 	private void doStrategy() {
-		//		for (PlayerRecord i : this.priorityList) {
-		//			System.out.println("ME " + i);
-		//		}
 		if (this.inDanger(this.priorityList[0])) {
 			this.runAway();
 		}
@@ -97,62 +94,97 @@ public class Runner extends Player{
 		}
 		return dangerList;
 	}
-	
+
 	private void runAway() {		
 		PlayerRecord[] dangerList = this.findDangers();
-//		for (PlayerRecord i : dangerList) {
-//			System.out.println("ME " + i);
-//		}
-		
-		Direction bestDirection = findSafestDirection(dangerList);
-		this.turnTo(bestDirection);
+		//		for (PlayerRecord i : dangerList) {
+		//			System.out.println("ME " + i);
+		//		}
 
-		// Move with available speed
-		int stepsTaken = 0;
-		while (stepsTaken < this.obtainSpeed() && this.frontIsClear()) {
-			this.move();
-			stepsTaken++;
-		}
+		int[] bestLocation = findSafestDirection(dangerList);
+		this.moveTo(bestLocation[0], bestLocation[1], true);
+
+		//		// Move with available speed
+		//		int stepsTaken = 0;
+		//		while (stepsTaken < this.obtainSpeed() && this.frontIsClear()) {
+		//			this.move();
+		//			stepsTaken++;
+		//		}
 	}
 
-	private Direction findSafestDirection(PlayerRecord[] dangers) {
+	private int[] findSafestDirection(PlayerRecord[] dangers) {
 		Direction[] possibleDirections = {
 				Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST
 		};
 
-		Direction safestDirection = Direction.NORTH;
+		int [] safestLocation = {this.getStreet(), this.getAvenue()};
 		int lowestDangerScore = Integer.MAX_VALUE;
-		
-		for (Direction dir : possibleDirections) {
-			int newAve = this.getAvenue();
-			int newStr = this.getStreet();
 
-			switch(dir) {
-			case NORTH: newStr-=this.obtainSpeed(); break;
-			case EAST: newAve+=this.obtainSpeed(); break;
-			case SOUTH: newStr+=this.obtainSpeed(); break;
-			case WEST: newAve-=this.obtainSpeed(); break;
-			}
-			if (newAve < 0) {
-				newAve = 0;
-			}
-			if (newStr < 0) {
+		int [][] options = this.calculateMoveOptions();
+		for (int i = 0; i < options.length; i ++) {
+			System.out.println(options[i][0] + " " + options[i][1]);
+		}
+
+		for (int i = 0; i < options.length; i ++) {
+			//			int newAve = this.getAvenue();
+			//			int newStr = this.getStreet();
+			//
+			//			switch(dir) {
+			//			case NORTH: newStr-=this.obtainSpeed(); break;
+			//			case EAST: newAve+=this.obtainSpeed(); break;
+			//			case SOUTH: newStr+=this.obtainSpeed(); break;
+			//			case WEST: newAve-=this.obtainSpeed(); break;
+			//			}
+			int newStr = options[i][0];
+			int newAve = options[i][1];
+
+			if (newStr < 0 || newStr > 12) {
 				newStr = 0;
 			}
 
+			if (newAve < 0 || newAve > 23) {
+				newAve = 0;
+			}
+
 			// Calculate danger at new position
-			int dangerScore = calculateDangerAt(newAve, newStr, dangers);
+			int dangerScore = calculateDangerAt(newStr, newAve, dangers);
 
 			if (dangerScore < lowestDangerScore) {
 				lowestDangerScore = dangerScore;
-				safestDirection = dir;
+				safestLocation[0] = newStr;
+				safestLocation[1] = newAve;
 			}
 		}
 
-		return safestDirection;
+		return safestLocation;
 	}
 
-	private int calculateDangerAt(int avenue, int street, PlayerRecord[] dangers) {
+	public int[][] calculateMoveOptions() {
+		int speed = this.obtainSpeed();
+
+		int [][] options = new int[speed*4][2];
+
+		int currentStr = this.getStreet();
+		int currentAve = this.getAvenue();
+
+		int optionIndex = 0;
+		int i = 0;
+		for (int s = speed; s > 0; s--) {
+			// North
+			options[optionIndex++] = new int[]{currentStr + i, currentAve - s};
+			// East
+			options[optionIndex++] = new int[]{currentStr + s, currentAve + i};
+			// South
+			options[optionIndex++] = new int[]{currentStr - i, currentAve + s};
+			// West
+			options[optionIndex++] = new int[]{currentStr - s, currentAve - i};
+			i ++;
+		}
+
+		return options;
+	}
+
+	private int calculateDangerAt(int street, int avenue, PlayerRecord[] dangers) {
 		int totalDanger = 0;
 
 		for (PlayerRecord danger : dangers) {
@@ -166,18 +198,18 @@ public class Runner extends Player{
 			case 3: totalDanger += 400; break;
 			case 4: totalDanger += 200; break;
 			}
-			if (avenue == 0 || avenue == 23) {
-				totalDanger += 100;
-			}
-			if (street == 0 || street == 12) {
-				totalDanger += 100;
-			}
-			if (avenue == 1 || avenue == 22) {
-				totalDanger += 50;
-			}
-			if (street == 1 || street == 11) {
-				totalDanger += 50;
-			}
+		}
+		if (avenue == 0 || avenue == 23) {
+			totalDanger += 300;
+		}
+		if (street == 0 || street == 12) {
+			totalDanger += 300;
+		}
+		if (avenue == 1 || avenue == 22) {
+			totalDanger += 150;
+		}
+		if (street == 1 || street == 11) {
+			totalDanger += 150;
 		}
 		return totalDanger;
 	}

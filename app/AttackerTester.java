@@ -8,7 +8,7 @@ import tools.*;
  * @author Eric, Felix, and Richard
  * @version 5/26/2025
  */
-public class Main {
+public class AttackerTester {
 	
 	final private static int numOfPlayers = 5;
 	private static Player[] players = new Player[numOfPlayers];
@@ -57,13 +57,13 @@ public class Main {
 	 * still need to decide on what to put on the tags
 	 */
 	public static void updateTags() {
-		for (Player p : Main.players) {
+		for (Player p : AttackerTester.players) {
 			p.setLabel("" + p.getPLAYER_ID());
 		}
 	}
 	
 	public static void initializePlayers() {
-		for (Player p : Main.players) {
+		for (Player p : AttackerTester.players) {
 			p.initialize(playerRecords);
 			updatePlayerRecord();
 		}
@@ -73,8 +73,8 @@ public class Main {
 	 * Updates Player records
 	 */
 	public static void updatePlayerRecord() {
-		for (int i = 0; i < Main.players.length; i++) {
-			Main.playerRecords[i] = new PlayerRecord(players[i]);
+		for (int i = 0; i < AttackerTester.players.length; i++) {
+			AttackerTester.playerRecords[i] = new PlayerRecord(players[i]);
 		}
 	}
 }
