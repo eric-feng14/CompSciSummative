@@ -10,9 +10,9 @@ import tools.*;
  */
 public class Main {
 	
-	public static int numOfPlayers = 5;
-	public static Player[] players = new Player[numOfPlayers];
-	public static PlayerRecord[] playerRecords = new PlayerRecord[players.length];
+	final private static int numOfPlayers = 5;
+	private static Player[] players = new Player[numOfPlayers];
+	private static PlayerRecord[] playerRecords = new PlayerRecord[players.length];
 	
 	/**
 	 * 
