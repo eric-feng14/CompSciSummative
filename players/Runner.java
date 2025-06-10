@@ -4,15 +4,20 @@ import becker.robots.*;
 
 public class Runner extends Player{
 	private PlayerRecord[] priorityList;
-	private int stamina = 10;
+	private int stamina = 15;
+	private int steps = this.obtainSpeed();
 
 	public Runner(City c, int s, int a, Direction d) {
-		super(c, s, a, d, 3, "Runner", false);
+		super(c, s, a, d, Player.generator.nextInt(4) + 2, "Runner", false);
 		this.setColor(Color.BLUE);
 	}
 
 	@Override
 	public void performAction(PlayerRecord[] players) {
+		this.stamina ++;
+		if (this.obtainSpeed() > this.stamina) {
+			this.steps = stamina;
+		}
 		this.priorityList = new PlayerRecord[players.length];
 		this.updateList(players);
 		this.sortPriority(players);
@@ -97,25 +102,16 @@ public class Runner extends Player{
 
 	private void runAway() {		
 		PlayerRecord[] dangerList = this.findDangers();
-		//		for (PlayerRecord i : dangerList) {
-		//			System.out.println("ME " + i);
-		//		}
 
-		int[] bestLocation = findSafestDirection(dangerList);
+		int[] bestLocation = findSafestLocation(dangerList);
 		this.moveTo(bestLocation[0], bestLocation[1], true);
-
-		//		// Move with available speed
-		//		int stepsTaken = 0;
-		//		while (stepsTaken < this.obtainSpeed() && this.frontIsClear()) {
-		//			this.move();
-		//			stepsTaken++;
-		//		}
+		
+		PlayerRecord r = this.priorityList[priorityList.length - 1];
+		int numSteps = Math.abs(r.getAvenue() - this.getAvenue()) + Math.abs(r.getStreet() - this.getStreet());
+		this.stamina -= numSteps;
 	}
 
-	private int[] findSafestDirection(PlayerRecord[] dangers) {
-		Direction[] possibleDirections = {
-				Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST
-		};
+	private int[] findSafestLocation(PlayerRecord[] dangers) {
 
 		int [] safestLocation = {this.getStreet(), this.getAvenue()};
 		int lowestDangerScore = Integer.MAX_VALUE;
@@ -126,15 +122,6 @@ public class Runner extends Player{
 		}
 
 		for (int i = 0; i < options.length; i ++) {
-			//			int newAve = this.getAvenue();
-			//			int newStr = this.getStreet();
-			//
-			//			switch(dir) {
-			//			case NORTH: newStr-=this.obtainSpeed(); break;
-			//			case EAST: newAve+=this.obtainSpeed(); break;
-			//			case SOUTH: newStr+=this.obtainSpeed(); break;
-			//			case WEST: newAve-=this.obtainSpeed(); break;
-			//			}
 			int newStr = options[i][0];
 			int newAve = options[i][1];
 
@@ -160,7 +147,7 @@ public class Runner extends Player{
 	}
 
 	public int[][] calculateMoveOptions() {
-		int speed = this.obtainSpeed();
+		int speed = this.steps;
 
 		int [][] options = new int[speed*4][2];
 
