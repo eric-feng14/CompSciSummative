@@ -8,7 +8,7 @@ import tools.*;
  * @author Eric, Felix, and Richard
  * @version 5/26/2025
  */
-public class Main {
+public class AttackerTester {
 	
 	public static int numOfPlayers = 5;
 	public static Player[] players = new Player[numOfPlayers];
@@ -35,9 +35,9 @@ public class Main {
 		creator.createWallRect(0, 0, 24, 13);
 		
 		players[0] = new Runner(city, 4, 4, Direction.EAST);
-		players[1] = new Attacker(city, 6, 7, Direction.WEST);
+		players[1] = new Attacker(city, 6, 6, Direction.WEST);
 		players[2] = new Medic(city, 8, 8, Direction.NORTH);
-		players[3] = new Attacker(city, 6, 9, Direction.SOUTH);
+		players[3] = new Attacker(city, 4, 5, Direction.SOUTH);
 		players[4] = new Runner(city, 1, 1, Direction.SOUTH);
 		updatePlayerRecord();
 		updateTags();

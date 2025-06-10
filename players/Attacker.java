@@ -13,9 +13,10 @@ import java.awt.*;
  * @version Due date: June 13 2025
  */
 public class Attacker extends Player{
-
+	
+	private AttackerRecord[] learnedAttributes;
+	private PlayerRecord[] attackers;
 	private PlayerRecord[] priorityList;
-	private ArrayList<PlayerRecord> targets = new ArrayList<PlayerRecord>();
 	private int roundsSpentChasing = 0, currentState = STATE_CHASE;
 	private final static int MAX_CHASE_TIME = 5;
 	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
@@ -34,9 +35,9 @@ public class Attacker extends Player{
 		}
 	}
 	
-	private void printTargets() {
-		System.out.println("\nTargets for attacker " + this.getPLAYER_ID());
-		for (PlayerRecord rec : targets) {
+	private void printAttackers() {
+		System.out.println("\nAttacker information for attacker" + this.getPLAYER_ID());
+		for (PlayerRecord rec : attackers) {
 			System.out.format("type: %s, street: %d, avenue %d\n", rec.getTYPE(), rec.getStreet(), rec.getAvenue());
 		}
 	}
@@ -54,7 +55,7 @@ public class Attacker extends Player{
 			this.setCurrentTarget(newTarget(players));
 		}
 		printPriorityList();
-		printTargets();
+		printAttackers();
 		printCurrentTarget();
 		switch(this.currentState) { 
 			case STATE_CHASE: //chasing state -> could have multiple strategies in this case: maybe another switch
@@ -92,7 +93,7 @@ public class Attacker extends Player{
 	}
 	
 	public void fight() {//assuming we are at the same position as our target
-		
+		//would we have to send information back to the application class?
 	}
 	
 	public void rest() {}
@@ -144,20 +145,13 @@ public class Attacker extends Player{
 		}
 	}
 	
-	/**
-	 * Find out who the other attackers are going for and add it to the current robot's "targets" list
-	 * @param players
-	 */
-	private void communicate(PlayerRecord[] players) {
-		this.targets.clear(); //clear it first because other attacker's targets can change
-		//Find out the targets
-		for (PlayerRecord rec : players) {
-			//If rec happens to be the playerRecord of itself, we want to add it anyways. since the array contains all targets
-			if (rec.getTYPE().equals("Attacker") && rec.getCurrentTarget() != null) { 
-				this.targets.add(rec.getCurrentTarget());
+	private boolean noTargets() {
+		for (PlayerRecord attacker : this.attackers) {
+			if (attacker != null) { //an attacker is already chasing someone, targets already existed
+				return false;
 			}
 		}
-		//Potentially in the future, the other targets can give information about the players they have already fought -> e.g. the robots learn over time
+		return true;
 	}
 	
 	/**
@@ -165,23 +159,29 @@ public class Attacker extends Player{
 	 * @return returns a PlayerRecord representing the target of the current attacker
 	 */
 	private PlayerRecord newTarget(PlayerRecord[] players) {
-		this.communicate(players);
 		//Edge case: first robot gets a target
-		if (this.targets.size() == 0) {
+		if (noTargets()) {
 			return this.priorityList[0];
 		}
+		
+		//priority list and attackers are already updated
 		for (PlayerRecord record : this.priorityList) {
+			//Check whether the other attackers are already searching for "record". If not, it's a valid target. 
+			//Note that "attackers" contains the current target as well. This is intended.
 			boolean found = false;
-			for (PlayerRecord target : this.targets) {
-				if (target.getPLAYER_ID() == record.getPLAYER_ID()) { 
+			for (PlayerRecord attacker : this.attackers) {
+				PlayerRecord target = attacker.getCurrentTarget();
+				if (target != null && target.getPLAYER_ID() == record.getPLAYER_ID()) { 
 					found = true;
 					break;
 				}
 			}
+			
 			if (!found) {
 				return record;
 			}
 		}
+		
 		//everyone is already being chased -> return a random target
 		int idx = generator.nextInt(this.priorityList.length);
 		return this.priorityList[idx];
@@ -205,6 +205,8 @@ public class Attacker extends Player{
 		}
 		
 		this.priorityList = new PlayerRecord[size]; //Assign the priorityList a specific size
+		this.attackers = new PlayerRecord[players.length - size];
+		this.learnedAttributes = new AttackerRecord[attackers.length];
 	}
 	
 	/**
@@ -212,24 +214,26 @@ public class Attacker extends Player{
 	 * @param players players is the PlayerRecord array with the newest information
 	 */
 	private void updateInfo(PlayerRecord[] players) {
-		this.updatePriorityListAndTarget(players);
-		this.sortByDistance();
+		this.updateListsAndTarget(players);
+		this.sortPriorityListByDistance();
 	}
-	
 	/**
 	 * Updates the current robot's priority list with the latest information from "players". also updates the current target information
 	 * @param players players is the PlayerRecord array with the newest and latest information from the game
 	 */
-	private void updatePriorityListAndTarget(PlayerRecord[] players) {
-		int idx = 0;
+	private void updateListsAndTarget(PlayerRecord[] players) {
+		int idx1 = 0, idx2 = 0;
 		for (PlayerRecord record : players) {
 			if (! record.getTYPE().equals("Attacker")) {
-				this.priorityList[idx] = record;
-				idx++;
+				this.priorityList[idx1] = record;
+				idx1++;
 				//Update current target along when new information is passed
 				if (this.getCurrentTarget() != null && record.getPLAYER_ID() == this.getCurrentTarget().getPLAYER_ID()) {
 					this.setCurrentTarget(record);
 				}
+			} else { //then it is an attacker
+				this.attackers[idx2] = record;
+				idx2++;
 			}
 		}
 	}
@@ -237,13 +241,13 @@ public class Attacker extends Player{
 	/**
 	 * Selection sort algorithm that sorts the players in the current robot's priority list by distance
 	 */
-	private void sortByDistance() {
+	private void sortPriorityListByDistance() {
 		int len = this.priorityList.length;
 		for (int i = 0; i < this.priorityList.length - 1; i++) {
 			for (int j = i + 1; j < this.priorityList.length; j++) {
 				int dist1 = calcDistance(this.priorityList[j]), dist2 = calcDistance(this.priorityList[i]);
 				if (dist1 < dist2) {
-					swapPlayerRecord(i, j);
+					swapPlayerRecord(i, j, this.priorityList);
 				}
 			}
 		}
@@ -253,11 +257,12 @@ public class Attacker extends Player{
 	 * Helper function for sorting the priority list
 	 * @param idx1 idx1 is the index of the first PlayerRecord
 	 * @param idx2 idx2 is the index of the second PlayerRecord
+	 * @param lst lst is the player record array containing the items to be swapped
 	 */
-	private void swapPlayerRecord(int idx1, int idx2) {
-		PlayerRecord temp = this.priorityList[idx1];
-		this.priorityList[idx1] = this.priorityList[idx2];
-		this.priorityList[idx2] = temp;
+	private void swapPlayerRecord(int idx1, int idx2, PlayerRecord[] lst) {
+		PlayerRecord temp = lst[idx1];
+		lst[idx1] = lst[idx2];
+		lst[idx2] = temp;
 	}
 	
 	/**
