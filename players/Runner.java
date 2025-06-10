@@ -4,18 +4,19 @@ import becker.robots.*;
 
 public class Runner extends Player{
 	private PlayerRecord[] priorityList;
-	private int stamina = 15;
-	private int steps = this.obtainSpeed();
+	private int stamina = 10;
+	private int steps;
 
 	public Runner(City c, int s, int a, Direction d) {
-		super(c, s, a, d, Player.generator.nextInt(3) + 2, "Runner", false);
+		super(c, s, a, d, /*Player.generator.nextInt(3) + 2*/ 2, "Runner", false);
 		this.setColor(Color.BLUE);
 	}
 
 	@Override
 	public void performAction(PlayerRecord[] players) {
 		this.stamina ++;
-		if (this.obtainSpeed() > this.stamina) {
+		steps = this.obtainSpeed();
+		if (steps > this.stamina) {
 			this.steps = stamina;
 		}
 		if (this.priorityList == null) {
@@ -100,6 +101,7 @@ public class Runner extends Player{
 		this.steps = 1;
 		int[] bestLocation = findSafestLocation(dangerList);
 		this.moveTo(bestLocation[0], bestLocation[1], true);
+		this.stamina ++; 
 	}
 
 	private boolean inDanger(PlayerRecord record) {
@@ -148,15 +150,13 @@ public class Runner extends Player{
 		int[] bestLocation = findSafestLocation(dangerList);
 		this.moveTo(bestLocation[0], bestLocation[1], true);
 		
-		PlayerRecord r = this.priorityList[priorityList.length - 1];
-		int numSteps = Math.abs(r.getAvenue() - this.getAvenue()) + Math.abs(r.getStreet() - this.getStreet());
-		this.stamina -= numSteps;
+		this.stamina -= this.steps;
 	}
 
 	private int[] findSafestLocation(PlayerRecord[] dangers) {
 
 		int [] safestLocation = {this.getStreet(), this.getAvenue()};
-		int lowestDangerScore = Integer.MAX_VALUE;
+		int lowestScore = Integer.MAX_VALUE;
 
 		int [][] options = this.calculateMoveOptions();
 		for (int i = 0; i < options.length; i ++) {
@@ -177,9 +177,15 @@ public class Runner extends Player{
 
 			// Calculate danger at new position
 			int dangerScore = calculateDangerAt(newStr, newAve, dangers);
-
-			if (dangerScore < lowestDangerScore) {
-				lowestDangerScore = dangerScore;
+			
+			int distance = Math.abs(dangers[0].getAvenue() - newAve) + 
+					Math.abs(dangers[0].getStreet() - newStr);
+			
+			int distance1 = Math.abs(dangers[0].getAvenue() - safestLocation[1]) + 
+					Math.abs(dangers[0].getStreet() - safestLocation[0]);
+			
+			if (dangerScore < lowestScore || (dangerScore == lowestScore && distance > distance1)) {
+				lowestScore = dangerScore;
 				safestLocation[0] = newStr;
 				safestLocation[1] = newAve;
 			}
