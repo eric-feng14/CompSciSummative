@@ -8,7 +8,7 @@ public class Runner extends Player{
 	private int steps = this.obtainSpeed();
 
 	public Runner(City c, int s, int a, Direction d) {
-		super(c, s, a, d, Player.generator.nextInt(4) + 2, "Runner", false);
+		super(c, s, a, d, Player.generator.nextInt(3) + 2, "Runner", false);
 		this.setColor(Color.BLUE);
 	}
 
@@ -18,8 +18,10 @@ public class Runner extends Player{
 		if (this.obtainSpeed() > this.stamina) {
 			this.steps = stamina;
 		}
-		this.priorityList = new PlayerRecord[players.length];
-		this.updateList(players);
+		if (this.priorityList == null) {
+			this.priorityList = new PlayerRecord[players.length];
+		}
+		this.learnDifferences(players);
 		this.sortPriority(players);
 		this.doStrategy();
 	}
@@ -46,10 +48,11 @@ public class Runner extends Player{
 		}
 	}
 
-	private void updateList(PlayerRecord[] players) {
+	private void learnDifferences(PlayerRecord[] players) {
 		if (this.priorityList[0] == null) {
 			for(int i = 0; i < this.priorityList.length; i ++) {
 				this.priorityList[i] = players[i];
+				this.priorityList[i].setSpeed(1);
 			}
 		}
 		else {
@@ -73,20 +76,41 @@ public class Runner extends Player{
 	}
 
 	private void doStrategy() {
+		PlayerRecord[] dangerList = this.findAttackers();
+		
 		if (this.inDanger(this.priorityList[0])) {
-			this.runAway();
+			this.runAway(dangerList);
+		}
+		else {
+			if (this.getHp() < 50) {
+				this.seekMedic();
+			}
+			else {
+				this.rest(dangerList);
+			}
 		}
 	}
 
+	private void seekMedic() {
+		PlayerRecord[] medicList = this.findMedics();
+		
+	}
+
+	private void rest(PlayerRecord[] dangerList) {
+		this.steps = 1;
+		int[] bestLocation = findSafestLocation(dangerList);
+		this.moveTo(bestLocation[0], bestLocation[1], true);
+	}
+
 	private boolean inDanger(PlayerRecord record) {
-		if((this.calcDistance(record) <= record.getSpeed()) || (this.calcDistance(record) <= 5)) {
+		if((this.calcDistance(record) <= record.getSpeed()) || (this.calcDistance(record) <= 6)) {
 			return true;
 		}
 		else {
 			return false;
 		}
 	}
-	private PlayerRecord[] findDangers() {
+	private PlayerRecord[] findAttackers() {
 		int numAttacker = 0;
 		for (int i = 0; i < priorityList.length; i ++) {
 			if(this.priorityList[i].getTYPE().equals("Attacker")) {
@@ -99,9 +123,27 @@ public class Runner extends Player{
 		}
 		return dangerList;
 	}
+	
+	private  PlayerRecord[] findMedics() {
+		int numMedic = 0;
+		int firstIndex = 0;
+		
+		for (int i = 0; i < priorityList.length; i ++) {
+			if(this.priorityList[i].getTYPE().equals("Medic")) {
+				if (numMedic == 0) {
+					firstIndex = i;
+				}
+				numMedic ++;
+			}
+		}
+		PlayerRecord[] medicList = new PlayerRecord[numMedic];
+		for (int i = 0; i < medicList.length; i ++) {
+			medicList[i] = this.priorityList[firstIndex++];
+		}
+		return medicList;
+	}
 
-	private void runAway() {		
-		PlayerRecord[] dangerList = this.findDangers();
+	private void runAway(PlayerRecord[] dangerList) {		
 
 		int[] bestLocation = findSafestLocation(dangerList);
 		this.moveTo(bestLocation[0], bestLocation[1], true);
