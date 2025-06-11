@@ -47,6 +47,10 @@ public class Main {
 		// Game loop
 		while (!gameEnd()) {
 		    players[idx].performAction(playerRecords);
+		    PlayerRecord[] battlers = players[idx].getInfo(); 
+		    if (battlers != null) {
+		    	//seems messy
+		    }
 		    idx = (idx + 1) % players.length;
 		    updatePlayerRecord();
 		    updateTags();
@@ -65,7 +69,6 @@ public class Main {
 	public static void initializePlayers() {
 		for (Player p : Main.players) {
 			p.initialize(playerRecords);
-			updatePlayerRecord();
 		}
 	}
 	

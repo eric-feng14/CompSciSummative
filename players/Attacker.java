@@ -8,18 +8,24 @@ import java.awt.*;
  * TODO:
  * - implement the other states (e.g. fighting, resting, etc)
  * - work on powerups later
- * - figure out how to make the robots learn (enhance the communicate() method). how to store in memory?
+ * - add feature, after engaging in battle with a target, you cannot fight them again
+ * - for the learning part, we would learn about the speed of the other robots by observing their movements.
+ * When sorting the priority list we could compare and consider 2 attributes e.g. dist/speed which would
+ * conveniently represent time. By default, on the first run since we don't know the speeds of the other 
+ * robots, we would set the speed to 1 so we're sorting by dist. As the robots continue to observe, they
+ * will update the speeds of the other robots
  * @author Eric Feng
  * @version Due date: June 13 2025
  */
 public class Attacker extends Player{
 	
+	//learnedAttributes contains information gathered from watching others as well as fighting others
 	private AttackerRecord[] learnedAttributes;
-	private PlayerRecord[] attackers;
-	private PlayerRecord[] priorityList;
+	private PlayerRecord[] attackers, priorityList, previousPriorityList;
 	private int roundsSpentChasing = 0, currentState = STATE_CHASE;
 	private final static int MAX_CHASE_TIME = 5;
 	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
+	private final static int NORMAL_HIT = 20, CRITICAL_HIT = 40, KNOCKOUT = 100;
 	
 
 	public Attacker(City city, int s, int a, Direction d) {
@@ -27,7 +33,6 @@ public class Attacker extends Player{
 		this.setColor(Color.RED); //attackers are red
 	}
 
-	@SuppressWarnings("unused")
 	private void printPriorityList() {
 		System.out.println("\nPriority list of attacker: " + this.getPLAYER_ID());
 		for (PlayerRecord rec : this.priorityList) {
@@ -51,7 +56,7 @@ public class Attacker extends Player{
 	@Override 
 	public void performAction(PlayerRecord[] players) { 
 		this.updateInfo(players);
-		if (this.getCurrentTarget() == null) {
+		if (this.getCurrentTarget() == null) { //no target, e.g. first round of play
 			this.setCurrentTarget(newTarget(players));
 		}
 		printPriorityList();
@@ -61,13 +66,11 @@ public class Attacker extends Player{
 			case STATE_CHASE: //chasing state -> could have multiple strategies in this case: maybe another switch
 				this.chase(players);
 				break;
-			case STATE_FIGHT: //fighting state
-				this.fight();
-				break;
 			case STATE_REST: //resting state
 				this.rest();
 				break;
 		}
+		this.updatePreviousPriority(players);
 	}
 	
 	public void chase(PlayerRecord[] players) {
@@ -94,6 +97,17 @@ public class Attacker extends Player{
 	
 	public void fight() {//assuming we are at the same position as our target
 		//would we have to send information back to the application class?
+	}
+	
+	public PlayerRecord[] getInfo() {
+		if (this.currentState == STATE_FIGHT) {
+			return new PlayerRecord[] {new PlayerRecord(this), this.getCurrentTarget()};
+		}
+		return null;
+	}
+	
+	public int getAmount() {
+		return NORMAL_HIT;
 	}
 	
 	public void rest() {}
@@ -205,8 +219,21 @@ public class Attacker extends Player{
 		}
 		
 		this.priorityList = new PlayerRecord[size]; //Assign the priorityList a specific size
+		this.previousPriorityList = new PlayerRecord[size];
 		this.attackers = new PlayerRecord[players.length - size];
 		this.learnedAttributes = new AttackerRecord[attackers.length];
+		
+		//Populate previousPriorityList with default player records
+		int idx = 0;
+		for (PlayerRecord rec : players) {
+			if (! rec.getTYPE().equals("Attacker")) {
+				this.previousPriorityList[idx] = rec;
+				idx++;
+			}
+		}
+		
+		//Extra note: priorityList and attackers will be updated upon the first call of performAction()
+		//Learned attributes will be filled up as interactions between various robots start to happen
 	}
 	
 	/**
@@ -215,8 +242,27 @@ public class Attacker extends Player{
 	 */
 	private void updateInfo(PlayerRecord[] players) {
 		this.updateListsAndTarget(players);
-		this.sortPriorityListByDistance();
+		this.sortPriorityList();
 	}
+	
+	
+	
+	private void updatePreviousPriority(PlayerRecord[] players) {
+		int idx = 0;
+		for (PlayerRecord record : this.priorityList) {
+			if (! record.getTYPE().equals("Attacker")) {
+				this.previousPriorityList[idx] = record;
+				idx++;
+			}
+		}
+	}
+	
+	private void updateCurrentTarget(PlayerRecord rec) {
+		if (this.getCurrentTarget() != null & rec.getPLAYER_ID() == this.getCurrentTarget().getPLAYER_ID()) {
+			this.setCurrentTarget(rec);
+		}
+	}
+	
 	/**
 	 * Updates the current robot's priority list with the latest information from "players". also updates the current target information
 	 * @param players players is the PlayerRecord array with the newest and latest information from the game
@@ -226,11 +272,10 @@ public class Attacker extends Player{
 		for (PlayerRecord record : players) {
 			if (! record.getTYPE().equals("Attacker")) {
 				this.priorityList[idx1] = record;
+				this.learnSpeed(idx1);
 				idx1++;
-				//Update current target along when new information is passed
-				if (this.getCurrentTarget() != null && record.getPLAYER_ID() == this.getCurrentTarget().getPLAYER_ID()) {
-					this.setCurrentTarget(record);
-				}
+				//Update current target as well when new information is passed
+				this.updateCurrentTarget(record);
 			} else { //then it is an attacker
 				this.attackers[idx2] = record;
 				idx2++;
@@ -238,15 +283,36 @@ public class Attacker extends Player{
 		}
 	}
 	
+	private PlayerRecord findRecord(int idx) {
+		for (PlayerRecord record : this.previousPriorityList) {
+			if (record.getPLAYER_ID() == this.priorityList[idx].getPLAYER_ID()) {
+				return record;
+			}
+		}
+		return null;
+	}
+	
+	private void learnSpeed(int idx) {
+		//We need to find the previous record because the order of "previousPriorityList" constantly changes,
+		//while the players array from the application class never changes order
+		PlayerRecord prevRecord = findRecord(idx), currentRecord = this.priorityList[idx];
+		int speed = calcDistance(prevRecord, currentRecord);
+		//We're looking at the maximum possible speed of other players, not the current speed, so we can get a better understanding of their abilities
+		int newSpeed = Math.max(speed, this.previousPriorityList[idx].getSpeed());
+		this.priorityList[idx].setSpeed(newSpeed);
+	}
+	
 	/**
-	 * Selection sort algorithm that sorts the players in the current robot's priority list by distance
+	 * Selection sort algorithm that sorts the players in the current robot's priority list by distance and maximum speed
 	 */
-	private void sortPriorityListByDistance() {
+	private void sortPriorityList() {
 		int len = this.priorityList.length;
 		for (int i = 0; i < this.priorityList.length - 1; i++) {
 			for (int j = i + 1; j < this.priorityList.length; j++) {
 				int dist1 = calcDistance(this.priorityList[j]), dist2 = calcDistance(this.priorityList[i]);
-				if (dist1 < dist2) {
+				int speed1 = this.priorityList[j].getSpeed(), speed2 = this.priorityList[i].getSpeed();
+				double time1 = (double) dist1 / speed1, time2 = (double) dist2 / speed2;
+				if (time1 < time2) {
 					swapPlayerRecord(i, j, this.priorityList);
 				}
 			}
@@ -272,5 +338,15 @@ public class Attacker extends Player{
 	 */
 	private int calcDistance(PlayerRecord rec) {
 		return Math.abs(rec.getAvenue() - this.getAvenue()) + Math.abs(rec.getStreet() - this.getStreet());
+	}
+	
+	/**
+	 * Overloaded calcDistance method that calculates the distance between two playerRecords rather than a single record vs the current robot
+	 * @param rec1 rec1 is the first playerRecord
+	 * @param rec2 rec2 is the second playerRecord
+	 * @return
+	 */
+	private int calcDistance(PlayerRecord rec1, PlayerRecord rec2) {
+		return Math.abs(rec1.getAvenue() - rec2.getAvenue()) + Math.abs(rec1.getStreet() - rec2.getStreet());
 	}
 }

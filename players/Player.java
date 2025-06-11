@@ -70,6 +70,8 @@ public abstract class Player extends EnhancedBot{
 	 */
 	public void initialize(PlayerRecord[] players) {}
 	
+	public PlayerRecord[] getInfo() {return null;}
+	
 	/**
 	 * Gets health of player
 	 * @return - health

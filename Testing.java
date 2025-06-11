@@ -49,7 +49,8 @@ public class Testing {
 //		initializePlayers();
 //		
 //		medic.performAction(playerRecords);
-		System.out.println("test");
+		PlayerRecord[] array = new PlayerRecord[4];
+		System.out.println(1-array[1].getSpeed());
 	}
 	
 	public static void initializePlayers() {

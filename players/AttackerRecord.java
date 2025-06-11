@@ -3,7 +3,7 @@ package players;
 public class AttackerRecord extends PlayerRecord{
 	
 	/*
-	 * Attackers will learn about what?
+	 * Attackers will learn about what? 
 	 * Will each attacker record have an array about the other players? 
 	 * What the robots will learn is the same thing, so why should we have multiple AttackerRecords when they hold the same info?
 	 * If we just kept a nonAttacker class for every player that isn't an attacker, we would save memory no?
