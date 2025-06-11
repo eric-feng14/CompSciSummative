@@ -9,11 +9,7 @@ import java.awt.*;
  * - implement the other states (e.g. fighting, resting, etc)
  * - work on powerups later
  * - add feature, after engaging in battle with a target, you cannot fight them again
- * - for the learning part, we would learn about the speed of the other robots by observing their movements.
- * When sorting the priority list we could compare and consider 2 attributes e.g. dist/speed which would
- * conveniently represent time. By default, on the first run since we don't know the speeds of the other 
- * robots, we would set the speed to 1 so we're sorting by dist. As the robots continue to observe, they
- * will update the speeds of the other robots
+ * - add strategies, e.g. cornering, supporting & coordinating with other attackers
  * @author Eric Feng
  * @version Due date: June 13 2025
  */
@@ -311,8 +307,7 @@ public class Attacker extends Player{
 			for (int j = i + 1; j < this.priorityList.length; j++) {
 				int dist1 = calcDistance(this.priorityList[j]), dist2 = calcDistance(this.priorityList[i]);
 				int speed1 = this.priorityList[j].getSpeed(), speed2 = this.priorityList[i].getSpeed();
-				int a = 1, b = 1; //weight factors
-				int priority1 = a * dist1 + b * speed1, priority2 = a * dist2 + b * speed2;
+				int priority1 = dist1 * speed1, priority2 = dist2 * speed2;
 				if (priority1 < priority2) {
 					swapPlayerRecord(i, j, this.priorityList);
 				}
