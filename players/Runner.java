@@ -8,13 +8,13 @@ public class Runner extends Player{
 	private int steps;
 
 	public Runner(City c, int s, int a, Direction d) {
-		super(c, s, a, d, /*Player.generator.nextInt(3) + 2*/ 2, "Runner", false);
+		super(c, s, a, d, /*Player.generator.nextInt(3) + 2*/ 3, "Runner", false);
 		this.setColor(Color.BLUE);
 	}
 
 	@Override
 	public void performAction(PlayerRecord[] players) {
-		this.stamina ++;
+		this.addStamina(1);
 		steps = this.obtainSpeed();
 		if (steps > this.stamina) {
 			this.steps = stamina;
@@ -22,12 +22,20 @@ public class Runner extends Player{
 		if (this.priorityList == null) {
 			this.priorityList = new PlayerRecord[players.length];
 		}
+		System.out.println("Stam: " + this.stamina);
 		this.learnDifferences(players);
 		this.sortPriority(players);
 		this.doStrategy();
 	}
 
-
+	private void addStamina(int num) {
+		if (this.stamina + num <= 10) {
+			this.stamina += num;
+		}
+		else {
+			this.stamina = 10;
+		}
+	}
 	private void sortPriority(PlayerRecord[] players) {
 		PlayerRecord thisRecord = priorityList[this.getPLAYER_ID()];
 		priorityList[this.getPLAYER_ID()] = priorityList[priorityList.length - 1];
@@ -101,7 +109,7 @@ public class Runner extends Player{
 		this.steps = 1;
 		int[] bestLocation = findSafestLocation(dangerList);
 		this.moveTo(bestLocation[0], bestLocation[1], true);
-		this.stamina ++; 
+		this.addStamina(1);
 	}
 
 	private boolean inDanger(PlayerRecord record) {
@@ -159,9 +167,6 @@ public class Runner extends Player{
 		int lowestScore = Integer.MAX_VALUE;
 
 		int [][] options = this.calculateMoveOptions();
-		for (int i = 0; i < options.length; i ++) {
-			System.out.println(options[i][0] + " " + options[i][1]);
-		}
 
 		for (int i = 0; i < options.length; i ++) {
 			int newStr = options[i][0];
