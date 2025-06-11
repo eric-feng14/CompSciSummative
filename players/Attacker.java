@@ -50,7 +50,7 @@ public class Attacker extends Player{
 	private void printCurrentTarget() {
 		PlayerRecord ct = this.getCurrentTarget();
 		System.out.println("\nCurrent target of player" + this.getPLAYER_ID());
-		System.out.format("type: %s, street: %d, avenue: %d\n", ct.getTYPE(), ct.getStreet(), ct.getAvenue());
+		System.out.format("type: %s, street: %d, avenue: %d, speed: %d\n", ct.getTYPE(), ct.getStreet(), ct.getAvenue(), ct.getSpeed());
 	}
 
 	@Override 
@@ -62,7 +62,7 @@ public class Attacker extends Player{
 		printPriorityList();
 		printAttackers();
 		printCurrentTarget();
-		switch(this.currentState) { 
+		switch(this.currentState) { //fighting state is controlled between the application class
 			case STATE_CHASE: //chasing state -> could have multiple strategies in this case: maybe another switch
 				this.chase(players);
 				break;
@@ -70,7 +70,7 @@ public class Attacker extends Player{
 				this.rest();
 				break;
 		}
-		this.updatePreviousPriority(players);
+//		this.updatePreviousPriority(players);
 	}
 	
 	public void chase(PlayerRecord[] players) {
@@ -243,22 +243,19 @@ public class Attacker extends Player{
 	private void updateInfo(PlayerRecord[] players) {
 		this.updateListsAndTarget(players);
 		this.sortPriorityList();
+		this.updatePreviousPriority();
 	}
 	
 	
 	
-	private void updatePreviousPriority(PlayerRecord[] players) {
-		int idx = 0;
-		for (PlayerRecord record : this.priorityList) {
-			if (! record.getTYPE().equals("Attacker")) {
-				this.previousPriorityList[idx] = record;
-				idx++;
-			}
+	private void updatePreviousPriority() {
+		for (int i = 0; i < this.priorityList.length; i++) {
+			this.previousPriorityList[i] = this.priorityList[i];
 		}
 	}
 	
 	private void updateCurrentTarget(PlayerRecord rec) {
-		if (this.getCurrentTarget() != null & rec.getPLAYER_ID() == this.getCurrentTarget().getPLAYER_ID()) {
+		if (this.getCurrentTarget() != null && rec.getPLAYER_ID() == this.getCurrentTarget().getPLAYER_ID()) {
 			this.setCurrentTarget(rec);
 		}
 	}
@@ -296,6 +293,9 @@ public class Attacker extends Player{
 		//We need to find the previous record because the order of "previousPriorityList" constantly changes,
 		//while the players array from the application class never changes order
 		PlayerRecord prevRecord = findRecord(idx), currentRecord = this.priorityList[idx];
+		if (prevRecord == null) {
+			System.out.println("Didn't find the previous record!");
+		}
 		int speed = calcDistance(prevRecord, currentRecord);
 		//We're looking at the maximum possible speed of other players, not the current speed, so we can get a better understanding of their abilities
 		int newSpeed = Math.max(speed, this.previousPriorityList[idx].getSpeed());
@@ -311,8 +311,9 @@ public class Attacker extends Player{
 			for (int j = i + 1; j < this.priorityList.length; j++) {
 				int dist1 = calcDistance(this.priorityList[j]), dist2 = calcDistance(this.priorityList[i]);
 				int speed1 = this.priorityList[j].getSpeed(), speed2 = this.priorityList[i].getSpeed();
-				double time1 = (double) dist1 / speed1, time2 = (double) dist2 / speed2;
-				if (time1 < time2) {
+				int a = 1, b = 1; //weight factors
+				int priority1 = a * dist1 + b * speed1, priority2 = a * dist2 + b * speed2;
+				if (priority1 < priority2) {
 					swapPlayerRecord(i, j, this.priorityList);
 				}
 			}
