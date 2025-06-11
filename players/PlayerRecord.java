@@ -9,6 +9,7 @@ public class PlayerRecord {
 	private int street, avenue;
 	private int speed, hp;
 	private final int PLAYER_ID;
+	private final static int DEFAULT_SPEED = 1;
 	private boolean isDefeated;
 	private final String TYPE;
 	private PlayerRecord currentTarget;
@@ -35,7 +36,7 @@ public class PlayerRecord {
 	 * @param player - Player
 	 */
 	public PlayerRecord(Player player) {
-		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), 0, player.isDefeated(), player.getHp(), player.getCurrentTarget());
+		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), PlayerRecord.DEFAULT_SPEED, player.isDefeated(), player.getHp(), player.getCurrentTarget());
 	}
 	
 	public PlayerRecord getCurrentTarget() {
