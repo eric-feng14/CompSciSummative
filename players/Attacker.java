@@ -26,7 +26,6 @@ public class Attacker extends Player{
 	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
 	//no need for cornering since support state logic overlaps with it
 	private final static int STRAT_FOCUS_WEAKEST = 4, STRAT_FOCUS_MEDIC = 5, STRAT_SUPPORT = 6; 
-	private final static int NORMAL_HIT = 20, CRITICAL_HIT = 40, KNOCKOUT = 100;
 
 	public Attacker(City city, int s, int a, Direction d) {
 		super(city, s, a, d, 3, "Attacker", false);
@@ -117,16 +116,6 @@ public class Attacker extends Player{
 			return this.getCurrentTarget();
 		}
 		return null;
-	}
-	
-	public int getNormal() {
-		return NORMAL_HIT;
-	}
-	public int getCrit() {
-		return CRITICAL_HIT;
-	}
-	public int getKnockout() {
-		return KNOCKOUT;
 	}
 	
 	public void rest() {}

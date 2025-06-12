@@ -59,7 +59,7 @@ public abstract class Player extends EnhancedBot{
 	 * @param defeated - isDefeated
 	 */
 	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated) {
-		this(city, s, a, d, speed, TYPE, defeated, DEFAULT_HP, null, DEFAULT_DEFENCE, DEFAULT_STRENGTH, DEFAULT_SPEED);
+		this(city, s, a, d, speed, TYPE, defeated, DEFAULT_HP, null, DEFAULT_DEFENCE, DEFAULT_STRENGTH, DEFAULT_STAMINA);
 	}
 	
 	

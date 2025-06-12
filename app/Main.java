@@ -51,24 +51,24 @@ public class Main {
 			players[idx].performAction(playerRecords);
 		    InfoRecord attacker = players[idx].getThisInfo(); 
 		    PlayerRecord victum = players[idx].getRunnerInfo(); 
-		    if (attacker != null) {
+		    if (attacker != null && victum != null) {
 		    	double[] chances = calculateChances(attacker, victum);
-		    	for (double i : chances) {
-		    		System.out.println("Chance: " + i);
-		    	}
+//		    	for (double i : chances) {
+//		    		System.out.println("Chance: " + i);
+//		    	}
 		    	int attackType = chooseType(chances);
 		    	System.out.println("Type: " + attackType);
 		    	
 		    	
 		    	switch(attackType) {
 		    	case 0: break;
-		    	case 1: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - 20); break;
-		    	case 2: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - 40); break;
-		    	case 3: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - 100); break;
+		    	case 1: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - InfoRecord.getNormalHit()); break;
+		    	case 2: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - InfoRecord.getCriticalHit()); break;
+		    	case 3: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - InfoRecord.getKnockout()); break;
 		    	}
-//		    	if (players[victum.getPLAYER_ID()].getHp() <= 0) {
-//		    		players[victum.getPLAYER_ID()].setDefeated(true);
-//		    	}
+		    	if (players[victum.getPLAYER_ID()].getHp() <= 0) {
+		    		players[victum.getPLAYER_ID()].setDefeated(true);
+		    	}
 		    }
 		    updatePlayerRecord(idx);
 		    updateTags();

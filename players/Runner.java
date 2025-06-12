@@ -4,11 +4,11 @@ import becker.robots.*;
 
 public class Runner extends Player{
 	private PlayerRecord[] priorityList;
-	private int stamina = 10;
 	private int steps;
 
 	public Runner(City c, int s, int a, Direction d) {
 		super(c, s, a, d, /*Player.generator.nextInt(3) + 2*/ 3, "Runner", false);
+		this.setStamina(10);
 		this.setColor(Color.BLUE);
 	}
 
@@ -16,24 +16,24 @@ public class Runner extends Player{
 	public void performAction(PlayerRecord[] players) {
 		this.addStamina(1);
 		steps = this.obtainSpeed();
-		if (steps > this.stamina) {
-			this.steps = stamina;
+		if (steps > this.getStamina()) {
+			this.steps = this.getStamina();
 		}
 		if (this.priorityList == null) {
 			this.priorityList = new PlayerRecord[players.length];
 		}
-		System.out.println("Stam: " + this.stamina);
+		System.out.println("Stam: " + this.getStamina());
 		this.learnDifferences(players);
 		this.sortPriority(players);
 		this.doStrategy();
 	}
 
 	private void addStamina(int num) {
-		if (this.stamina + num <= 10) {
-			this.stamina += num;
+		if (this.getStamina() + num <= 10) {
+			this.setStamina(this.getStamina() + num);
 		}
 		else {
-			this.stamina = 10;
+			this.setStamina(10);
 		}
 	}
 	private void sortPriority(PlayerRecord[] players) {
@@ -158,7 +158,7 @@ public class Runner extends Player{
 		int[] bestLocation = findSafestLocation(dangerList);
 		this.moveTo(bestLocation[0], bestLocation[1], true);
 		
-		this.stamina -= this.steps;
+		this.setStamina(this.getStamina() + this.steps);
 	}
 
 	private int[] findSafestLocation(PlayerRecord[] dangers) {
@@ -236,7 +236,9 @@ public class Runner extends Player{
 			case 1: totalDanger += 800; break;
 			case 2: totalDanger += 600; break;
 			case 3: totalDanger += 400; break;
-			case 4: totalDanger += 200; break;
+			case 4: totalDanger += 300; break;
+			case 5: totalDanger += 200; break;
+			case 6: totalDanger += 100; break;
 			}
 		}
 		if (avenue == 0 || avenue == 23) {
