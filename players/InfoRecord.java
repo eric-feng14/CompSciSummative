@@ -1,9 +1,9 @@
 package players;
 
-public class InfoRecords extends PlayerRecord {
+public class InfoRecord extends PlayerRecord {
 	int defense, strength;
 
-	public InfoRecords(Player player, int d, int s) {
+	public InfoRecord(Player player, int d, int s) {
 		super(player);
 		this.defense = d;
 		this.strength = s;

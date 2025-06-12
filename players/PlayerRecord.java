@@ -13,6 +13,7 @@ public class PlayerRecord {
 	private boolean isDefeated;
 	private final String TYPE;
 	private PlayerRecord currentTarget;
+	//Note: the robots will not be attempting to learn each others stamina due to  potential inaccuracy (e.g. strategies could affect it)
 	
 	/**
 	 * Constructor of PlayerRecod

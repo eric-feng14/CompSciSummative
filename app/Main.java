@@ -48,10 +48,8 @@ public class Main {
 		// Game loop
 		while (!gameEnd()) {
 			System.out.println("HP: " + players[idx].getHp());
-//			if (!players[idx].isDefeated()) {
-				players[idx].performAction(playerRecords);
-//			}
-		    InfoRecords attacker = players[idx].getThisInfo(); 
+			players[idx].performAction(playerRecords);
+		    InfoRecord attacker = players[idx].getThisInfo(); 
 		    PlayerRecord victum = players[idx].getRunnerInfo(); 
 		    if (attacker != null) {
 		    	double[] chances = calculateChances(attacker, victum);
@@ -79,7 +77,7 @@ public class Main {
 		}
 	}
 	
-	public static double[] calculateChances(InfoRecords attacker, PlayerRecord victum) {
+	public static double[] calculateChances(InfoRecord attacker, PlayerRecord victum) {
 		double attackerStrength = attacker.getStrength();
 		double runnerDefense = Main.players[victum.getPLAYER_ID()].getDefense();
 		
@@ -136,7 +134,7 @@ public class Main {
 	}
 	
 	/**
-	 * Updates the player record of index
+	 * Overloaded method that updates the player record of index
 	 * @param index - index of the player
 	 */
 	public static void updatePlayerRecord(int index) {

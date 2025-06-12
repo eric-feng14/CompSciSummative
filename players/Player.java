@@ -17,7 +17,7 @@ public abstract class Player extends EnhancedBot{
 	private boolean isDefeated;
 	private final String TYPE;
 	private PlayerRecord currentTarget;
-	private int defense, strength;	
+	private int defense, strength, stamina;
 	
 	/**
 	 * Constructor of player
@@ -61,6 +61,24 @@ public abstract class Player extends EnhancedBot{
 	}
 	
 	
+	
+	
+	public int getStamina() {
+		return stamina;
+	}
+
+	public void setStamina(int stamina) {
+		this.stamina = stamina;
+	}
+
+	public void setDefense(int defense) {
+		this.defense = defense;
+	}
+
+	public void setStrength(int strength) {
+		this.strength = strength;
+	}
+
 	public PlayerRecord getCurrentTarget() {
 		return currentTarget;
 	}
@@ -75,7 +93,7 @@ public abstract class Player extends EnhancedBot{
 	 */
 	public void initialize(PlayerRecord[] players) {}
 	
-	public InfoRecords getThisInfo() {return null;}
+	public InfoRecord getThisInfo() {return null;}
 	public PlayerRecord getRunnerInfo() {return null;}
 	
 	/**

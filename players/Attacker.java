@@ -12,6 +12,7 @@ import java.awt.*;
  * - add strategies, e.g. cornering, supporting & coordinating with other attackers
  * - add randomness
  * - randomize the speed for each player
+ * - add stamina to the base class
  * @author Eric Feng
  * @version Due date: June 13 2025
  */
@@ -20,11 +21,12 @@ public class Attacker extends Player{
 	//learnedAttributes contains information gathered from watching others as well as fighting others
 	private AttackerRecord[] learnedAttributes;
 	private PlayerRecord[] attackers, priorityList, previousPriorityList;
-	private int roundsSpentChasing = 0, currentState = STATE_CHASE;
-	private final static int MAX_CHASE_TIME = 5;
+	private int roundsSpentChasing = 0, currentState = STATE_CHASE, currentStrat = STRAT_FOCUS_WEAKEST;
+	private final static int MAX_CHASE_TIME = 10;
 	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
-	private final static int MISS = 0, NORMAL_HIT = 20, CRITICAL_HIT = 40, KNOCKOUT = 100;
-	
+	//no need for cornering since support state logic overlaps with it
+	private final static int STRAT_FOCUS_WEAKEST = 4, STRAT_FOCUS_MEDIC = 5, STRAT_SUPPORT = 6; 
+	private final static int NORMAL_HIT = 20, CRITICAL_HIT = 40, KNOCKOUT = 100;
 
 	public Attacker(City city, int s, int a, Direction d) {
 		super(city, s, a, d, 3, "Attacker", false);
@@ -61,12 +63,20 @@ public class Attacker extends Player{
 		printAttackers();
 		printCurrentTarget();
 		switch(this.currentState) { //fighting state is controlled between the application class
-			case STATE_CHASE: //chasing state -> could have multiple strategies in this case: maybe another switch
+			case STATE_CHASE: 
+				switch(this.currentStrat) {
+					case STRAT_FOCUS_WEAKEST:
+						//blah
+					case STRAT_FOCUS_MEDIC:
+						
+					case STRAT_SUPPORT:
+				}
 				this.chase(players);
 				break;
 			case STATE_REST: //resting state
 				this.rest();
 				break;
+			//note that the fighting state is handled mostly by the application class
 		}
 	}
 	
@@ -96,9 +106,9 @@ public class Attacker extends Player{
 		//would we have to send information back to the application class?
 	}
 	
-	public InfoRecords getThisInfo() {
+	public InfoRecord getThisInfo() {
 		if (this.currentState == STATE_FIGHT) {
-			return new InfoRecords(this, this.getDefense(), this.getStrength());
+			return new InfoRecord(this, this.getDefense(), this.getStrength());
 		}
 		return null;
 	}
@@ -168,25 +178,11 @@ public class Attacker extends Player{
 		}
 	}
 	
-	private boolean noTargets() {
-		for (PlayerRecord attacker : this.attackers) {
-			if (attacker != null) { //an attacker is already chasing someone, targets already existed
-				return false;
-			}
-		}
-		return true;
-	}
-	
 	/**
 	 * Returns a PlayerRecord representing the current players target. Note that a target will always be returned.
 	 * @return returns a PlayerRecord representing the target of the current attacker
 	 */
 	private PlayerRecord newTarget(PlayerRecord[] players) {
-		//Edge case: first robot gets a target
-		if (noTargets()) {
-			return this.priorityList[0];
-		}
-		
 		//priority list and attackers are already updated
 		for (PlayerRecord record : this.priorityList) {
 			//Check whether the other attackers are already searching for "record". If not, it's a valid target. 
