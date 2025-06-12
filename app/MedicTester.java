@@ -47,10 +47,10 @@ public class MedicTester {
 		// Game loop
 		while (!gameEnd()) {
 		    players[idx].performAction(playerRecords);
-		    PlayerRecord[] battlers = players[idx].getInfo(); 
-		    if (battlers != null) {
-		    	//seems messy
-		    }
+		    //PlayerRecord[] battlers = players[idx].getInfo(); 
+//		    if (battlers != null) {
+//		    	//seems messy
+//		    }
 		    idx = (idx + 1) % players.length;
 		    updatePlayerRecord();
 		    updateTags();

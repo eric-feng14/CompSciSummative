@@ -195,8 +195,13 @@ public class Medic extends Player{
 		return movement;
 	}
 	
-	private AmbiguousMovement getHealMovement(PlayerRecord[] runners) {
-		int[] proximity = this.getProximityValues(runners);
+//	private AmbiguousMovement getHealMovement(PlayerRecord[] runners) {
+//		int[] proximity = this.getProximityValues(runners);
+//		
+//	}
+	
+	private AmbiguousMovement getHealMovement(PlayerRecord[] runners, int s, int a) {
+		int[] proximity = this.getProximityValues(runners, s, a);
 		
 	}
 	
@@ -329,7 +334,7 @@ public class Medic extends Player{
 	 * @return - the proximity of each player
 	 */
 	private int[] getProximityValues(PlayerRecord[] players) {
-		this.getProximityValues(players, this.getStreet(), this.getAvenue())
+		return this.getProximityValues(players, this.getStreet(), this.getAvenue());
 	}
 	
 	/**
