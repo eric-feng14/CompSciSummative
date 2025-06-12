@@ -195,7 +195,10 @@ public class Medic extends Player{
 		return movement;
 	}
 	
-	private AmbiguousMovement getHealMovement(PlayerRecord[] runners) {return null;}
+	private AmbiguousMovement getHealMovement(PlayerRecord[] runners) {
+		int[] proximity = this.getProximityValues(runners);
+		
+	}
 	
 	/**
 	 * Gets escape movement
@@ -326,11 +329,22 @@ public class Medic extends Player{
 	 * @return - the proximity of each player
 	 */
 	private int[] getProximityValues(PlayerRecord[] players) {
+		this.getProximityValues(players, this.getStreet(), this.getAvenue())
+	}
+	
+	/**
+	 * Gets the relative distance values of players
+	 * @param players - the list of specific player records
+	 * @param s - street
+	 * @param a - avenue
+	 * @return - the proximity of each player
+	 */
+	private int[] getProximityValues(PlayerRecord[] players, int s, int a) {
 		int[] proximity = new int[players.length];
 		// Gets relative distance values of players
 		for (int i = 0; i < players.length; i++) {
-			proximity[i] = Math.abs(players[i].getAvenue() - this.getAvenue()) + 
-					Math.abs(players[i].getStreet() - this.getStreet());
+			proximity[i] = Math.abs(players[i].getAvenue() - a) + 
+					Math.abs(players[i].getStreet() - s);
 		}
 		return proximity;
 	}

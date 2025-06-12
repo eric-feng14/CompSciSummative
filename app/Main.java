@@ -112,13 +112,13 @@ public class Main {
 	/**
 	 * still need to decide on what to put on the tags
 	 */
-	public static void updateTags() {
+	private static void updateTags() {
 		for (Player p : Main.players) {
 			p.setLabel("" + p.getHp());
 		}
 	}
 	
-	public static void initializePlayers() {
+	private static void initializePlayers() {
 		for (Player p : Main.players) {
 			p.initialize(playerRecords);
 		}
@@ -127,7 +127,7 @@ public class Main {
 	/**
 	 * Updates Player records
 	 */
-	public static void updatePlayerRecord() {
+	private static void updatePlayerRecord() {
 		for (int i = 0; i < Main.players.length; i++) {
 			Main.playerRecords[i] = new PlayerRecord(players[i]);
 		}
@@ -137,7 +137,12 @@ public class Main {
 	 * Overloaded method that updates the player record of index
 	 * @param index - index of the player
 	 */
-	public static void updatePlayerRecord(int index) {
+	private static void updatePlayerRecord(int index) {
 		Main.playerRecords[index] = new PlayerRecord(players[index]);
+	}
+	
+	public static void signal(char s) {
+		switch (s) {
+		}
 	}
 }
