@@ -9,6 +9,7 @@ public class AmbiguousMovement {
 	
 	/*
 	 * Horizontal Direction States:
+	 * 0 - None
 	 * 1 - EAST
 	 * 2 - WEST
 	 * 3 - Both
@@ -17,6 +18,7 @@ public class AmbiguousMovement {
 	
 	/*
 	 * Vertical Direction States
+	 * 0 - None
 	 * 1 - NORTH
 	 * 2 - SOUTH
 	 * 3 - Both

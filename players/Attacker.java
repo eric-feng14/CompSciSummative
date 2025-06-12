@@ -21,8 +21,13 @@ public class Attacker extends Player{
 	//learnedAttributes contains information gathered from watching others as well as fighting others
 	private AttackerRecord[] learnedAttributes;
 	private PlayerRecord[] attackers, priorityList, previousPriorityList;
+<<<<<<< HEAD
+	private int roundsSpentChasing = 0, currentState = STATE_CHASE;
+	private final static int MAX_CHASE_TIME = 500;
+=======
 	private int roundsSpentChasing = 0, currentState = STATE_CHASE, currentStrat = STRAT_FOCUS_WEAKEST;
 	private final static int MAX_CHASE_TIME = 10;
+>>>>>>> 712a6798374b85a2e69f07baf533579c24f8385b
 	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
 	//no need for cornering since support state logic overlaps with it
 	private final static int STRAT_FOCUS_WEAKEST = 4, STRAT_FOCUS_MEDIC = 5, STRAT_SUPPORT = 6; 

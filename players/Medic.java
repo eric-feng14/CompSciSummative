@@ -1,9 +1,14 @@
 package players;
 import java.util.ArrayList;
 import java.awt.Color;
-import playerMods.AmbiguousMovement;
+import playerMods.*;
 import becker.robots.*;
 
+/**
+ * The Medic class: Healing Runners
+ * @author Richard
+ * @version 6/9/2025
+ */
 public class Medic extends Player{
 	private PlayerRecord[] prevPlayers;
 	private PlayerRecord[] runnerPriority, attackerPriority, medicPriority;
@@ -18,7 +23,7 @@ public class Medic extends Player{
 	 * @param d - direction
 	 */
 	public Medic (City c, int s, int a, Direction d) {
-		super(c, s, a, d, 3, "Medic", false);
+		super(c, s, a, d, 4, "Medic", false);
 //		this.setColor(new Color(133, 248, 108));
 		this.setColor(Color.GREEN);
 	}
@@ -30,80 +35,185 @@ public class Medic extends Player{
 	public void performAction(PlayerRecord[] players) {
 		this.stamina = this.obtainSpeed(); // Resets number of turns allowed
 		
+		players = this.getUpdatedSpeeds(players);
 		this.runnerPriority = this.getTypeArray("Runner", players);
 		this.attackerPriority = this.getTypeArray("Attacker", players);
 		this.medicPriority = this.getTypeArray("Medic", players);
 		
 		// Only moves if is defeated
 		if (!this.isDefeated()) {
-			this.sortPriority(players);
+			
+			Movement nextMovement = this.getEscapeMovement(this.attackerPriority);
+			this.escapeMove(nextMovement);
 		}
 		
 		this.prevPlayers = players;
 	}
 	
 	/**
-	 * Sorts priorities
-	 * @param - players that need to be sorted
+	 * Moves the movement
+	 * @param m - movement
 	 */
-	private void sortPriority(PlayerRecord[] players) {
-		players = this.getUpdatedSpeeds(players);
-		
-		int[] attackerPredicted = this.sortAttackerPriorities();
-		this.getEscapeMovements(this.attackerPriority, null);
+	private void escapeMove(Movement m) {
+		int distanceCovered = 0;
+		// Caps movement at stamina
+		if (m.getDistance() > this.stamina)
+			m.setDistance(this.stamina);
+		this.turnTo(m.getDirection());
+		// Moves if has stamina
+		while (distanceCovered < m.getDistance() && this.frontIsClear() && this.stamina > 0) {
+			this.move();
+			this.stamina--;
+			distanceCovered++;
+		}
+		// Moves more if it hits wall
+		if (distanceCovered < m.getDistance()) {
+			this.escapeMove(this.getEscapeMovement(this.attackerPriority, new Direction[] {this.getDirection()}));
+		}
 	}
 	
-	private AmbiguousMovement[] getEscapeMovements(PlayerRecord[] attackers, Direction[] barredDirections) {
+	/**
+	 * Gets one escape movement
+	 * @param attackers - attackers
+	 * @param barredDirections - directions that cannot be run
+	 * @return - the movement to move
+	 */
+	private Movement getEscapeMovement(PlayerRecord[] attackers, Direction[] barredDirections) {
+		Movement movement = new Movement(Direction.EAST, 0);
 		
 		int[] predicted = this.sortAttackerPriorities(attackers);
-		int immanentNum = 0;
+		int imminentNum = 0;
 		
 		// Gets predictedFuture values copied from predicted
 		for(int i = 0; i < attackers.length; i++) {
 			if (predicted[i] <= 0) {
-				immanentNum++;
+				imminentNum++;
 			}
 		}
 		
-		// Escapes if it is threatened by immanent tagging
-		if (immanentNum > 0) {
+		// Escapes if it is threatened by imminent tagging
+		if (imminentNum > 0) {
 			// Advisory variables
-			ArrayList<AmbiguousMovement> movements = new ArrayList<AmbiguousMovement>(); // All movements needed to escape
 			Direction[] possibleEscapes = new Direction[] {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
+			// Checks if there are barred directions
+			if (barredDirections != null) {
+				// Picks out all barred directions
+				for (int i = 0; i < possibleEscapes.length; i++) {
+					// Checks for the barred directions
+					for (int j = 0; j < barredDirections.length; j++) {
+						// If the barred directions exist
+						if (possibleEscapes[i] == barredDirections[j])
+							possibleEscapes[i] = null;
+					}
+				}
+			}
 			
 			// Records and status
-			int[] immanentProximities = new int[immanentNum];
-			PlayerRecord[] immanentThreats = new PlayerRecord[immanentNum];
+			int[] imminentProximities = new int[imminentNum];
+			PlayerRecord[] imminentThreats = new PlayerRecord[imminentNum];
 			
 			int counter = 0;
 			// Puts everything into an array
 			for(int i = 0; i < attackers.length; i++) {
-				// Only if threat is immanent (enough to tag player)
+				// Only if threat is imminent (enough to tag player)
 				if (predicted[i] <= 0) {
-					immanentProximities[counter] = predicted[i];
-					immanentThreats[counter] = attackers[i];
+					imminentProximities[counter] = predicted[i];
+					imminentThreats[counter] = attackers[i];
 				}
 			}
 			
 			// MAIN LOOP OF MOVEMENT DETERMINATION
-			// TODO movement determination
-			for (int i = 0; i < immanentThreats.length; i++) {
-				this.getPossibleEscapes((immanentThreats[i]));
+			
+			int runDistance = 0;
+//			int escapeDirH = 3;
+//			int escapeDirV = 3;
+//			for (int i = 0; i < imminentThreats.length; i++) {
+//				AmbiguousMovement escape = this.getPossibleEscapes(imminentThreats[i], imminentProximities[i]);
+//				if (escape.getDistance() > runDistance) {
+//					runDistance = escape.getDistance();
+//				}
+//				if (escape.getDirectionH() < 3 && escape.getDirectionH() != escapeDirH && escapeDirH != 0) {
+//					escapeDirH = escape.getDirectionH();
+//				}
+//			}
+			for (int i = 0; i < imminentThreats.length; i++) {
+				AmbiguousMovement escape = this.getPossibleEscapes(imminentThreats[i], imminentProximities[i]);
+				// Removes impossible horizontal directions 
+				switch(escape.getDirectionH()) {
+				case 1:
+					possibleEscapes[3] = null;
+					break;
+				case 2:
+					possibleEscapes[1] = null;
+					break;
+				default:
+				}
+				
+				// Removes impossible vertical directions
+				switch(escape.getDirectionV()) {
+				case 1:
+					possibleEscapes[2] = null;
+					break;
+				case 2:
+					possibleEscapes[0] = null;
+					break;
+				default:
+				}
+				
+				// Gets the final run distance
+				if (escape.getDistance() > runDistance) {
+					runDistance = escape.getDistance();
+				}
 			}
 			
+			Direction[] possibleDirections = this.removeNulls(possibleEscapes);
+			
+			// Moves towards direction options
+			if (possibleDirections.length != 0) {
+				int randomDirection = (int) (Math.random() * possibleDirections.length);
+				movement = new Movement(possibleDirections[randomDirection], runDistance);
+			} else {
+				Direction direction;
+				// Gets a random direction
+				switch((int)(Math.random()*4)) {
+				case 0:
+					direction = Direction.EAST;
+					break;
+				case 1:
+					direction = Direction.NORTH;
+					break;
+				case 2:
+					direction = Direction.WEST;
+					break;
+				default:
+					direction = Direction.SOUTH;
+					
+				}
+				movement = new Movement(direction, this.obtainSpeed());
+			}
 		}
-		
-		return null; // TODO return statement stub
+		return movement;
 	}
 	
-	private AmbiguousMovement getPossibleEscapes(PlayerRecord attacker) {
-		AmbiguousMovement maneuver = new AmbiguousMovement(0, 0, 0);
+	private AmbiguousMovement getHealMovement(PlayerRecord[] runners) {return null;}
+	
+	/**
+	 * Gets escape movement
+	 * @param attackers - attackers
+	 * @return - the next movement
+	 */
+	private Movement getEscapeMovement(PlayerRecord[] attackers) {
+		return this.getEscapeMovement(attackers, null);
+	}
+	
+	private AmbiguousMovement getPossibleEscapes(PlayerRecord attacker, int predDist) {
+		AmbiguousMovement maneuver = new AmbiguousMovement(3, 3, 0);
+		if (attacker == null) {
+			return maneuver;
+		}
 		
 		int streetDifference = this.getStreet() - attacker.getStreet();
 		int avenueDifference = this.getAvenue() - attacker.getAvenue();
-		
-		// GETTING NEXT DIRECTION
-		Direction horizontal;
 		
 		// Determines generic nature of next vertical movement
 		if (streetDifference < 0) {
@@ -122,8 +232,9 @@ public class Medic extends Player{
 		} else {
 			maneuver.setDirectionH(3);
 		}
+		maneuver.setDistance(-1*(predDist)+1);
 		
-		return null; // TODO return stub
+		return maneuver;
 	}
 	
 	/**
@@ -151,6 +262,8 @@ public class Medic extends Player{
 				// TODO Advanced speed assumption with FATIGUE
 				if (newSpeed > this.prevPlayers[i].getSpeed()) {
 					updatedPlayers[i].setSpeed(newSpeed);
+				} else {
+					updatedPlayers[i].setSpeed(this.prevPlayers[i].getSpeed());
 				}
 			}
 		}
@@ -264,4 +377,35 @@ public class Medic extends Player{
 		return count;
 	}
 	
+	private Direction[] removeNulls(Direction[] d) {
+		int indexNum = 0;
+		// gets array number
+		for (int i = 0; i < d.length; i++) {
+			if(d[i] != null)
+				indexNum++;
+		}
+		Direction[] directions = new Direction[indexNum];
+		// fills directions
+		int counter = 0;
+		for (int i = 0; i < d.length; i++) {
+			// gets all not null
+			if(d[i] != null) {
+				directions[counter] = d[i];
+				counter++;
+			}
+		}
+		
+		return directions;
+	}
+	
+	/**
+	 * Moves if can move
+	 */
+	@Override
+	public void move() {
+		// Moves if front is clear
+		if(this.frontIsClear()) {
+			super.move();
+		}
+	}
 }
