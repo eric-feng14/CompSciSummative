@@ -25,7 +25,7 @@ public class Attacker extends Player{
 	
 
 	public Attacker(City city, int s, int a, Direction d) {
-		super(city, s, a, d, 3, "Attacker", true);
+		super(city, s, a, d, 3, "Attacker", false);
 		this.setColor(Color.RED); //attackers are red
 	}
 
@@ -95,15 +95,27 @@ public class Attacker extends Player{
 		//would we have to send information back to the application class?
 	}
 	
-	public PlayerRecord[] getInfo() {
+	public InfoRecords getThisInfo() {
 		if (this.currentState == STATE_FIGHT) {
-			return new PlayerRecord[] {new PlayerRecord(this), this.getCurrentTarget()};
+			return new InfoRecords(this, this.getDefense(), this.getStrength());
+		}
+		return null;
+	}
+	public PlayerRecord getRunnerInfo() {
+		if (this.currentState == STATE_FIGHT) {
+			return this.getCurrentTarget();
 		}
 		return null;
 	}
 	
-	public int getAmount() {
+	public int getNormal() {
 		return NORMAL_HIT;
+	}
+	public int getCrit() {
+		return CRITICAL_HIT;
+	}
+	public int getKnockout() {
+		return KNOCKOUT;
 	}
 	
 	public void rest() {}

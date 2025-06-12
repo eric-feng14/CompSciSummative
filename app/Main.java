@@ -2,7 +2,7 @@ package app;
 import players.*;
 import becker.robots.*;
 import tools.*;
-
+import java.util.*;
 /**
  * A friendly game of tag
  * @author Eric, Felix, and Richard
@@ -13,6 +13,7 @@ public class Main {
 	final private static int numOfPlayers = 5;
 	private static Player[] players = new Player[numOfPlayers];
 	private static PlayerRecord[] playerRecords = new PlayerRecord[players.length];
+	private static final Random RANDOM = new Random();
 	
 	/**
 	 * 
@@ -46,10 +47,30 @@ public class Main {
 		int idx = 0;
 		// Game loop
 		while (!gameEnd()) {
-		    players[idx].performAction(playerRecords);
-		    PlayerRecord[] battlers = players[idx].getInfo(); 
-		    if (battlers != null) {
-		    	//seems messy
+			System.out.println("HP: " + players[idx].getHp());
+//			if (!players[idx].isDefeated()) {
+				players[idx].performAction(playerRecords);
+//			}
+		    InfoRecords attacker = players[idx].getThisInfo(); 
+		    PlayerRecord victum = players[idx].getRunnerInfo(); 
+		    if (attacker != null) {
+		    	double[] chances = calculateChances(attacker, victum);
+		    	for (double i : chances) {
+		    		System.out.println("Chance: " + i);
+		    	}
+		    	int attackType = chooseType(chances);
+		    	System.out.println("Type: " + attackType);
+		    	
+		    	
+		    	switch(attackType) {
+		    	case 0: break;
+		    	case 1: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - 20); break;
+		    	case 2: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - 40); break;
+		    	case 3: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - 100); break;
+		    	}
+//		    	if (players[victum.getPLAYER_ID()].getHp() <= 0) {
+//		    		players[victum.getPLAYER_ID()].setDefeated(true);
+//		    	}
 		    }
 		    updatePlayerRecord(idx);
 		    updateTags();
@@ -58,12 +79,44 @@ public class Main {
 		}
 	}
 	
+	public static double[] calculateChances(InfoRecords attacker, PlayerRecord victum) {
+		double attackerStrength = attacker.getStrength();
+		double runnerDefense = Main.players[victum.getPLAYER_ID()].getDefense();
+		
+		double normalHit = attackerStrength + 0.5*runnerDefense;
+		double critHit = attackerStrength;
+		double knockout = attackerStrength - 0.5*runnerDefense;
+		double totalWeights = critHit*3;
+
+		double dodgeChance = runnerDefense / (attackerStrength + runnerDefense);
+		double hitChance = 1 - dodgeChance;
+	
+		double normalChance = hitChance*(normalHit/totalWeights);
+		double critChance = hitChance*(critHit/totalWeights);
+		double knockChance = hitChance*(knockout/totalWeights);
+		
+		return new double[] {dodgeChance, normalChance, critChance, knockChance};
+	}
+	
+	public static int chooseType (double[] probabilities) {
+		double rand = Main.RANDOM.nextDouble();  // Random double between 0.0 and 1.0
+        double cumulative = 0.0;
+        
+   
+        for (int i = 0; i < probabilities.length; i++) {
+            cumulative += probabilities[i];
+            if (rand < cumulative) {
+                return i;
+            }
+        }
+        return 1;
+	}
 	/**
 	 * still need to decide on what to put on the tags
 	 */
 	public static void updateTags() {
 		for (Player p : Main.players) {
-			p.setLabel("" + p.getPLAYER_ID());
+			p.setLabel("" + p.getHp());
 		}
 	}
 	

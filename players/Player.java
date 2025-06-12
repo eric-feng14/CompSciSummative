@@ -17,6 +17,7 @@ public abstract class Player extends EnhancedBot{
 	private boolean isDefeated;
 	private final String TYPE;
 	private PlayerRecord currentTarget;
+	private int defense, strength;	
 	
 	/**
 	 * Constructor of player
@@ -31,7 +32,8 @@ public abstract class Player extends EnhancedBot{
 	 * @param hp - Health of player
 	 * @param currentTarget - target of the current player
 	 */
-	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated, int hp, PlayerRecord currentTarget) {
+	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated, int hp, 
+			PlayerRecord currentTarget, int defence, int strength) {
 		super(city, s, a, d);
 		this.PLAYER_ID = nextID;
 		this.speed = speed;
@@ -39,6 +41,8 @@ public abstract class Player extends EnhancedBot{
 		this.TYPE = TYPE;
 		this.hp = hp;
 		this.currentTarget = currentTarget;
+		this.defense = defence;
+		this.strength = strength;
 		Player.nextID++; // Iterates playerID to create a unique player identification number
 	}
 	
@@ -53,8 +57,9 @@ public abstract class Player extends EnhancedBot{
 	 * @param defeated - isDefeated
 	 */
 	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated) {
-		this(city, s, a, d, speed, TYPE, defeated, 100, null);
+		this(city, s, a, d, speed, TYPE, defeated, 100, null, 6, 10);
 	}
+	
 	
 	public PlayerRecord getCurrentTarget() {
 		return currentTarget;
@@ -70,7 +75,8 @@ public abstract class Player extends EnhancedBot{
 	 */
 	public void initialize(PlayerRecord[] players) {}
 	
-	public PlayerRecord[] getInfo() {return null;}
+	public InfoRecords getThisInfo() {return null;}
+	public PlayerRecord getRunnerInfo() {return null;}
 	
 	/**
 	 * Gets health of player
@@ -137,5 +143,21 @@ public abstract class Player extends EnhancedBot{
 	
 	public String getTYPE() {
 		return this.TYPE;
+	}
+	
+	/**
+	 * Gets the defense value of Player
+	 * @return - defense
+	 */
+	public int getDefense() {
+		return this.defense;
+	}
+	
+	/**
+	 * Gets the strength of Player
+	 * @return - strength
+	 */
+	public int getStrength() {
+		return this.strength;
 	}
 }
