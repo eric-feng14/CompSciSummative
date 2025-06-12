@@ -51,9 +51,10 @@ public class Main {
 		    if (battlers != null) {
 		    	//seems messy
 		    }
-		    idx = (idx + 1) % players.length;
-		    updatePlayerRecord();
+		    updatePlayerRecord(idx);
 		    updateTags();
+		    
+		    idx = (idx + 1) % players.length;
 		}
 	}
 	
@@ -79,5 +80,8 @@ public class Main {
 		for (int i = 0; i < Main.players.length; i++) {
 			Main.playerRecords[i] = new PlayerRecord(players[i]);
 		}
+	}
+	public static void updatePlayerRecord(int index) {
+		Main.playerRecords[index] = new PlayerRecord(players[index]);
 	}
 }
