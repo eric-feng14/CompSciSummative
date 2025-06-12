@@ -10,7 +10,7 @@ import tools.*;
  */
 public class AttackerTester {
 	
-	final private static int numOfPlayers = 2;
+	final private static int numOfPlayers = 4;
 	private static Player[] players = new Player[numOfPlayers];
 	private static PlayerRecord[] playerRecords = new PlayerRecord[players.length];
 	
@@ -29,13 +29,15 @@ public class AttackerTester {
 	}
 	
 	public static void main(String[] args) {
-		City city = new City(10, 24);
+		City city = new City(13, 24);
 
 		WallCreator creator = new WallCreator(city);
 		creator.createWallRect(0, 0, 24, 13);
 		
 		players[0] = new Runner(city, 4, 4, Direction.EAST);
-		players[1] = new Attacker(city, 6, 6, Direction.WEST);
+		players[1] = new Attacker(city, 3, 3, Direction.WEST);
+		players[2] = new Runner(city, 0, 0, Direction.NORTH);
+		players[3] = new Attacker(city, 2, 2, Direction.SOUTH);
 		updatePlayerRecord();
 		updateTags();
 		initializePlayers();

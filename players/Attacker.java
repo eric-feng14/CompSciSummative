@@ -10,6 +10,8 @@ import java.awt.*;
  * - work on powerups later
  * - add feature, after engaging in battle with a target, you cannot fight them again
  * - add strategies, e.g. cornering, supporting & coordinating with other attackers
+ * - add randomness
+ * - randomize the speed for each player
  * @author Eric Feng
  * @version Due date: June 13 2025
  */
@@ -21,7 +23,7 @@ public class Attacker extends Player{
 	private int roundsSpentChasing = 0, currentState = STATE_CHASE;
 	private final static int MAX_CHASE_TIME = 5;
 	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
-	private final static int NORMAL_HIT = 20, CRITICAL_HIT = 40, KNOCKOUT = 100;
+	private final static int MISS = 0, NORMAL_HIT = 20, CRITICAL_HIT = 40, KNOCKOUT = 100;
 	
 
 	public Attacker(City city, int s, int a, Direction d) {
@@ -66,7 +68,6 @@ public class Attacker extends Player{
 				this.rest();
 				break;
 		}
-//		this.updatePreviousPriority(players);
 	}
 	
 	public void chase(PlayerRecord[] players) {
@@ -100,10 +101,6 @@ public class Attacker extends Player{
 			return new PlayerRecord[] {new PlayerRecord(this), this.getCurrentTarget()};
 		}
 		return null;
-	}
-	
-	public int getAmount() {
-		return NORMAL_HIT;
 	}
 	
 	public void rest() {}
@@ -291,6 +288,7 @@ public class Attacker extends Player{
 		PlayerRecord prevRecord = findRecord(idx), currentRecord = this.priorityList[idx];
 		if (prevRecord == null) {
 			System.out.println("Didn't find the previous record!");
+			System.exit(0);
 		}
 		int speed = calcDistance(prevRecord, currentRecord);
 		//We're looking at the maximum possible speed of other players, not the current speed, so we can get a better understanding of their abilities
