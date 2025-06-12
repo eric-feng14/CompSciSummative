@@ -13,6 +13,7 @@ public class PlayerRecord {
 	private boolean isDefeated;
 	private final String TYPE;
 	private PlayerRecord currentTarget;
+	//Note: the robots will not be attempting to learn each others stamina due to  potential inaccuracy (e.g. strategies could affect it)
 	
 	/**
 	 * Constructor of PlayerRecod
@@ -20,7 +21,8 @@ public class PlayerRecord {
 	 * @param street - street of city
 	 * @param avenue - avenue of city
 	 */
-	public PlayerRecord(String TYPE, int PLAYER_ID, int street, int avenue, int speed, boolean isDefeated, int hp, PlayerRecord currentTarget) {
+	public PlayerRecord(String TYPE, int PLAYER_ID, int street, int avenue, int speed, boolean isDefeated, int hp, 
+			PlayerRecord currentTarget) {
 		this.TYPE = TYPE;
 		this.street = street;
 		this.avenue = avenue;
@@ -36,7 +38,8 @@ public class PlayerRecord {
 	 * @param player - Player
 	 */
 	public PlayerRecord(Player player) {
-		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), PlayerRecord.DEFAULT_SPEED, player.isDefeated(), player.getHp(), player.getCurrentTarget());
+		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), 
+				PlayerRecord.DEFAULT_SPEED, player.isDefeated(), player.getHp(), player.getCurrentTarget());
 	}
 	
 	public PlayerRecord getCurrentTarget() {
