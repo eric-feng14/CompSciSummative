@@ -81,6 +81,11 @@ public class Main {
 			Main.playerRecords[i] = new PlayerRecord(players[i]);
 		}
 	}
+	
+	/**
+	 * Updates the player record of index
+	 * @param index - index of the player
+	 */
 	public static void updatePlayerRecord(int index) {
 		Main.playerRecords[index] = new PlayerRecord(players[index]);
 	}
