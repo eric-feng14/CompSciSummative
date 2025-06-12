@@ -141,8 +141,13 @@ public class Main {
 		Main.playerRecords[index] = new PlayerRecord(players[index]);
 	}
 	
-	public static void signal(char s) {
-		switch (s) {
-		}
+	/**
+	 * Signals main to do action specified in string
+	 * @param s - signal message (string)
+	 */
+	public static void signal(String s, int playerID) {
+		if (s.equals("attack")) {}
+		else
+		if (s.equals("heal")) {}
 	}
 }
