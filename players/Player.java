@@ -18,6 +18,7 @@ public abstract class Player extends EnhancedBot{
 	private final String TYPE;
 	private PlayerRecord currentTarget;
 	private int defense, strength, stamina;
+	private final static int DEFAULT_HP = 100, DEFAULT_DEFENCE = 6, DEFAULT_STRENGTH = 10, DEFAULT_STAMINA = 3;
 	
 	/**
 	 * Constructor of player
@@ -33,7 +34,7 @@ public abstract class Player extends EnhancedBot{
 	 * @param currentTarget - target of the current player
 	 */
 	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated, int hp, 
-			PlayerRecord currentTarget, int defence, int strength) {
+			PlayerRecord currentTarget, int defence, int strength, int stamina) {
 		super(city, s, a, d);
 		this.PLAYER_ID = nextID;
 		this.speed = speed;
@@ -43,6 +44,7 @@ public abstract class Player extends EnhancedBot{
 		this.currentTarget = currentTarget;
 		this.defense = defence;
 		this.strength = strength;
+		this.stamina = stamina;
 		Player.nextID++; // Iterates playerID to create a unique player identification number
 	}
 	
@@ -57,7 +59,7 @@ public abstract class Player extends EnhancedBot{
 	 * @param defeated - isDefeated
 	 */
 	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated) {
-		this(city, s, a, d, speed, TYPE, defeated, 100, null, 6, 10);
+		this(city, s, a, d, speed, TYPE, defeated, DEFAULT_HP, null, DEFAULT_DEFENCE, DEFAULT_STRENGTH, DEFAULT_SPEED);
 	}
 	
 	
