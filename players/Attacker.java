@@ -23,7 +23,7 @@ public class Attacker extends Player{
 	private AttackerRecord[] learnedAttributes;
 	private PlayerRecord[] attackers, priorityList, previousPriorityList;
 	private int roundsSpentChasing = 0, currentState = STATE_CHASE;
-	private final static int MAX_CHASE_TIME = 5;
+	private final static int MAX_CHASE_TIME = 500;
 	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
 	private final static int NORMAL_HIT = 20, CRITICAL_HIT = 40, KNOCKOUT = 100;
 	

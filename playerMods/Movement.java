@@ -52,6 +52,13 @@ public class Movement {
 	public void setDistance(int distance) {
 		this.distance = distance;
 	}
-	
-	
+
+	/**
+	 * toString for Movement
+	 * @return - information
+	 */
+	@Override
+	public String toString() {
+		return "Movement [direction=" + this.direction + ", distance=" + this.distance + "]";
+	}
 }
