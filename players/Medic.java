@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.awt.Color;
 import playerMods.*;
 import becker.robots.*;
+import powerUps.*;
 
 /**
  * The Medic class: Healing Runners
@@ -13,7 +14,7 @@ public class Medic extends Player{
 	private PlayerRecord[] prevPlayers;
 	private PlayerRecord[] runnerPriority, attackerPriority, medicPriority;
 	
-	private int stamina;
+	private int steps;
 	
 	/**
 	 * PlayerRecord constructor
@@ -24,7 +25,6 @@ public class Medic extends Player{
 	 */
 	public Medic (City c, int s, int a, Direction d) {
 		super(c, s, a, d, 4, "Medic", false);
-//		this.setColor(new Color(133, 248, 108));
 		this.setColor(Color.GREEN);
 	}
 	
@@ -32,8 +32,8 @@ public class Medic extends Player{
 	 * Performs main action
 	 */
 	@Override
-	public void performAction(PlayerRecord[] players) {
-		this.stamina = this.obtainSpeed(); // Resets number of turns allowed
+	public void performAction(PlayerRecord[] players, ArrayList<EnhancedThing> powerups) {
+		this.steps = this.obtainSpeed(); // Resets number of turns allowed
 		
 		players = this.getUpdatedSpeeds(players);
 		this.runnerPriority = this.getTypeArray("Runner", players);
@@ -56,14 +56,14 @@ public class Medic extends Player{
 	 */
 	private void escapeMove(Movement m) {
 		int distanceCovered = 0;
-		// Caps movement at stamina
-		if (m.getDistance() > this.stamina)
-			m.setDistance(this.stamina);
+		// Caps movement at steps
+		if (m.getDistance() > this.steps)
+			m.setDistance(this.steps);
 		this.turnTo(m.getDirection());
-		// Moves if has stamina
-		while (distanceCovered < m.getDistance() && this.frontIsClear() && this.stamina > 0) {
+		// Moves if has steps
+		while (distanceCovered < m.getDistance() && this.frontIsClear() && this.steps > 0) {
 			this.move();
-			this.stamina--;
+			this.steps--;
 			distanceCovered++;
 		}
 		// Moves more if it hits wall
@@ -93,20 +93,6 @@ public class Medic extends Player{
 		
 		// Escapes if it is threatened by imminent tagging
 		if (imminentNum > 0) {
-			// Advisory variables
-			Direction[] possibleEscapes = new Direction[] {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
-			// Checks if there are barred directions
-			if (barredDirections != null) {
-				// Picks out all barred directions
-				for (int i = 0; i < possibleEscapes.length; i++) {
-					// Checks for the barred directions
-					for (int j = 0; j < barredDirections.length; j++) {
-						// If the barred directions exist
-						if (possibleEscapes[i] == barredDirections[j])
-							possibleEscapes[i] = null;
-					}
-				}
-			}
 			
 			// Records and status
 			int[] imminentProximities = new int[imminentNum];
@@ -124,72 +110,99 @@ public class Medic extends Player{
 			
 			// MAIN LOOP OF MOVEMENT DETERMINATION
 			
-			int runDistance = 0;
-//			int escapeDirH = 3;
-//			int escapeDirV = 3;
-//			for (int i = 0; i < imminentThreats.length; i++) {
-//				AmbiguousMovement escape = this.getPossibleEscapes(imminentThreats[i], imminentProximities[i]);
-//				if (escape.getDistance() > runDistance) {
-//					runDistance = escape.getDistance();
-//				}
-//				if (escape.getDirectionH() < 3 && escape.getDirectionH() != escapeDirH && escapeDirH != 0) {
-//					escapeDirH = escape.getDirectionH();
-//				}
-//			}
+			int runDistance = 0;			
+			
+			AmbiguousMovement[] escapes = new AmbiguousMovement[imminentThreats.length];
 			for (int i = 0; i < imminentThreats.length; i++) {
-				AmbiguousMovement escape = this.getPossibleEscapes(imminentThreats[i], imminentProximities[i]);
-				// Removes impossible horizontal directions 
-				switch(escape.getDirectionH()) {
-				case 1:
-					possibleEscapes[3] = null;
-					break;
-				case 2:
-					possibleEscapes[1] = null;
-					break;
-				default:
-				}
-				
-				// Removes impossible vertical directions
-				switch(escape.getDirectionV()) {
-				case 1:
-					possibleEscapes[2] = null;
-					break;
-				case 2:
-					possibleEscapes[0] = null;
-					break;
-				default:
-				}
-				
+				escapes[i] = this.getPossibleEscapes(imminentThreats[i], imminentProximities[i]);
 				// Gets the final run distance
-				if (escape.getDistance() > runDistance) {
-					runDistance = escape.getDistance();
+				if (escapes[i].getDistance() > runDistance) {
+					runDistance = escapes[i].getDistance();
+				}
+			}
+			Direction[] possibleDirections = this.getDirectionsFromAmbiguous(escapes);
+			if (barredDirections != null) {
+				// Picks out all barred directions
+				for (int i = 0; i < possibleDirections.length; i++) {
+					// Checks for the barred directions
+					for (int j = 0; j < barredDirections.length; j++) {
+						// If the barred directions exist
+						if (possibleDirections[i] == barredDirections[j])
+							possibleDirections[i] = null;
+					}
 				}
 			}
 			
-			Direction[] possibleDirections = this.removeNulls(possibleEscapes);
+			Direction[] optimalDirections = new Direction[0];
 			
-			// Moves towards direction options
-			if (possibleDirections.length != 0) {
+			ArrayList<AmbiguousMovement> healPaths = this.getHealMovements();
+			
+			// Gets the difference of heal paths and possible directions of escape
+			for (int i = 0; i < healPaths.size(); i++) {
+				Direction[] healDir = this.getDirectionsFromAmbiguous(new AmbiguousMovement[]{healPaths.get(i)});
+				Direction[] tempDir = new Direction[]{null, null, null, null};
+				// Fills tempDir
+//				for (int j = 0; j < tempDir.length; j++) {
+//					tempDir[i] = possibleDirections[i];
+//				}
+				// Fills optimal
+				for (int j = 0; j < healDir.length; j++) {
+					// Fills individual
+					for (int k = 0; k < possibleDirections.length; i++) {
+						if (healDir[j] == possibleDirections[k]) {
+							// Determines the directions present
+							switch(healDir[j]) {
+							case NORTH:
+								tempDir[0] = Direction.NORTH;
+								break;
+							case EAST:
+								tempDir[1] = Direction.EAST;
+								break;
+							case SOUTH:
+								tempDir[2] = Direction.SOUTH;
+								break;
+							case WEST:
+								tempDir[3] = Direction.WEST;
+							default:
+								
+							}
+						}
+					}
+				}
+				tempDir = this.removeNulls(tempDir);
+				if (tempDir.length > 0) {
+					optimalDirections = tempDir;
+					break;
+				}
+			}
+			
+			if (optimalDirections.length != 0) {
 				int randomDirection = (int) (Math.random() * possibleDirections.length);
 				movement = new Movement(possibleDirections[randomDirection], runDistance);
 			} else {
-				Direction direction;
-				// Gets a random direction
-				switch((int)(Math.random()*4)) {
-				case 0:
-					direction = Direction.EAST;
-					break;
-				case 1:
-					direction = Direction.NORTH;
-					break;
-				case 2:
-					direction = Direction.WEST;
-					break;
-				default:
-					direction = Direction.SOUTH;
-					
+				// Moves towards direction options
+				if (possibleDirections.length != 0) {
+					int randomDirection = (int) (Math.random() * possibleDirections.length);
+					movement = new Movement(possibleDirections[randomDirection], runDistance);
+				} else {
+					Direction direction;
+					// Gets a random direction
+					switch((int)(Math.random()*4)) {
+					case 0:
+						direction = Direction.EAST;
+						break;
+					case 1:
+						direction = Direction.NORTH;
+						break;
+					case 2:
+						direction = Direction.WEST;
+						break;
+					default:
+						direction = Direction.SOUTH;
+						
+					}
+					movement = new Movement(direction, this.obtainSpeed());
 				}
-				movement = new Movement(direction, this.obtainSpeed());
 			}
 		}
 		return movement;
@@ -207,27 +220,69 @@ public class Medic extends Player{
 	 * @param a
 	 * @return
 	 */
-	private AmbiguousMovement getHealMovement(PlayerRecord[] runners, int s, int a) {
-		int[] proximity = this.getProximityValues(runners, s, a);
+	private ArrayList<AmbiguousMovement> getHealMovements() {
+		int[] proximity = this.getProximityValues(this.runnerPriority, this.getStreet(), this.getAvenue());
 		
-		// Sorts proximity and runners
-		for (int i = 0; i < runners.length; i++) {
+		// Sorts proximity and runners using insertion
+		for (int i = 0; i < this.runnerPriority.length; i++) {
 			// Swaps until sorted
 			for (int j = i; j > 0; j--) {
 				// Swaps if not sorted
 				if (proximity[j] < proximity[j-1]) {
 					int proxTemp = proximity[j];
-					PlayerRecord runnerTemp = runners[j];
+					PlayerRecord runnerTemp = this.runnerPriority[j];
 					
 					proximity[j] = proximity[j-1];
 					proximity[j-1] = proxTemp;
 					
-					runners[j] = runners[j-1];
-					runners[j-1] = runnerTemp;
+					this.runnerPriority[j] = this.runnerPriority[j-1];
+					this.runnerPriority[j-1] = runnerTemp;
 				}
 			}
 		}
+		
+		ArrayList<AmbiguousMovement> patients = new ArrayList<AmbiguousMovement>();
+		// Gets all possible runner targets
+		for (int i = 0; i < (int)(runnerPriority.length); i++) {
+			// Adds all hurt runners
+			if (this.runnerPriority[i].getHP() < 100) {
+				patients.add(this.getAmbiguousHealPlan(this.runnerPriority[i], proximity[i]));
+			}
+		}
+		
+		return patients;
 	}
+	
+	private AmbiguousMovement getAmbiguousHealPlan(PlayerRecord patient, int predDist) {
+		AmbiguousMovement maneuver = new AmbiguousMovement(3, 3, 0);
+		if (patient == null) {
+			return maneuver;
+		}
+		
+		int streetDifference = this.getStreet() - patient.getStreet();
+		int avenueDifference = this.getAvenue() - patient.getAvenue();
+		
+		// Determines generic nature of next vertical movement
+		if (streetDifference < 0) {
+			maneuver.setDirectionV(2);
+		} else if (streetDifference > 0) {
+			maneuver.setDirectionV(1);
+		} else {
+			maneuver.setDirectionV(0);
+		}
+		
+		// Determines generic nature of next horizontal movement
+		if (avenueDifference < 0) {
+			maneuver.setDirectionH(1);
+		} else if (avenueDifference > 0) {
+			maneuver.setDirectionH(2);
+		} else {
+			maneuver.setDirectionH(0);
+		}
+		maneuver.setDistance(predDist);
+		return maneuver;
+	}
+	
 	
 	/**
 	 * Gets escape movement
@@ -450,5 +505,56 @@ public class Medic extends Player{
 		if(this.frontIsClear()) {
 			super.move();
 		}
+	}
+	
+	/**
+	 * Gets one ambiguous movement from a collection
+	 * @param movements - collection of ambiguous movements
+	 * @return - one ultimate ambiguous movement
+	 */
+	private Direction[] getDirectionsFromAmbiguous(AmbiguousMovement[] movements) {
+		Direction[] possibleDirections = new Direction[] {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
+		for (int i = 0; i < movements.length; i++) {
+			// Removes impossible horizontal directions 
+			switch(movements[i].getDirectionH()) {
+			case 1:
+				possibleDirections[3] = null;
+				break;
+			case 0:
+				possibleDirections[3] = null;
+			case 2:
+				possibleDirections[1] = null;
+				break;
+			default:
+			}
+			
+			// Removes impossible vertical directions
+			switch(movements[i].getDirectionV()) {
+			case 1:
+				possibleDirections[2] = null;
+				break;
+			case 0:
+				possibleDirections[2] = null;
+			case 2:
+				possibleDirections[0] = null;
+				break;
+			default:
+			}
+		}
+		
+		
+		return possibleDirections = this.removeNulls(possibleDirections);
+	}
+
+	@Override
+	public void sendSignal() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void pickPowerUp(EnhancedThing powerup) {
+		powerup.applyTo(this);
+		this.pickThing();
 	}
 }
