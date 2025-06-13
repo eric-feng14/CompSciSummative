@@ -19,7 +19,7 @@ public abstract class Player extends EnhancedBot{
 	private final String TYPE;
 	private PlayerRecord currentTarget;
 	private int defense, strength, stamina;
-	private final static int DEFAULT_HP = 100, DEFAULT_DEFENCE = 6, DEFAULT_STRENGTH = 10, DEFAULT_STAMINA = 3;
+	private final static int DEFAULT_HP = 100, DEFAULT_DEFENCE = 6, DEFAULT_STRENGTH = 10, DEFAULT_STAMINA = 5;
 	private final static int NORMAL_HIT = 20, CRITICAL_HIT = 40, KNOCKOUT = 100;
 
 

@@ -38,9 +38,9 @@ public class AttackerTester {
 		WallCreator creator = new WallCreator(city);
 		creator.createWallRect(0, 0, AVENUE_SIZE, STREET_SIZE);
 		
-		players[0] = new Attacker(city, 4, 4, Direction.EAST);
+		players[0] = new Runner(city, 4, 4, Direction.EAST);
 		players[1] = new Attacker(city, 6, 7, Direction.WEST);
-		updatePlayerRecord();
+		updatePlayerRecords();
 		updateTags();
 		initializePlayers();
 		addPowerUps(city);
@@ -50,9 +50,10 @@ public class AttackerTester {
 		while (!gameEnd()) {
 			System.out.println("HP: " + players[idx].getHp());
 			players[idx].performAction(playerRecords, powerUps);
-		    updatePlayerRecord(idx);
-		    updateTags();
-		    
+			players[idx].sendSignal();
+			
+			updatePlayerRecord(idx);
+			updateTag(idx);
 		    idx = (idx + 1) % players.length;
 		}
 	}
@@ -60,14 +61,18 @@ public class AttackerTester {
 	private static void addPowerUps(City c) {
 		for (int i = 0; i < powerUps.length; i++) {
 			int choice = RANDOM.nextInt(3);
+			System.out.println(choice);
 			int newStreet = RANDOM.nextInt(STREET_SIZE), newAvenue = RANDOM.nextInt(AVENUE_SIZE);
 			switch(choice) {
 			case 0: 
 				powerUps[i] = new LuckPowerUp(c, newStreet, newAvenue);
+				break;
 			case 1:
 				powerUps[i] = new SpeedPowerUp(c, newStreet, newAvenue);
+				break;
 			case 2:
 				powerUps[i] = new StaminaPowerUp(c, newStreet, newAvenue);
+				break;
 			}
 		}
 	}
@@ -76,9 +81,9 @@ public class AttackerTester {
 		System.out.println("test");
 	}
 	
-	public static double[] calculateChances(InfoRecord attacker, PlayerRecord victum) {
-		double attackerStrength = attacker.getStrength();
-		double runnerDefense = players[victum.getPLAYER_ID()].getDefense();
+	private static double[] calculateChances(int attacker, int victum) {
+		double attackerStrength = players[attacker].getStrength();
+		double runnerDefense = players[victum].getDefense();
 		
 		double normalHit = attackerStrength + 0.5*runnerDefense;
 		double critHit = attackerStrength;
@@ -95,7 +100,7 @@ public class AttackerTester {
 		return new double[] {dodgeChance, normalChance, critChance, knockChance};
 	}
 	
-	public static int chooseType (double[] probabilities) {
+	private static int chooseType (double[] probabilities) {
 		double rand = RANDOM.nextDouble();  // Random double between 0.0 and 1.0
         double cumulative = 0.0;
         
@@ -108,13 +113,18 @@ public class AttackerTester {
         }
         return 1;
 	}
-	/**
-	 * still need to decide on what to put on the tags
-	 */
-	private static void updateTags() {
-		for (Player p : players) {
-			p.setLabel("" + p.getHp());
-		}
+	
+	private static void performAttack(int attackType, int targetID) {
+		switch(attackType) {
+    	case 0: break;
+    	case 1: players[targetID].setHp(players[targetID].getHp() - Player.getNormalHit()); break;
+    	case 2: players[targetID].setHp(players[targetID].getHp() - Player.getCriticalHit()); break;
+    	case 3: players[targetID].setHp(players[targetID].getHp() - Player.getKnockout()); break;
+    	}
+		
+		if (players[targetID].getHp() <= 0) {
+    		players[targetID].setDefeated(true);
+    	}
 	}
 	
 	private static void initializePlayers() {
@@ -124,9 +134,18 @@ public class AttackerTester {
 	}
 	
 	/**
+	 * still need to decide on what to put on the tags
+	 */
+	private static void updateTags() {
+		for (Player p : players) {
+			p.setLabel("" + p.getHp());
+		}
+	}
+	
+	/**
 	 * Updates Player records
 	 */
-	private static void updatePlayerRecord() {
+	private static void updatePlayerRecords() {
 		for (int i = 0; i < players.length; i++) {
 			playerRecords[i] = new PlayerRecord(players[i]);
 		}
@@ -140,12 +159,22 @@ public class AttackerTester {
 		playerRecords[index] = new PlayerRecord(players[index]);
 	}
 	
+	private static void updateTag(int idx) {
+		players[idx].setLabel("" + players[idx].getHp());
+	}
+	
 	/**
 	 * Signals main to do action specified in string
 	 * @param s - signal message (string)
 	 */
-	public static void signal(String s, int playerID) {
-		if (s.equals("attack")) {}
+	public static void signal(String s, int thisID, int targetID) {
+		if (s.equals("attack")) {
+			double[] chances = calculateChances(thisID, targetID);
+			int attackType = chooseType(chances);
+			performAttack(attackType, targetID);
+			updatePlayerRecord(targetID);
+			updateTag(targetID);
+		}
 		else
 		if (s.equals("heal")) {}
 	}

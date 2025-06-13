@@ -115,18 +115,16 @@ public class Attacker extends Player{
 		return false;
 	}
 	
-	public void fight() {//assuming we are at the same position as our target
-		//would we have to send information back to the application class?
-	}
-	
 	public void sendSignal() {
 		if (this.currentState == STATE_FIGHT) {
 			Main.signal("attack", this.getPLAYER_ID(), this.getCurrentTarget().getPLAYER_ID());
 		}
 	}
 	
-	
-	public void rest() {}
+	public void rest() {
+		this.setStamina(this.getStamina() + this.obtainSpeed());
+		//rest for a specific number of rounds (necessary to reach the target)
+	}
 	
 	/**
 	 * chases the target with a set amount of steps
@@ -154,6 +152,10 @@ public class Attacker extends Player{
 			int horizontalSteps = Math.min(Math.abs(horizontalDiff), speed);
 			Direction dir  = (horizontalDiff > 0) ? Direction.WEST : Direction.EAST;
 			this.directedMove(dir, horizontalSteps);
+		}
+		
+		if (this.getStamina() <= 0) {
+			this.currentState = STATE_REST;
 		}
 	}
 	
