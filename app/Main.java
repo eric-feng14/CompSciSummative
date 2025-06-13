@@ -64,7 +64,7 @@ public class Main {
 	}
 
 	private static void addPowerUps(City c) {
-		for (int i = 0; i < powerUps.size(); i++) {
+		for (int i = 0; i < NUM_OF_POWERUPS; i++) {
 			int choice = RANDOM.nextInt(3);
 			System.out.println(choice);
 			int newStreet = RANDOM.nextInt(STREET_SIZE), newAvenue = RANDOM.nextInt(AVENUE_SIZE);

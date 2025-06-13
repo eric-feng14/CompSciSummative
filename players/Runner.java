@@ -14,7 +14,7 @@ public class Runner extends Player{
 	private PlayerRecord[] priorityList; // Sorted list of players by priority
 	private EnhancedThing[] powerUps; // Array of available power-ups
 	private int steps; // Number of steps to take in current turn
-	private final int MAX_STAM = this.getStamina(); // Max stamina of player
+	private final int MAX_STAM; // Max stamina of player
 
 	/**
 	 * Constructor for the Runner player
@@ -26,6 +26,7 @@ public class Runner extends Player{
 	public Runner(City c, int s, int a, Direction d) {
 		super(c, s, a, d, /*Player.generator.nextInt(3) + 2*/ 3, "Runner", false);
 		this.setStamina(10);
+		this.MAX_STAM = 10;
 		this.setColor(Color.BLUE);
 	}
 
@@ -220,13 +221,13 @@ public class Runner extends Player{
 			this.runAway(dangerList);
 		}
 		else {
-			// If low health, seek medics
-			if (this.getHp() < 50) {
-				this.seekMedic();
-			}
 			// If low stamina, rest near power-up
-			if (this.getStamina() <= 6) {
+			if (this.getStamina() <= 5) {
 				this.rest(dangerList);
+			}
+			// If low health, seek medics
+			else if (this.getHp() <= 50) {
+				this.seekMedic();
 			}
 			else {
 				// Otherwise seek power-ups
@@ -328,8 +329,9 @@ public class Runner extends Player{
 	private void runAway(PlayerRecord[] dangerList) {        
 		int[] bestLocation = findBestLocation(dangerList);
 		this.moveTo(bestLocation[0], bestLocation[1], true);
-		this.pickPowerUp(this.powerUps[0]);
-
+		if (this.powerUps.length != 0) {
+			this.pickPowerUp(this.powerUps[0]);
+		}
 		this.setStamina(this.getStamina() - this.steps);
 	}
 
@@ -361,24 +363,36 @@ public class Runner extends Player{
 			// Calculate danger at new position
 			int dangerScore = calculateDangerAt(newStr, newAve, dangers);
 
-			// Calculate distance to nearest power-up
-			int distanceP = Math.abs(this.powerUps[0].getAvenue() - newAve) + 
-					Math.abs(this.powerUps[0].getStreet() - newStr);
+			if (this.powerUps.length > 0) {
+				int distanceP = Math.abs(this.powerUps[0].getAvenue() - newAve) + 
+						Math.abs(this.powerUps[0].getStreet() - newStr);
 
-			int distanceP1 = Math.abs(this.powerUps[0].getAvenue() - safestLocation[1]) + 
-					Math.abs(this.powerUps[0].getStreet() - safestLocation[0]);
-
-			// Choose location with least danger or closer to power-up if equal danger
-			if (dangerScore < lowestScore || (dangerScore == lowestScore && distanceP < distanceP1)) {
-				lowestScore = dangerScore;
-				safestLocation[0] = newStr;
-				safestLocation[1] = newAve;
+				int distanceP1 = Math.abs(this.powerUps[0].getAvenue() - safestLocation[1]) + 
+						Math.abs(this.powerUps[0].getStreet() - safestLocation[0]);
+				// Choose location with least danger or closer to power-up if equal danger
+				if (dangerScore < lowestScore || (dangerScore == lowestScore && distanceP < distanceP1)) {
+					lowestScore = dangerScore;
+					safestLocation[0] = newStr;
+					safestLocation[1] = newAve;
+				}
+			}
+			else {
+				int distance = Math.abs(dangers[0].getAvenue() - newAve) + 
+						Math.abs(dangers[0].getStreet() - newStr);
+				
+				int distance1 = Math.abs(dangers[0].getAvenue() - safestLocation[1]) + 
+						Math.abs(dangers[0].getStreet() - safestLocation[0]);
+				if (dangerScore < lowestScore || (dangerScore == lowestScore && distance > distance1)) {
+					lowestScore = dangerScore;
+					safestLocation[0] = newStr;
+					safestLocation[1] = newAve;
+				}
 			}
 		}
 
 		// Consider moving directly to power-up if it's safe and reachable
-		if (this.calcDistance(this.powerUps[0]) <= this.steps && 
-				this.calculateDangerAt(this.powerUps[0].getStreet(), this.powerUps[0].getAvenue(), dangers) <= lowestScore + 400) {
+		if (this.powerUps.length > 0 && this.calcDistance(this.powerUps[0]) <= this.steps && 
+				this.calculateDangerAt(this.powerUps[0].getStreet(), this.powerUps[0].getAvenue(), dangers) <= lowestScore + 250) {
 			safestLocation[0] = this.powerUps[0].getStreet();
 			safestLocation[1] = this.powerUps[0].getAvenue();
 			this.steps = this.calcDistance(this.powerUps[0]);
@@ -430,7 +444,7 @@ public class Runner extends Player{
 		// Add danger from each attacker based on distance
 		for (PlayerRecord danger : dangers) {
 			int distance = Math.abs(danger.getAvenue() - avenue) + Math.abs(danger.getStreet() - street);
-			
+
 			switch(distance) {
 			case 0: totalDanger += 1000; break;
 			case 1: totalDanger += 800; break;
