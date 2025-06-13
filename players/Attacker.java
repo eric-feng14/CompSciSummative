@@ -20,11 +20,10 @@ import java.awt.*;
  */
 public class Attacker extends Player{
 	
-	//learnedAttributes contains information gathered from watching others as well as fighting others
-	private AttackerRecord[] learnedAttributes;
 	private PlayerRecord[] attackers, priorityList, previousPriorityList;
 	private ArrayList<EnhancedThing> powerUps;
 	private int roundsSpentChasing = 0, currentState = STATE_CHASE, currentStrat = STRAT_DEFAULT;
+	private static boolean noPowerUps = false;
 	private final static int MAX_CHASE_TIME = 10;
 	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
 	//no need for cornering since support state logic overlaps with it
@@ -55,15 +54,16 @@ public class Attacker extends Player{
 		if (ct != null) {
 			System.out.println("\nCurrent target of player" + this.getPLAYER_ID());
 			System.out.format("type: %s, street: %d, avenue: %d, speed: %d\n", ct.getTYPE(), ct.getStreet(), ct.getAvenue(), ct.getSpeed());
+		} else {
+			System.out.println("No current target");
 		}
 	}
 
 	@Override 
 	public void performAction(PlayerRecord[] players, ArrayList<EnhancedThing> powerUps) { 
 		this.updateInfo(players, powerUps);
-		if (this.getCurrentTarget() == null) { //no target, e.g. first round of play
-			this.setCurrentTarget(newTarget(players));
-		}
+		
+		//Debugging statements
 //		printPriorityList();
 //		printAttackers();
 //		printCurrentTarget();
@@ -71,39 +71,53 @@ public class Attacker extends Player{
 			case STATE_CHASE: 
 				switch(this.currentStrat) {
 					case STRAT_DEFAULT:
-						this.chase(players);
-					case STRAT_ALTERNATE:
+						this.chaseTarget(players);
+					case STRAT_ALTERNATE: 
 						
-					case STRAT_SUPPORT:
+					case STRAT_SUPPORT: //activate this case if there is at least 2 attackers
 						
-					case STRAT_FOCUS_POWERUP:
-						
+					case STRAT_FOCUS_POWERUP: //activate this case if there are powerups on the field (Condition)
+						this.chasePowerUp();
 				}
 				break;
 			case STATE_REST: //resting state
 				this.rest();
 				break;
-			//note that the fighting state is handled mostly by the application class
 		}
 	}
 	
-//	public void tester(EnhancedThing[] powerups) {
-//		this.moveTo(powerups[0].getStreet(), powerups[0].getAvenue());
-//		this.pickPowerUp(powerups[0]);
-//	}
-	
-	public void chasePowerUp(ArrayList<EnhancedThing> powerUps) {
+	public void chasePowerUp() {
+		EnhancedThing targetPowerUp = this.powerUps.get(0);
+		//Safety check
+		if (targetPowerUp == null) {
+			System.out.println("No power ups available");
+			return;
+		}
 		
+		int verticalDiff = this.getStreet() - targetPowerUp.getStreet();
+		int horizontalDiff = this.getAvenue() - targetPowerUp.getAvenue();
+		this.chase(verticalDiff, horizontalDiff);
+		if (this.canPickThing()) {
+			this.pickPowerUp(targetPowerUp);
+		}
 	}
 	
-	public void chase(PlayerRecord[] players) {
+	public void chaseTarget(PlayerRecord[] players) {
 		//If there is currently no target, find a new target
 		if (this.roundsSpentChasing == Attacker.MAX_CHASE_TIME) {
 			this.setCurrentTarget(newTarget(players));
 			this.roundsSpentChasing = 0;
 		}
 		
-		this.chaseTarget();
+		//Safety check
+		if (this.getCurrentTarget() == null) {
+			System.out.println("No current target! Null target!");
+			return;
+		}
+		
+		int verticalDiff = this.getStreet() - this.getCurrentTarget().getStreet();
+		int horizontalDiff = this.getAvenue() - this.getCurrentTarget().getAvenue();
+		this.chase(verticalDiff, horizontalDiff);
 		this.roundsSpentChasing++;
 		if (this.targetReached()) {
 			this.currentState = STATE_FIGHT; //change to fighting state
@@ -124,35 +138,42 @@ public class Attacker extends Player{
 		}
 	}
 	
-	public void pickPowerUp(EnhancedThing powerup) {
-		//safety check
-		if (this.canPickThing()) {
-			powerup.applyTo(this);
-			this.pickThing();
+	public void sendInfo(int damageDealt, int victimID) {
+		for (PlayerRecord rec : this.priorityList) {
+			if (rec.getPLAYER_ID() == victimID) {
+				//simple multiplication formula to estimate the defense of the player
+				//it assumes that more damage means less defense, and vice versa
+				rec.setDefense(this.getStrength() - damageDealt);
+			}
 		}
 	}
 	
+	public void pickPowerUp(EnhancedThing powerup) {
+		powerup.applyTo(this);
+		this.pickThing();
+	}
+	
 	public void rest() {
-		int dist = calcDistance(this.getCurrentTarget());
-		this.setStamina(this.getStamina() + this.obtainSpeed());
-		if (this.getStamina() == dist) {
-			this.currentState = STATE_CHASE;
+		int dist;
+		if (this.currentStrat == STRAT_DEFAULT || this.currentStrat == STRAT_ALTERNATE) {
+			dist = calcDistance(this.getCurrentTarget());
+		} else if (this.currentStrat == STRAT_FOCUS_POWERUP){
+			dist = calcDistance(this.powerUps.get(0)); 
+		} else {
+			dist = 0;
 		}
 		//rest for a specific number of rounds (necessary to reach the target)
+		this.setStamina(this.getStamina() + this.obtainSpeed());
+		if (this.getStamina() >= dist) {
+			this.currentState = STATE_CHASE;
+		}
+
 	}
 	
 	/**
 	 * chases the target with a set amount of steps
 	 */
-	private void chaseTarget() {
-		//Safety check
-		if (this.getCurrentTarget() == null) {
-			System.out.println("No current target! Null target!");
-			return;
-		}
-		
-		int verticalDiff = this.getStreet() - this.getCurrentTarget().getStreet();
-		int horizontalDiff = this.getAvenue() - this.getCurrentTarget().getAvenue();
+	private void chase(int verticalDiff, int horizontalDiff) {
 		int speed = this.obtainSpeed();
 
 		if (verticalDiff != 0 && this.getStamina() > 0) {
@@ -220,10 +241,12 @@ public class Attacker extends Player{
 			}
 		}
 		
+		int idx;
 		//everyone is already being chased -> return a random target
-//		int idx = generator.nextInt(this.priorityList.length);
-//		return this.priorityList[idx];
-		return null;
+		do {
+			idx = generator.nextInt(this.priorityList.length);
+		} while (idx == this.getCurrentTarget().getPLAYER_ID() && this.priorityList.length > 1);
+		return this.priorityList[idx];
 	}
 	
 	/**
@@ -238,15 +261,14 @@ public class Attacker extends Player{
 			}
 		}
 //		//Edge case -> no other players other than attackers on the field
-//		if (size == 0) {
-//			System.out.println("No other players!");
-//			System.exit(0);
-//		}
+		if (size == 0) {
+			System.out.println("No other players!");
+			System.exit(0);
+		}
 		
 		this.priorityList = new PlayerRecord[size]; //Assign the priorityList a specific size
 		this.previousPriorityList = new PlayerRecord[size];
 		this.attackers = new PlayerRecord[players.length - size];
-		this.learnedAttributes = new AttackerRecord[attackers.length];
 		
 		//Populate previousPriorityList with default player records
 		int idx = 0;
@@ -272,6 +294,15 @@ public class Attacker extends Player{
 		this.sortPowerUps(powerUps);
 		//Update the previous priority list
 		this.previousPriorityList = this.priorityList;
+		
+		//Safety checks
+		if (this.getCurrentTarget() == null) { //no target, e.g. first round of play
+			this.setCurrentTarget(newTarget(players));
+		}
+		
+		if (powerUps.size() == 0) {
+			noPowerUps = true;
+		}
 	}
 	
 	private void sortPowerUps(ArrayList<EnhancedThing> powerUps) {
@@ -279,11 +310,13 @@ public class Attacker extends Player{
 		for (int i = 1; i < powerUps.size(); i++) {
 			EnhancedThing currentPowerUp = powerUps.get(i);
 			int j = i;
+			
 			//Continue shifting elements until the desired position is found 
-			for (; j > 0 && calcDistance(currentPowerUp) < accounts[j-1].getAccountNum(); j--) {
-				accounts[j] = accounts[j-1];
+			while (j > 0 && calcDistance(currentPowerUp) < calcDistance(powerUps.get(j-1))) {
+				powerUps.set(j, powerUps.get(j-1));
+				j--;
 			}
-			accounts[j] = currentAccount;
+			powerUps.set(j, currentPowerUp);
 		}
 	}
 	

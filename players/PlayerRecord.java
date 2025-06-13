@@ -9,10 +9,11 @@ public class PlayerRecord {
 	private int street, avenue;
 	private int speed, hp;
 	private final int PLAYER_ID;
-	private final static int DEFAULT_SPEED = 1;
+	private final static int DEFAULT_SPEED = 1, DEFAULT_DEFENSE = 1;
 	private boolean isDefeated;
 	private final String TYPE;
 	private PlayerRecord currentTarget;
+	private int defense;
 	//Note: the robots will not be attempting to learn each others stamina due to  potential inaccuracy (e.g. strategies could affect it)
 	
 	/**
@@ -22,7 +23,7 @@ public class PlayerRecord {
 	 * @param avenue - avenue of city
 	 */
 	public PlayerRecord(String TYPE, int PLAYER_ID, int street, int avenue, int speed, boolean isDefeated, int hp, 
-			PlayerRecord currentTarget) {
+			PlayerRecord currentTarget, int defense) {
 		this.TYPE = TYPE;
 		this.street = street;
 		this.avenue = avenue;
@@ -31,6 +32,7 @@ public class PlayerRecord {
 		this.isDefeated = isDefeated;
 		this.hp = hp;
 		this.currentTarget = currentTarget;
+		this.defense = defense;
 	}
 	
 	/**
@@ -39,9 +41,17 @@ public class PlayerRecord {
 	 */
 	public PlayerRecord(Player player) {
 		this(player.getTYPE(), player.getPLAYER_ID(), player.getStreet(), player.getAvenue(), 
-				PlayerRecord.DEFAULT_SPEED, player.isDefeated(), player.getHp(), player.getCurrentTarget());
+				PlayerRecord.DEFAULT_SPEED, player.isDefeated(), player.getHp(), player.getCurrentTarget(), PlayerRecord.DEFAULT_DEFENSE);
 	}
 	
+	public int getDefense() {
+		return defense;
+	}
+
+	public void setDefense(int defense) {
+		this.defense = defense;
+	}
+
 	public PlayerRecord getCurrentTarget() {
 		return currentTarget;
 	}

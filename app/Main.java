@@ -114,13 +114,8 @@ public class Main {
 		return 1;
 	}
 
-	private static void performAttack(int attackType, int targetID) {
-		switch(attackType) {
-		case 0: break; //in the case that the attacker misses their attack
-		case 1: players[targetID].setHp(players[targetID].getHp() - Player.getNormalHit()); break;
-		case 2: players[targetID].setHp(players[targetID].getHp() - Player.getCriticalHit()); break;
-		case 3: players[targetID].setHp(players[targetID].getHp() - Player.getKnockout()); break;
-		}
+	private static void performAttack(int damageDealt, int targetID) {
+		players[targetID].setHp(players[targetID].getHp() - damageDealt);
 
 		if (players[targetID].getHp() <= 0) {
 			players[targetID].setDefeated(true);
@@ -172,9 +167,18 @@ public class Main {
 		if (s.equals("attack")) {
 			double[] chances = calculateChances(thisID, targetID);
 			int attackType = chooseType(chances);
-			performAttack(attackType, targetID);
+			int damageDealt;
+			switch(attackType) {
+			case 1: damageDealt = Player.getNormalHit(); break;
+			case 2: damageDealt = Player.getCriticalHit(); break;
+			case 3: damageDealt = Player.getKnockout(); break;
+			default: damageDealt = 0; break; //there is a chance of dodging
+			}
+			performAttack(damageDealt, targetID);
 			updatePlayerRecord(targetID);
 			updateTag(targetID);
+			
+			players[thisID].sendInfo(damageDealt, targetID);
 		}
 		else
 			if (s.equals("heal")) {}

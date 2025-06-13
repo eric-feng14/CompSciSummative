@@ -67,6 +67,8 @@ public abstract class Player extends EnhancedBot{
 	
 	public abstract void sendSignal();
 	
+	public void sendInfo(int damageDealt, int victimID) {};
+	
 	public static int getNormalHit() {
 		return NORMAL_HIT;
 	}
