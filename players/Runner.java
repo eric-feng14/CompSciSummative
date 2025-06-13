@@ -5,6 +5,7 @@ import powerUps.EnhancedThing;
 
 public class Runner extends Player{
 	private PlayerRecord[] priorityList;
+	private EnhancedThing[] powerUps;
 	private int steps;
 
 	public Runner(City c, int s, int a, Direction d) {
@@ -20,15 +21,37 @@ public class Runner extends Player{
 		if (steps > this.getStamina()) {
 			this.steps = this.getStamina();
 		}
-		if ((this.priorityList == null) || (this.priorityList.length != players.length)) {
-			this.priorityList = new PlayerRecord[players.length];
-		}
 		System.out.println("Stam: " + this.getStamina());
 		this.learnDifferences(players);
 		this.sortPriority();
+		this.sortPowerUps(powerUps); 
 		this.doStrategy();
 	}
 	
+	private void sortPowerUps(EnhancedThing[] powerUps) {
+		PlayerRecord[] dangerList = this.findAttackers();
+		if ((this.powerUps == null) || (this.powerUps.length != powerUps.length)) {
+			this.powerUps = new EnhancedThing[powerUps.length];
+		}
+		
+		for (int i = 0; i < powerUps.length; i ++) {
+			this.powerUps[i] = powerUps[i];
+		}
+		
+		for (int i = 0; i < this.powerUps.length - 1; i ++) {
+			for (int j = i + 1; j < this.powerUps.length; j ++) {
+				if (this.calcDistance(this.powerUps[i]) > this.calcDistance(this.powerUps[j])
+						|| (this.calcDistance(this.powerUps[i]) == this.calcDistance(this.powerUps[j]) 
+						&& this.calculateDangerAt(this.powerUps[i].getStreet(), this.powerUps[i].getAvenue(), dangerList) > 
+						this.calculateDangerAt(powerUps[j].getStreet(), powerUps[j].getAvenue(), dangerList))) {
+					EnhancedThing thing = this.powerUps[i];
+					this.powerUps[i] = this.powerUps[j];
+					this.powerUps[j] = thing;
+				}
+			}
+		}
+	}
+
 	@Override
 	public void pickPowerUp(EnhancedThing thing) {
 		if(this.canPickThing()) {
@@ -73,6 +96,10 @@ public class Runner extends Player{
 	}
 
 	private void learnDifferences(PlayerRecord[] players) {
+		if ((this.priorityList == null) || (this.priorityList.length != players.length)) {
+			this.priorityList = new PlayerRecord[players.length];
+		}
+		
 		if (this.priorityList[0] == null) {
 			for(int i = 0; i < this.priorityList.length; i ++) {
 				this.priorityList[i] = players[i];
@@ -96,6 +123,9 @@ public class Runner extends Player{
 	private int calcDistance(PlayerRecord r) { 
 		return Math.abs(r.getAvenue() - this.getAvenue()) + Math.abs(r.getStreet() - this.getStreet());
 	}
+	private int calcDistance(EnhancedThing powerUp) {
+		return Math.abs(powerUp.getAvenue() - this.getAvenue()) + Math.abs(powerUp.getStreet() - this.getStreet());
+	}
 
 	private int calcDistance(PlayerRecord r1, PlayerRecord r2) { 
 		return Math.abs(r1.getAvenue() - r2.getAvenue()) + Math.abs(r1.getStreet() - r2.getStreet());
@@ -111,10 +141,18 @@ public class Runner extends Player{
 			if (this.getHp() < 50) {
 				this.seekMedic();
 			}
-			else {
+			if (this.getStamina() <= 6) {
 				this.rest(dangerList);
 			}
+			else {
+				this.seekPowerUps();
+			}
 		}
+	}
+
+	private void seekPowerUps() {
+		
+		
 	}
 
 	private void seekMedic() {
@@ -124,8 +162,9 @@ public class Runner extends Player{
 
 	private void rest(PlayerRecord[] dangerList) {
 		this.steps = 1;
-		int[] bestLocation = findSafestLocation(dangerList);
+		int[] bestLocation = findBestLocation(dangerList);
 		this.moveTo(bestLocation[0], bestLocation[1], true);
+		this.pickPowerUp(this.powerUps[0]);
 		this.addStamina(1);
 	}
 
@@ -172,13 +211,14 @@ public class Runner extends Player{
 
 	private void runAway(PlayerRecord[] dangerList) {		
 
-		int[] bestLocation = findSafestLocation(dangerList);
+		int[] bestLocation = findBestLocation(dangerList);
 		this.moveTo(bestLocation[0], bestLocation[1], true);
+		this.pickPowerUp(this.powerUps[0]);
 		
-		this.setStamina(this.getStamina() + this.steps);
+		this.setStamina(this.getStamina() - this.steps);
 	}
 
-	private int[] findSafestLocation(PlayerRecord[] dangers) {
+	private int[] findBestLocation(PlayerRecord[] dangers) {
 
 		int [] safestLocation = {this.getStreet(), this.getAvenue()};
 		int lowestScore = Integer.MAX_VALUE;
@@ -206,11 +246,24 @@ public class Runner extends Player{
 			int distance1 = Math.abs(dangers[0].getAvenue() - safestLocation[1]) + 
 					Math.abs(dangers[0].getStreet() - safestLocation[0]);
 			
-			if (dangerScore < lowestScore || (dangerScore == lowestScore && distance > distance1)) {
+			int distanceP = Math.abs(this.powerUps[0].getAvenue() - newAve) + 
+					Math.abs(this.powerUps[0].getStreet() - newStr);
+			
+			int distanceP1 = Math.abs(this.powerUps[0].getAvenue() - safestLocation[1]) + 
+					Math.abs(this.powerUps[0].getStreet() - safestLocation[0]);
+			
+			if (dangerScore < lowestScore || (dangerScore == lowestScore && distance > distance1)
+					|| (dangerScore == lowestScore && distance == distance1 && distanceP < distanceP1)) {
 				lowestScore = dangerScore;
 				safestLocation[0] = newStr;
 				safestLocation[1] = newAve;
 			}
+		}
+		if (this.calcDistance(this.powerUps[0]) <= this.steps && 
+				this.calculateDangerAt(this.powerUps[0].getStreet(), this.powerUps[0].getAvenue(), dangers) <= lowestScore + 400) {
+			safestLocation[0] = this.powerUps[0].getStreet();
+			safestLocation[1] = this.powerUps[0].getAvenue();
+			this.steps = this.calcDistance(this.powerUps[0]);
 		}
 
 		return safestLocation;
