@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * A friendly game of tag
  * @author Eric, Felix, and Richard
- * @version 5/26/2025
+ * @version Due date: June 13 2025
  */
 public class Main {
 	
@@ -80,10 +80,6 @@ public class Main {
 		}
 	}
 	
-	public static void handlePowerUps() {
-		System.out.println("test");
-	}
-	
 	private static double[] calculateChances(int attacker, int victum) {
 		double attackerStrength = players[attacker].getStrength();
 		double runnerDefense = players[victum].getDefense();
@@ -106,7 +102,6 @@ public class Main {
 	private static int chooseType (double[] probabilities) {
 		double rand = RANDOM.nextDouble();  // Random double between 0.0 and 1.0
         double cumulative = 0.0;
-        
    
         for (int i = 0; i < probabilities.length; i++) {
             cumulative += probabilities[i];
@@ -119,7 +114,7 @@ public class Main {
 	
 	private static void performAttack(int attackType, int targetID) {
 		switch(attackType) {
-    	case 0: break;
+    	case 0: break; //in the case that the attacker misses their attack
     	case 1: players[targetID].setHp(players[targetID].getHp() - Player.getNormalHit()); break;
     	case 2: players[targetID].setHp(players[targetID].getHp() - Player.getCriticalHit()); break;
     	case 3: players[targetID].setHp(players[targetID].getHp() - Player.getKnockout()); break;
@@ -127,6 +122,7 @@ public class Main {
 		
 		if (players[targetID].getHp() <= 0) {
     		players[targetID].setDefeated(true);
+    		players[targetID].destroy();
     	}
 	}
 	

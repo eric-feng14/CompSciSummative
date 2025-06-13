@@ -26,8 +26,8 @@ public class Attacker extends Player{
 	private final static int MAX_CHASE_TIME = 10;
 	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
 	//no need for cornering since support state logic overlaps with it
-	//default strategy is chase based on distance and speed, alternate strategy is based on defense and speed
-	private final static int STRAT_DEFAULT = 4, STRAT_ALTERNATE = 5, STRAT_SUPPORT = 6;
+	//default strategy is chase based on distance and speed, alternate strategy is based on learned defense
+	private final static int STRAT_DEFAULT = 4, STRAT_ALTERNATE = 5, STRAT_FOCUS_POWERUP = 6, STRAT_SUPPORT = 7;
 
 	public Attacker(City city, int s, int a, Direction d) {
 		super(city, s, a, d, 3, "Attacker", false);
@@ -50,8 +50,10 @@ public class Attacker extends Player{
 	
 	private void printCurrentTarget() {
 		PlayerRecord ct = this.getCurrentTarget();
-		System.out.println("\nCurrent target of player" + this.getPLAYER_ID());
-		System.out.format("type: %s, street: %d, avenue: %d, speed: %d\n", ct.getTYPE(), ct.getStreet(), ct.getAvenue(), ct.getSpeed());
+		if (ct != null) {
+			System.out.println("\nCurrent target of player" + this.getPLAYER_ID());
+			System.out.format("type: %s, street: %d, avenue: %d, speed: %d\n", ct.getTYPE(), ct.getStreet(), ct.getAvenue(), ct.getSpeed());
+		}
 	}
 
 	@Override 
@@ -71,6 +73,9 @@ public class Attacker extends Player{
 					case STRAT_ALTERNATE:
 						
 					case STRAT_SUPPORT:
+						
+					case STRAT_FOCUS_POWERUP:
+						
 				}
 				break;
 			case STATE_REST: //resting state
@@ -122,7 +127,11 @@ public class Attacker extends Player{
 	}
 	
 	public void rest() {
+		int dist = calcDistance(this.getCurrentTarget());
 		this.setStamina(this.getStamina() + this.obtainSpeed());
+		if (this.getStamina() == dist) {
+			this.currentState = STATE_CHASE;
+		}
 		//rest for a specific number of rounds (necessary to reach the target)
 	}
 	
@@ -253,7 +262,9 @@ public class Attacker extends Player{
 	private void updateInfo(PlayerRecord[] players) {
 		this.updateListsAndTarget(players);
 		this.sortPriorityList();
-		this.updatePreviousPriority();
+		//Update the previous priority list
+		this.previousPriorityList = this.priorityList;
+//		this.updatePreviousPriority();
 	}
 	
 	

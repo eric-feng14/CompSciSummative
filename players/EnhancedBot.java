@@ -19,6 +19,14 @@ public class EnhancedBot extends RobotSE {
 		super(city, s, a, d);
 	}
 	
+	public void destroy() {
+		try {
+			this.breakRobot("Robot has been destroyed!");
+		} catch (Exception e) {
+			System.out.print("Destroy failed!");
+		}
+	}
+	
 	/**
 	 * Turns to specified direction
 	 * @param direction - direction to turn to
