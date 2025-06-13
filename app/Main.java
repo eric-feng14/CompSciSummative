@@ -54,27 +54,7 @@ public class Main {
 			System.out.println("HP: " + players[idx].getHp());
 			players[idx].performAction(playerRecords, powerUps);
 			players[idx].sendSignal();
-//		    InfoRecord attacker = players[idx].getThisInfo(); 
-//		    PlayerRecord victum = players[idx].getRunnerInfo(); 
-//		    if (attacker != null && victum != null) {
-		    	//double[] chances = calculateChances(attacker, victum);
-//		    	for (double i : chances) {
-//		    		System.out.println("Chance: " + i);
-//		    	}
-		    	//int attackType = chooseType(chances);
-//		    	System.out.println("Type: " + attackType);
-		    	
-		    	
-//		    	switch(attackType) {
-//		    	case 0: break;
-//		    	case 1: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - InfoRecord.getNormalHit()); break;
-//		    	case 2: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - InfoRecord.getCriticalHit()); break;
-//		    	case 3: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - InfoRecord.getKnockout()); break;
-//		    	}
-//		    	if (players[victum.getPLAYER_ID()].getHp() <= 0) {
-//		    		players[victum.getPLAYER_ID()].setDefeated(true);
-//		    	}
-//		    }
+
 		    updatePlayerRecord(idx);
 		    updateTags();
 		    
@@ -141,9 +121,9 @@ public class Main {
 	private static void performAttack(int attackType, int targetID) {
 		switch(attackType) {
     	case 0: break;
-    	case 1: players[targetID].setHp(players[targetID].getHp() - InfoRecord.getNormalHit()); break;
-    	case 2: players[targetID].setHp(players[targetID].getHp() - InfoRecord.getCriticalHit()); break;
-    	case 3: players[targetID].setHp(players[targetID].getHp() - InfoRecord.getKnockout()); break;
+    	case 1: players[targetID].setHp(players[targetID].getHp() - Player.getNormalHit()); break;
+    	case 2: players[targetID].setHp(players[targetID].getHp() - Player.getCriticalHit()); break;
+    	case 3: players[targetID].setHp(players[targetID].getHp() - Player.getKnockout()); break;
     	}
 		
 		if (players[targetID].getHp() <= 0) {

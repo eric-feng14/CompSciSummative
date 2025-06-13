@@ -19,7 +19,6 @@ import java.awt.*;
  */
 public class Attacker extends Player{
 	
-	private final static int NORMAL_HIT = 20, CRITICAL_HIT = 40, KNOCKOUT = 100;
 	//learnedAttributes contains information gathered from watching others as well as fighting others
 	private AttackerRecord[] learnedAttributes;
 	private PlayerRecord[] attackers, priorityList, previousPriorityList;
@@ -126,18 +125,6 @@ public class Attacker extends Player{
 		}
 	}
 	
-	public InfoRecord getThisInfo() {
-		if (this.currentState == STATE_FIGHT) {
-			return new InfoRecord(this, this.getDefense(), this.getStrength());
-		}
-		return null;
-	}
-	public PlayerRecord getRunnerInfo() {
-		if (this.currentState == STATE_FIGHT) {
-			return this.getCurrentTarget();
-		}
-		return null;
-	}
 	
 	public void rest() {}
 	

@@ -20,7 +20,9 @@ public abstract class Player extends EnhancedBot{
 	private PlayerRecord currentTarget;
 	private int defense, strength, stamina;
 	private final static int DEFAULT_HP = 100, DEFAULT_DEFENCE = 6, DEFAULT_STRENGTH = 10, DEFAULT_STAMINA = 3;
-	
+	private final static int NORMAL_HIT = 20, CRITICAL_HIT = 40, KNOCKOUT = 100;
+
+
 	/**
 	 * Constructor of player
 	 * post: records all information of player when initialized
@@ -67,7 +69,17 @@ public abstract class Player extends EnhancedBot{
 		
 	}
 	
-	
+	public static int getNormalHit() {
+		return NORMAL_HIT;
+	}
+
+	public static int getCriticalHit() {
+		return CRITICAL_HIT;
+	}
+
+	public static int getKnockout() {
+		return KNOCKOUT;
+	}
 	public int getStamina() {
 		return stamina;
 	}
@@ -98,8 +110,6 @@ public abstract class Player extends EnhancedBot{
 	 */
 	public void initialize(PlayerRecord[] players) {}
 	
-	public InfoRecord getThisInfo() {return null;}
-	public PlayerRecord getRunnerInfo() {return null;}
 	
 	/**
 	 * Gets health of player

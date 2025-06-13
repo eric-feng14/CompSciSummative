@@ -20,15 +20,23 @@ public class Runner extends Player{
 		if (steps > this.getStamina()) {
 			this.steps = this.getStamina();
 		}
-		if (this.priorityList == null) {
+		if ((this.priorityList == null) || (this.priorityList.length != players.length)) {
 			this.priorityList = new PlayerRecord[players.length];
 		}
 		System.out.println("Stam: " + this.getStamina());
 		this.learnDifferences(players);
-		this.sortPriority(players);
+		this.sortPriority();
 		this.doStrategy();
 	}
-
+	
+	@Override
+	public void pickPowerUp(EnhancedThing thing) {
+		if(this.canPickThing()) {
+			thing.applyTo(this);
+			this.pickThing();
+		}
+	}
+	
 	private void addStamina(int num) {
 		if (this.getStamina() + num <= 10) {
 			this.setStamina(this.getStamina() + num);
@@ -37,16 +45,17 @@ public class Runner extends Player{
 			this.setStamina(10);
 		}
 	}
-	private void sortPriority(PlayerRecord[] players) {
+	private void sortPriority() {
 		PlayerRecord thisRecord = priorityList[this.getPLAYER_ID()];
 		priorityList[this.getPLAYER_ID()] = priorityList[priorityList.length - 1];
 		priorityList[priorityList.length - 1] = thisRecord;
 
 		for (int i = 1; i < priorityList.length - 1; i ++) {
 			for (int j = i; j > 0; j--) {
-				if ((priorityList[j].getTYPE().compareTo(priorityList[j - 1].getTYPE()) < 0) 
+				if (((priorityList[j].getTYPE().compareTo(priorityList[j - 1].getTYPE()) < 0) 
 						|| ((priorityList[j].getTYPE().equals(priorityList[j - 1].getTYPE()) && 
-								this.calcDistance(priorityList[j]) < this.calcDistance(priorityList[j-1])))) {
+								this.calcDistance(priorityList[j]) < this.calcDistance(priorityList[j-1]))))
+						&& (!priorityList[j].isDefeated())) {
 					PlayerRecord record = priorityList[j];
 					priorityList[j] = priorityList[j - 1];
 					priorityList[j - 1] = record;
@@ -62,7 +71,6 @@ public class Runner extends Player{
 		if (this.priorityList[0] == null) {
 			for(int i = 0; i < this.priorityList.length; i ++) {
 				this.priorityList[i] = players[i];
-				this.priorityList[i].setSpeed(1);
 			}
 		}
 		else {
@@ -72,6 +80,9 @@ public class Runner extends Player{
 				this.priorityList[i] = players[i];
 				if (this.calcDistance(this.priorityList[i], previous) > previous.getSpeed()) {
 					this.priorityList[i].setSpeed(this.calcDistance(this.priorityList[i], previous));
+				}
+				else {
+					this.priorityList[i].setSpeed(previous.getSpeed());
 				}
 			}
 		}
