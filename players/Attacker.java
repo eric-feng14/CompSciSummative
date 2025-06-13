@@ -3,6 +3,7 @@ import java.util.*;
 
 import app.Main;
 import powerUps.*;
+import unit_3_recurSort.sorting.Account;
 import becker.robots.*;
 import java.awt.*;
 
@@ -22,6 +23,7 @@ public class Attacker extends Player{
 	//learnedAttributes contains information gathered from watching others as well as fighting others
 	private AttackerRecord[] learnedAttributes;
 	private PlayerRecord[] attackers, priorityList, previousPriorityList;
+	private ArrayList<EnhancedThing> powerUps;
 	private int roundsSpentChasing = 0, currentState = STATE_CHASE, currentStrat = STRAT_DEFAULT;
 	private final static int MAX_CHASE_TIME = 10;
 	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
@@ -57,8 +59,8 @@ public class Attacker extends Player{
 	}
 
 	@Override 
-	public void performAction(PlayerRecord[] players, EnhancedThing[] powerUps) { 
-		this.updateInfo(players);
+	public void performAction(PlayerRecord[] players, ArrayList<EnhancedThing> powerUps) { 
+		this.updateInfo(players, powerUps);
 		if (this.getCurrentTarget() == null) { //no target, e.g. first round of play
 			this.setCurrentTarget(newTarget(players));
 		}
@@ -90,12 +92,8 @@ public class Attacker extends Player{
 //		this.pickPowerUp(powerups[0]);
 //	}
 	
-	public void pickPowerUp(EnhancedThing powerup) {
-		//safety check
-		if (this.canPickThing()) {
-			powerup.applyTo(this);
-			this.pickThing();
-		}
+	public void chasePowerUp(ArrayList<EnhancedThing> powerUps) {
+		
 	}
 	
 	public void chase(PlayerRecord[] players) {
@@ -123,6 +121,14 @@ public class Attacker extends Player{
 	public void sendSignal() {
 		if (this.currentState == STATE_FIGHT) {
 			Main.signal("attack", this.getPLAYER_ID(), this.getCurrentTarget().getPLAYER_ID());
+		}
+	}
+	
+	public void pickPowerUp(EnhancedThing powerup) {
+		//safety check
+		if (this.canPickThing()) {
+			powerup.applyTo(this);
+			this.pickThing();
 		}
 	}
 	
@@ -259,15 +265,27 @@ public class Attacker extends Player{
 	 * Main update method for gathering the latest information from the application class
 	 * @param players players is the PlayerRecord array with the newest information
 	 */
-	private void updateInfo(PlayerRecord[] players) {
+	private void updateInfo(PlayerRecord[] players, ArrayList<EnhancedThing> powerUps) {
 		this.updateListsAndTarget(players);
 		this.sortPriorityList();
+		this.powerUps = powerUps;
+		this.sortPowerUps(powerUps);
 		//Update the previous priority list
 		this.previousPriorityList = this.priorityList;
-//		this.updatePreviousPriority();
 	}
 	
-	
+	private void sortPowerUps(ArrayList<EnhancedThing> powerUps) {
+		//Insertion sort
+		for (int i = 1; i < powerUps.size(); i++) {
+			EnhancedThing currentPowerUp = powerUps.get(i);
+			int j = i;
+			//Continue shifting elements until the desired position is found 
+			for (; j > 0 && calcDistance(currentPowerUp) < accounts[j-1].getAccountNum(); j--) {
+				accounts[j] = accounts[j-1];
+			}
+			accounts[j] = currentAccount;
+		}
+	}
 	
 	private void updatePreviousPriority() {
 		for (int i = 0; i < this.priorityList.length; i++) {
@@ -370,5 +388,14 @@ public class Attacker extends Player{
 	 */
 	private int calcDistance(PlayerRecord rec1, PlayerRecord rec2) {
 		return Math.abs(rec1.getAvenue() - rec2.getAvenue()) + Math.abs(rec1.getStreet() - rec2.getStreet());
+	}
+	
+	/**
+	 * Overloaded calcDistance method that calculates the distance between the current robot and a "powerUp"
+	 * @param powerUp powerUp is an enhancedThing representing a specific type of power up
+	 * @return returns an integer representing distance
+	 */
+	private int calcDistance(EnhancedThing powerUp) {
+		return Math.abs(this.getAvenue() - powerUp.getAvenue()) + Math.abs(this.getStreet() - powerUp.getStreet());
 	}
 }

@@ -130,7 +130,7 @@ public abstract class Player extends EnhancedBot{
 	 * pre: It is called upon in the application class
 	 * post: The action determined by helper methods will be performed
 	 */
-	public abstract void performAction(PlayerRecord[] players, EnhancedThing[] powerUps);
+	public abstract void performAction(PlayerRecord[] players, ArrayList<EnhancedThing> powerUps);
 	
 	public abstract void pickPowerUp(EnhancedThing powerup);
 	

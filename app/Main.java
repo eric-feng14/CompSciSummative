@@ -15,7 +15,7 @@ public class Main {
 	final private static int STREET_SIZE = 13, AVENUE_SIZE = 24;
 	private static Player[] players = new Player[NUM_OF_PLAYERS];
 	private static PlayerRecord[] playerRecords = new PlayerRecord[players.length];
-	private static EnhancedThing[] powerUps = new EnhancedThing[NUM_OF_POWERUPS];
+	private static ArrayList<EnhancedThing> powerUps = new ArrayList<EnhancedThing>();
 	private static final Random RANDOM = new Random();
 
 	/**
@@ -64,19 +64,19 @@ public class Main {
 	}
 
 	private static void addPowerUps(City c) {
-		for (int i = 0; i < powerUps.length; i++) {
+		for (int i = 0; i < powerUps.size(); i++) {
 			int choice = RANDOM.nextInt(3);
 			System.out.println(choice);
 			int newStreet = RANDOM.nextInt(STREET_SIZE), newAvenue = RANDOM.nextInt(AVENUE_SIZE);
 			switch(choice) {
 			case 0: 
-				powerUps[i] = new LuckPowerUp(c, newStreet, newAvenue);
+				powerUps.add(new LuckPowerUp(c, newStreet, newAvenue));
 				break;
 			case 1:
-				powerUps[i] = new SpeedPowerUp(c, newStreet, newAvenue);
+				powerUps.add(new SpeedPowerUp(c, newStreet, newAvenue));
 				break;
 			case 2:
-				powerUps[i] = new StaminaPowerUp(c, newStreet, newAvenue);
+				powerUps.add(new StaminaPowerUp(c, newStreet, newAvenue));
 				break;
 			}
 		}
