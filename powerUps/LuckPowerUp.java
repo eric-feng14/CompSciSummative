@@ -17,6 +17,7 @@ public class LuckPowerUp extends EnhancedThing{
 		super(c,s,a,"Luck");
 		this.setColor(Color.orange);
 	}
+	
 	public void applyTo(Player p) {
 		if (p.getTYPE() == "Attacker") {
 			p.setStrength(p.getStrength() + strengthBoost);

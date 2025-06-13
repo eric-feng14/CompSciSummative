@@ -43,7 +43,7 @@ public class Main {
 		players[2] = new Medic(city, 8, 8, Direction.NORTH);
 		players[3] = new Attacker(city, 6, 9, Direction.SOUTH);
 		players[4] = new Runner(city, 1, 1, Direction.SOUTH);
-		updatePlayerRecord();
+		updatePlayerRecords();
 		updateTags();
 		initializePlayers();
 		addPowerUps(city);
@@ -54,10 +54,9 @@ public class Main {
 			System.out.println("HP: " + players[idx].getHp());
 			players[idx].performAction(playerRecords, powerUps);
 			players[idx].sendSignal();
-
-		    updatePlayerRecord(idx);
-		    updateTags();
-		    
+			
+			updatePlayerRecord(idx);
+			updateTag(idx);
 		    idx = (idx + 1) % players.length;
 		}
 	}
@@ -131,6 +130,12 @@ public class Main {
     	}
 	}
 	
+	private static void initializePlayers() {
+		for (Player p : players) {
+			p.initialize(playerRecords);
+		}
+	}
+	
 	/**
 	 * still need to decide on what to put on the tags
 	 */
@@ -140,16 +145,10 @@ public class Main {
 		}
 	}
 	
-	private static void initializePlayers() {
-		for (Player p : players) {
-			p.initialize(playerRecords);
-		}
-	}
-	
 	/**
 	 * Updates Player records
 	 */
-	private static void updatePlayerRecord() {
+	private static void updatePlayerRecords() {
 		for (int i = 0; i < players.length; i++) {
 			playerRecords[i] = new PlayerRecord(players[i]);
 		}
@@ -163,6 +162,10 @@ public class Main {
 		playerRecords[index] = new PlayerRecord(players[index]);
 	}
 	
+	private static void updateTag(int idx) {
+		players[idx].setLabel("" + players[idx].getHp());
+	}
+	
 	/**
 	 * Signals main to do action specified in string
 	 * @param s - signal message (string)
@@ -172,6 +175,8 @@ public class Main {
 			double[] chances = calculateChances(thisID, targetID);
 			int attackType = chooseType(chances);
 			performAttack(attackType, targetID);
+			updatePlayerRecord(targetID);
+			updateTag(targetID);
 		}
 		else
 		if (s.equals("heal")) {}

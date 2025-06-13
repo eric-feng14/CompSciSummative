@@ -67,7 +67,7 @@ public class Attacker extends Player{
 			case STATE_CHASE: 
 				switch(this.currentStrat) {
 					case STRAT_DEFAULT:
-						this.tester(powerUps);
+						this.chase(players);
 					case STRAT_ALTERNATE:
 						
 					case STRAT_SUPPORT:
@@ -80,10 +80,10 @@ public class Attacker extends Player{
 		}
 	}
 	
-	public void tester(EnhancedThing[] powerups) {
-		this.moveTo(powerups[0].getStreet(), powerups[0].getAvenue());
-		this.pickPowerUp(powerups[0]);
-	}
+//	public void tester(EnhancedThing[] powerups) {
+//		this.moveTo(powerups[0].getStreet(), powerups[0].getAvenue());
+//		this.pickPowerUp(powerups[0]);
+//	}
 	
 	public void pickPowerUp(EnhancedThing powerup) {
 		//safety check
