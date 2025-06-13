@@ -2,6 +2,7 @@ package players;
 import java.util.*;
 import app.Main;
 import becker.robots.*;
+import powerUps.*;
 
 /**
  * Abstract class for a player in the tag game
@@ -119,7 +120,9 @@ public abstract class Player extends EnhancedBot{
 	 * pre: It is called upon in the application class
 	 * post: The action determined by helper methods will be performed
 	 */
-	public abstract void performAction(PlayerRecord[] players);
+	public abstract void performAction(PlayerRecord[] players, EnhancedThing[] powerUps);
+	
+	public void pickThing() {};
 	
 	/**
 	 * Determines if is defeated

@@ -1,5 +1,6 @@
 package players;
 import java.util.*;
+import powerUps.*;
 import becker.robots.*;
 import java.awt.*;
 
@@ -22,11 +23,12 @@ public class Attacker extends Player{
 	//learnedAttributes contains information gathered from watching others as well as fighting others
 	private AttackerRecord[] learnedAttributes;
 	private PlayerRecord[] attackers, priorityList, previousPriorityList;
-	private int roundsSpentChasing = 0, currentState = STATE_CHASE, currentStrat = STRAT_FOCUS_WEAKEST;
+	private int roundsSpentChasing = 0, currentState = STATE_CHASE, currentStrat = STRAT_DEFAULT;
 	private final static int MAX_CHASE_TIME = 10;
 	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
 	//no need for cornering since support state logic overlaps with it
-	private final static int STRAT_FOCUS_WEAKEST = 4, STRAT_FOCUS_MEDIC = 5, STRAT_SUPPORT = 6; 
+	//default strategy is chase based on distance and speed, alternate strategy is based on defense and speed
+	private final static int STRAT_DEFAULT = 4, STRAT_ALTERNATE = 5, STRAT_SUPPORT = 6;
 
 	public Attacker(City city, int s, int a, Direction d) {
 		super(city, s, a, d, 3, "Attacker", false);
@@ -54,29 +56,41 @@ public class Attacker extends Player{
 	}
 
 	@Override 
-	public void performAction(PlayerRecord[] players) { 
+	public void performAction(PlayerRecord[] players, EnhancedThing[] powerUps) { 
 		this.updateInfo(players);
 		if (this.getCurrentTarget() == null) { //no target, e.g. first round of play
 			this.setCurrentTarget(newTarget(players));
 		}
-		printPriorityList();
-		printAttackers();
-		printCurrentTarget();
+//		printPriorityList();
+//		printAttackers();
+//		printCurrentTarget();
 		switch(this.currentState) { //fighting state is controlled between the application class
 			case STATE_CHASE: 
 				switch(this.currentStrat) {
-					case STRAT_FOCUS_WEAKEST:
-						//blah
-					case STRAT_FOCUS_MEDIC:
+					case STRAT_DEFAULT:
+						this.tester(powerUps);
+					case STRAT_ALTERNATE:
 						
 					case STRAT_SUPPORT:
 				}
-				this.chase(players);
 				break;
 			case STATE_REST: //resting state
 				this.rest();
 				break;
 			//note that the fighting state is handled mostly by the application class
+		}
+	}
+	
+	public void tester(EnhancedThing[] powerups) {
+		this.moveTo(powerups[0].getStreet(), powerups[0].getAvenue());
+		this.pickThing(powerups[0]);
+	}
+	
+	public void pickThing(EnhancedThing powerup) {
+		//safety check
+		if (this.canPickThing()) {
+			powerup.applyTo(this);
+			super.pickThing();
 		}
 	}
 	
@@ -192,8 +206,9 @@ public class Attacker extends Player{
 		}
 		
 		//everyone is already being chased -> return a random target
-		int idx = generator.nextInt(this.priorityList.length);
-		return this.priorityList[idx];
+//		int idx = generator.nextInt(this.priorityList.length);
+//		return this.priorityList[idx];
+		return null;
 	}
 	
 	/**
@@ -207,11 +222,11 @@ public class Attacker extends Player{
 				size++;
 			}
 		}
-		//Edge case -> no other players other than attackers on the field
-		if (size == 0) {
-			System.out.println("No other players!");
-			System.exit(0);
-		}
+//		//Edge case -> no other players other than attackers on the field
+//		if (size == 0) {
+//			System.out.println("No other players!");
+//			System.exit(0);
+//		}
 		
 		this.priorityList = new PlayerRecord[size]; //Assign the priorityList a specific size
 		this.previousPriorityList = new PlayerRecord[size];

@@ -1,5 +1,6 @@
 package app;
 import players.*;
+import powerUps.*;
 import becker.robots.*;
 import tools.*;
 import java.util.*;
@@ -10,9 +11,11 @@ import java.util.*;
  */
 public class Main {
 	
-	final private static int numOfPlayers = 5;
-	private static Player[] players = new Player[numOfPlayers];
+	final private static int NUM_OF_PLAYERS = 5, NUM_OF_POWERUPS = 6;
+	final private static int STREET_SIZE = 13, AVENUE_SIZE = 24;
+	private static Player[] players = new Player[NUM_OF_PLAYERS];
 	private static PlayerRecord[] playerRecords = new PlayerRecord[players.length];
+	private static EnhancedThing[] powerUps = new EnhancedThing[NUM_OF_POWERUPS];
 	private static final Random RANDOM = new Random();
 	
 	/**
@@ -30,10 +33,10 @@ public class Main {
 	}
 	
 	public static void main(String[] args) {
-		City city = new City(10, 24);
+		City city = new City(STREET_SIZE, AVENUE_SIZE);
 
 		WallCreator creator = new WallCreator(city);
-		creator.createWallRect(0, 0, 24, 13);
+		creator.createWallRect(0, 0, AVENUE_SIZE, STREET_SIZE);
 		
 		players[0] = new Runner(city, 4, 4, Direction.EAST);
 		players[1] = new Attacker(city, 6, 7, Direction.WEST);
@@ -43,12 +46,13 @@ public class Main {
 		updatePlayerRecord();
 		updateTags();
 		initializePlayers();
+		addPowerUps(city);
 		
 		int idx = 0;
 		// Game loop
 		while (!gameEnd()) {
 			System.out.println("HP: " + players[idx].getHp());
-			players[idx].performAction(playerRecords);
+			players[idx].performAction(playerRecords, powerUps);
 		    InfoRecord attacker = players[idx].getThisInfo(); 
 		    PlayerRecord victum = players[idx].getRunnerInfo(); 
 		    if (attacker != null && victum != null) {
@@ -77,9 +81,28 @@ public class Main {
 		}
 	}
 	
+	private static void addPowerUps(City c) {
+		for (int i = 0; i < powerUps.length; i++) {
+			int choice = RANDOM.nextInt(3);
+			int newStreet = RANDOM.nextInt(STREET_SIZE), newAvenue = RANDOM.nextInt(AVENUE_SIZE);
+			switch(choice) {
+			case 1: 
+				powerUps[i] = new LuckPowerUp(c, newStreet, newAvenue);
+			case 2:
+				powerUps[i] = new SpeedPowerUp(c, newStreet, newAvenue);
+			case 3:
+				powerUps[i] = new StaminaPowerUp(c, newStreet, newAvenue);
+			}
+		}
+	}
+	
+	public static void handlePowerUps() {
+		System.out.println("test");
+	}
+	
 	public static double[] calculateChances(InfoRecord attacker, PlayerRecord victum) {
 		double attackerStrength = attacker.getStrength();
-		double runnerDefense = Main.players[victum.getPLAYER_ID()].getDefense();
+		double runnerDefense = players[victum.getPLAYER_ID()].getDefense();
 		
 		double normalHit = attackerStrength + 0.5*runnerDefense;
 		double critHit = attackerStrength;
@@ -97,7 +120,7 @@ public class Main {
 	}
 	
 	public static int chooseType (double[] probabilities) {
-		double rand = Main.RANDOM.nextDouble();  // Random double between 0.0 and 1.0
+		double rand = RANDOM.nextDouble();  // Random double between 0.0 and 1.0
         double cumulative = 0.0;
         
    
@@ -113,13 +136,13 @@ public class Main {
 	 * still need to decide on what to put on the tags
 	 */
 	private static void updateTags() {
-		for (Player p : Main.players) {
+		for (Player p : players) {
 			p.setLabel("" + p.getHp());
 		}
 	}
 	
 	private static void initializePlayers() {
-		for (Player p : Main.players) {
+		for (Player p : players) {
 			p.initialize(playerRecords);
 		}
 	}
@@ -128,8 +151,8 @@ public class Main {
 	 * Updates Player records
 	 */
 	private static void updatePlayerRecord() {
-		for (int i = 0; i < Main.players.length; i++) {
-			Main.playerRecords[i] = new PlayerRecord(players[i]);
+		for (int i = 0; i < players.length; i++) {
+			playerRecords[i] = new PlayerRecord(players[i]);
 		}
 	}
 	
@@ -138,7 +161,7 @@ public class Main {
 	 * @param index - index of the player
 	 */
 	private static void updatePlayerRecord(int index) {
-		Main.playerRecords[index] = new PlayerRecord(players[index]);
+		playerRecords[index] = new PlayerRecord(players[index]);
 	}
 	
 	/**
