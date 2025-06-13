@@ -4,20 +4,27 @@ import java.awt.Color;
 import becker.robots.*;
 import players.Player;
 /**
- * e.g. if you're a runner, you're much more likely to take less dmg
- * e.g. if you're a medic, you're more like to heal more health
- * e.g. if you're an attacker, you're more likely to deal more dmg
- * @author 14eri
- *
+ * Subclass of Enhanced Thing, a specific type of powerup
+ * @author Eric Feng
+ * @version Due Date: June 13 2025
  */
 public class LuckPowerUp extends EnhancedThing{
 	private final static int strengthBoost = 3, defenseBoost = 4;
 	
+	/**
+	 * Constructor method for creating a luck powerup
+	 * @param c is the city
+	 * @param s is the street
+	 * @param a is the avenue
+	 */
 	public LuckPowerUp(City c, int s, int a) {
 		super(c,s,a,"Luck");
 		this.setColor(Color.orange);
 	}
 	
+	/**
+	 * Overridding the applyTo method to apply a specific effect, tailored to the current type of powerup
+	 */
 	public void applyTo(Player p) {
 		if (p.getTYPE() == "Attacker") {
 			p.setStrength(p.getStrength() + strengthBoost);

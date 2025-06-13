@@ -3,7 +3,7 @@ import becker.robots.*;
 
 /**
  * Robot with enhanced movement methods
- * @author tuojs
+ * @author Richard, Eric
  * @version 5/15/2025
  */
 public class EnhancedBot extends RobotSE {
@@ -19,6 +19,9 @@ public class EnhancedBot extends RobotSE {
 		super(city, s, a, d);
 	}
 	
+	/**
+	 * 
+	 */
 	public void destroy() {
 		try {
 			this.breakRobot("Robot has been destroyed!");

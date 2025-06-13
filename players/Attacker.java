@@ -1,6 +1,5 @@
 package players;
 import java.util.*;
-
 import app.Main;
 import powerUps.*;
 import becker.robots.*;
@@ -22,15 +21,21 @@ public class Attacker extends Player{
 	private PlayerRecord[] attackers, priorityList, previousPriorityList;
 	private ArrayList<EnhancedThing> powerUps;
 	private int roundsSpentChasing = 0, currentState = STATE_CHASE, currentStrat = STRAT_DEFAULT;
-	private static boolean noPowerUps = false;
 	private final static int MAX_CHASE_TIME = 10;
 	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
 	//no need for cornering since support state logic overlaps with it
 	//default strategy is chase based on distance and speed, alternate strategy is based on learned defense
 	private final static int STRAT_DEFAULT = 4, STRAT_ALTERNATE = 5, STRAT_FOCUS_POWERUP = 6, STRAT_SUPPORT = 7;
 
+	/**
+	 * Constructor method for creating an attacker
+	 * @param city is the city of the robot's home
+	 * @param s s is the street
+	 * @param a a is the avenue
+	 * @param d d is the initial direction it faces
+	 */
 	public Attacker(City city, int s, int a, Direction d) {
-		super(city, s, a, d, 3, "Attacker", false);
+		super(city, s, a, d, 4, "Attacker", false);
 		this.setColor(Color.RED); //attackers are red
 	}
 
@@ -58,7 +63,10 @@ public class Attacker extends Player{
 		}
 	}
 
-	@Override 
+	/**
+	 * Main method containing logic with actions that the robot needs to perform
+	 */
+	@Override
 	public void performAction(PlayerRecord[] players, ArrayList<EnhancedThing> powerUps) { 
 		this.updateListsAndTarget(players);
 		this.powerUps = powerUps;
@@ -68,29 +76,52 @@ public class Attacker extends Player{
 			this.setCurrentTarget(newTarget(players));
 		}
 		
-		if (powerUps.size() == 0) {
-			noPowerUps = true;
+		//Switch strategies
+		if (this.roundsSpentChasing == Attacker.MAX_CHASE_TIME) {
+			ArrayList<Integer> choices = new ArrayList<Integer>();
+			choices.add(STRAT_DEFAULT);
+			choices.add(STRAT_ALTERNATE);
+			//Add the suport strategy only if there are more than one attacker
+			if (this.attackers.length >= 2) {
+				choices.add(STRAT_SUPPORT);
+			}
+			//If there are powerups, add the focus power up strategy
+			if (powerUps.size() > 0 ) {
+				choices.add(STRAT_FOCUS_POWERUP);
+			}
+			//make a random selection
+			int choice = generator.nextInt(choices.size());
+			this.currentState = choices.get(choice);
+			this.roundsSpentChasing = 0;
 		}
 		
 		//Debugging statements
 //		printPriorityList();
 //		printAttackers();
 //		printCurrentTarget();
+		
 		switch(this.currentState) { //fighting state is controlled between the application class
 			case STATE_CHASE: 
 				switch(this.currentStrat) {
 					case STRAT_DEFAULT:
 						this.defaultSortPriorityList();
-						this.chaseTarget(players);
+						this.chaseTarget(players, false);
+						break;
 					case STRAT_ALTERNATE: 
 						this.alternativeSortPriorityList();
-						this.chaseTarget(players);
+						this.chaseTarget(players, false);
+						break;
 					case STRAT_SUPPORT: //activate this case if there is at least 2 attackers
-						
+						this.sortAttackersByDistance();
+						this.setCurrentTarget(attackers[0].getCurrentTarget());
+						this.chaseTarget(players, true);
+						break;
 					case STRAT_FOCUS_POWERUP: //activate this case if there are powerups on the field (Condition)
 						this.sortPowerUps(powerUps);
 						this.chasePowerUp();
+						break;
 				}
+				this.roundsSpentChasing++;
 				break;
 			case STATE_REST: //resting state
 				this.rest();
@@ -110,19 +141,13 @@ public class Attacker extends Player{
 		
 		int verticalDiff = this.getStreet() - targetPowerUp.getStreet();
 		int horizontalDiff = this.getAvenue() - targetPowerUp.getAvenue();
-		this.chase(verticalDiff, horizontalDiff);
+		this.chase(verticalDiff, horizontalDiff, false);
 		if (this.canPickThing()) {
 			this.pickPowerUp(targetPowerUp);
 		}
 	}
 	
-	public void chaseTarget(PlayerRecord[] players) {
-		//If there is currently no target, find a new target
-		if (this.roundsSpentChasing == Attacker.MAX_CHASE_TIME) {
-			this.setCurrentTarget(newTarget(players));
-			this.roundsSpentChasing = 0;
-		}
-		
+	public void chaseTarget(PlayerRecord[] players, boolean reverse) {	
 		//Safety check
 		if (this.getCurrentTarget() == null) {
 			System.out.println("No current target! Null target!");
@@ -131,8 +156,7 @@ public class Attacker extends Player{
 		
 		int verticalDiff = this.getStreet() - this.getCurrentTarget().getStreet();
 		int horizontalDiff = this.getAvenue() - this.getCurrentTarget().getAvenue();
-		this.chase(verticalDiff, horizontalDiff);
-		this.roundsSpentChasing++;
+		this.chase(verticalDiff, horizontalDiff, reverse);
 		if (this.targetReached()) {
 			this.currentState = STATE_FIGHT; //change to fighting state
 		}
@@ -149,13 +173,14 @@ public class Attacker extends Player{
 	public void sendSignal() {
 		if (this.currentState == STATE_FIGHT) {
 			Main.signal("attack", this.getPLAYER_ID(), this.getCurrentTarget().getPLAYER_ID());
+			this.currentState = STATE_CHASE;
 		}
 	}
 	
 	public void sendInfo(int damageDealt, int victimID) {
 		for (PlayerRecord rec : this.priorityList) {
 			if (rec.getPLAYER_ID() == victimID) {
-				//simple multiplication formula to estimate the defense of the player
+				//simple subtraction formula to estimate the defense of the player
 				//it assumes that more damage means less defense, and vice versa
 				rec.setDefense(this.getStrength() - damageDealt);
 			}
@@ -184,30 +209,55 @@ public class Attacker extends Player{
 
 	}
 	
-	/**
-	 * chases the target with a set amount of steps
-	 */
-	private void chase(int verticalDiff, int horizontalDiff) {
-		int speed = this.obtainSpeed();
+//	/**
+//	 * chases the target with a set amount of steps
+//	 */
+//	private void chase(int verticalDiff, int horizontalDiff) {
+//		int speed = this.obtainSpeed();
+//
+//		if (verticalDiff != 0 && this.getStamina() > 0) {
+//			int verticalSteps = Math.min(Math.abs(verticalDiff), speed);
+//			Direction dir = (verticalDiff > 0) ? Direction.NORTH : Direction.SOUTH;//use of ternary operator to make code more readable -> (condition) ? (true assignment) : (false assignment)
+//			this.directedMove(dir, verticalSteps);
+//			speed -= verticalSteps; //solves a lot of problems. e.g. if verticalSteps was the full speed, there would be no more horizontal movements
+//		}
+//		
+//		if (horizontalDiff != 0 && this.getStamina() > 0) {
+//			int horizontalSteps = Math.min(Math.abs(horizontalDiff), speed);
+//			Direction dir  = (horizontalDiff > 0) ? Direction.WEST : Direction.EAST;
+//			this.directedMove(dir, horizontalSteps);
+//		}
+//		
+//		if (this.getStamina() <= 0) {
+//			this.currentState = STATE_REST;
+//		}
+//	}
+//	
+	private void chase(int verticalDiff, int horizontalDiff, boolean reversedOrder) {
+	    int speed = this.obtainSpeed();
 
-		if (verticalDiff != 0 && this.getStamina() > 0) {
-			int verticalSteps = Math.min(Math.abs(verticalDiff), speed);
-			//use of ternary operator to make code more readable -> (condition) ? (true assignment) : (false assignment)
-			Direction dir = (verticalDiff > 0) ? Direction.NORTH : Direction.SOUTH;
-			this.directedMove(dir, verticalSteps);
-			speed -= verticalSteps; //solves a lot of problems. e.g. if verticalSteps was the full speed, there would be no more horizontal movements
-		}
-		
-		if (horizontalDiff != 0 && this.getStamina() > 0) {
-			int horizontalSteps = Math.min(Math.abs(horizontalDiff), speed);
-			Direction dir  = (horizontalDiff > 0) ? Direction.WEST : Direction.EAST;
-			this.directedMove(dir, horizontalSteps);
-		}
-		
-		if (this.getStamina() <= 0) {
-			this.currentState = STATE_REST;
-		}
+	    // Movement directions and differences
+	    int[] diffs = reversedOrder ? new int[]{horizontalDiff, verticalDiff} : new int[]{verticalDiff, horizontalDiff};
+	    Direction[] dirs = reversedOrder
+	        ? new Direction[]{(horizontalDiff > 0) ? Direction.WEST : Direction.EAST,
+	                          (verticalDiff > 0) ? Direction.NORTH : Direction.SOUTH}
+	        : new Direction[]{(verticalDiff > 0) ? Direction.NORTH : Direction.SOUTH,
+	                          (horizontalDiff > 0) ? Direction.WEST : Direction.EAST};
+
+	    for (int i = 0; i < 2 && speed > 0 && this.getStamina() > 0; i++) {
+	        int diff = Math.abs(diffs[i]);
+	        if (diff != 0) {
+	            int steps = Math.min(diff, speed);
+	            this.directedMove(dirs[i], steps);
+	            speed -= steps;
+	        }
+	    }
+
+	    if (this.getStamina() <= 0) {
+	        this.currentState = STATE_REST;
+	    }
 	}
+
 	
 	/**
 	 * Helper function for chasing another robot
@@ -284,7 +334,7 @@ public class Attacker extends Player{
 		this.previousPriorityList = new PlayerRecord[size];
 		this.attackers = new PlayerRecord[players.length - size];
 		
-		//Populate previousPriorityList with default player records
+		//Populate previousPriorityList with default player records to prevent exceptions in future calculations
 		int idx = 0;
 		for (PlayerRecord rec : players) {
 			if (! rec.getTYPE().equals("Attacker")) {
@@ -292,9 +342,18 @@ public class Attacker extends Player{
 				idx++;
 			}
 		}
-		
-		//Extra note: priorityList and attackers will be updated upon the first call of performAction()
-		//Learned attributes will be filled up as interactions between various robots start to happen
+	}
+	
+	private void sortAttackersByDistance() {
+		int len = this.attackers.length;
+		for (int i = 0; i < this.priorityList.length - 1; i++) {
+			for (int j = i + 1; j < this.priorityList.length; j++) {
+				int dist1 = calcDistance(this.attackers[j]), dist2 = calcDistance(this.attackers[i]);
+				if (dist1 < dist2) {
+					swapPlayerRecord(i, j, this.priorityList);
+				}
+			}
+		}
 	}
 	
 	private void sortPowerUps(ArrayList<EnhancedThing> powerUps) {
@@ -309,12 +368,6 @@ public class Attacker extends Player{
 				j--;
 			}
 			powerUps.set(j, currentPowerUp);
-		}
-	}
-	
-	private void updatePreviousPriority() {
-		for (int i = 0; i < this.priorityList.length; i++) {
-			this.previousPriorityList[i] = this.priorityList[i];
 		}
 	}
 	
@@ -421,7 +474,7 @@ public class Attacker extends Player{
 	 * Overloaded calcDistance method that calculates the distance between two playerRecords rather than a single record vs the current robot
 	 * @param rec1 rec1 is the first playerRecord
 	 * @param rec2 rec2 is the second playerRecord
-	 * @return
+	 * @return returns an integer representing their difference in distance
 	 */
 	private int calcDistance(PlayerRecord rec1, PlayerRecord rec2) {
 		return Math.abs(rec1.getAvenue() - rec2.getAvenue()) + Math.abs(rec1.getStreet() - rec2.getStreet());
