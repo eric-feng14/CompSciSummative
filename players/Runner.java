@@ -128,7 +128,7 @@ public class Runner extends Player{
 		PlayerRecord thisRecord = priorityList[this.getPLAYER_ID()];
 		priorityList[this.getPLAYER_ID()] = priorityList[priorityList.length - 1];
 		priorityList[priorityList.length - 1] = thisRecord;
-
+		
 		// Insertion sort for priority list
 		for (int i = 1; i < priorityList.length - 1; i ++) {
 			for (int j = i; j > 0; j--) {
@@ -147,6 +147,9 @@ public class Runner extends Player{
 				}
 			}
 		}
+//		for(PlayerRecord i : this.priorityList) {
+//			System.out.println(i);
+//		}
 	}
 
 	/**
@@ -215,23 +218,31 @@ public class Runner extends Player{
 	 */
 	private void doStrategy() {
 		PlayerRecord[] dangerList = this.findAttackers();
-
 		// Check if in immediate danger from closest attacker
 		if (this.inDanger(this.priorityList[0])) {
-			this.runAway(dangerList);
+			if (this.getStamina() == 1) {
+				this.rest(dangerList);
+			}
+			else {
+				System.out.println("run");
+				this.runAway(dangerList);
+			}
 		}
 		else {
 			// If low stamina, rest near power-up
 			if (this.getStamina() <= 5) {
+				System.out.println("rest");
 				this.rest(dangerList);
 			}
 			// If low health, seek medics
 			else if (this.getHp() <= 50) {
-				this.seekMedic();
+				System.out.println("medic");
+				this.seekMedic(dangerList);
 			}
 			else {
 				// Otherwise seek power-ups
-				this.seekPowerUps();
+				System.out.println("power");
+				this.seekPowerUps(dangerList);
 			}
 		}
 	}
@@ -239,16 +250,29 @@ public class Runner extends Player{
 	/**
 	 * Seeks nearby power-ups (to be implemented)
 	 */
-	private void seekPowerUps() {
-		// TODO: Implement power-up seeking behavior
+	private void seekPowerUps(PlayerRecord[] dangerList) {
+		int[] bestLocation = findBestLocation(dangerList);
+		this.moveTo(bestLocation[0], bestLocation[1], true);
+		if (this.powerUps.length != 0) {
+			this.pickPowerUp(this.powerUps[0]);
+		}
+		this.setStamina(this.getStamina() - this.steps);
 	}
+
 
 	/**
 	 * Seeks nearby medics for healing (to be implemented)
 	 */
-	private void seekMedic() {
+	private void seekMedic(PlayerRecord[] dangerList) {
 		PlayerRecord[] medicList = this.findMedics();
-		// TODO: Implement medic seeking behavior
+		if (this.calcDistance(medicList[0]) <= this.steps) {
+			this.steps = this.calcDistance(medicList[0]);
+			this.moveTo(medicList[0].getStreet(), medicList[0].getAvenue(), true);
+			this.setStamina(this.getStamina() - this.steps);
+		}
+		else {
+			this.rest(dangerList);
+		}
 	}
 
 	/**
@@ -259,7 +283,9 @@ public class Runner extends Player{
 		this.steps = 1; // Only move 1 step when resting
 		int[] bestLocation = findBestLocation(dangerList);
 		this.moveTo(bestLocation[0], bestLocation[1], true);
-		this.pickPowerUp(this.powerUps[0]);
+		if (this.powerUps.length != 0) {
+			this.pickPowerUp(this.powerUps[0]);
+		}
 		this.addStamina(1); // Recover additional stamina when resting
 	}
 
@@ -345,6 +371,10 @@ public class Runner extends Player{
 		int lowestScore = Integer.MAX_VALUE;
 
 		int [][] options = this.calculateMoveOptions();
+//		for (int i = 0; i < options.length; i ++) {
+//			System.out.println(options[i][0] + " " + options[i][1]);
+//			
+//		}
 
 		// Evaluate each possible move option
 		for (int i = 0; i < options.length; i ++) {
@@ -352,12 +382,18 @@ public class Runner extends Player{
 			int newAve = options[i][1];
 
 			// Handle edge of city wrapping
-			if (newStr < 0 || newStr > 12) {
+			if (newStr < 0) {
 				newStr = 0;
 			}
+			if (newStr > 12) {
+				newStr = 12;
+			}
 
-			if (newAve < 0 || newAve > 23) {
+			if (newAve < 0) {
 				newAve = 0;
+			}
+			if(newAve > 23) {
+				newAve = 23;
 			}
 
 			// Calculate danger at new position
@@ -379,7 +415,7 @@ public class Runner extends Player{
 			else {
 				int distance = Math.abs(dangers[0].getAvenue() - newAve) + 
 						Math.abs(dangers[0].getStreet() - newStr);
-				
+
 				int distance1 = Math.abs(dangers[0].getAvenue() - safestLocation[1]) + 
 						Math.abs(dangers[0].getStreet() - safestLocation[0]);
 				if (dangerScore < lowestScore || (dangerScore == lowestScore && distance > distance1)) {
@@ -392,7 +428,7 @@ public class Runner extends Player{
 
 		// Consider moving directly to power-up if it's safe and reachable
 		if (this.powerUps.length > 0 && this.calcDistance(this.powerUps[0]) <= this.steps && 
-				this.calculateDangerAt(this.powerUps[0].getStreet(), this.powerUps[0].getAvenue(), dangers) <= lowestScore + 250) {
+				this.calculateDangerAt(this.powerUps[0].getStreet(), this.powerUps[0].getAvenue(), dangers) <= lowestScore + 300) {
 			safestLocation[0] = this.powerUps[0].getStreet();
 			safestLocation[1] = this.powerUps[0].getAvenue();
 			this.steps = this.calcDistance(this.powerUps[0]);
@@ -407,7 +443,7 @@ public class Runner extends Player{
 	 */
 	public int[][] calculateMoveOptions() {
 		int speed = this.steps;
-
+//		System.out.println("steps: " + this.steps);
 		int [][] options = new int[speed*4][2];
 
 		int currentStr = this.getStreet();
