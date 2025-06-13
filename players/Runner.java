@@ -36,6 +36,11 @@ public class Runner extends Player{
 			this.pickThing();
 		}
 	}
+	@Override
+	public void sendSignal() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	private void addStamina(int num) {
 		if (this.getStamina() + num <= 10) {

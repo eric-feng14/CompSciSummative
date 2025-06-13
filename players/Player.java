@@ -65,9 +65,7 @@ public abstract class Player extends EnhancedBot{
 		this(city, s, a, d, speed, TYPE, defeated, DEFAULT_HP, null, DEFAULT_DEFENCE, DEFAULT_STRENGTH, DEFAULT_STAMINA);
 	}
 	
-	public void sendSignal() {
-		
-	}
+	public abstract void sendSignal();
 	
 	public static int getNormalHit() {
 		return NORMAL_HIT;
