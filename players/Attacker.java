@@ -60,7 +60,17 @@ public class Attacker extends Player{
 
 	@Override 
 	public void performAction(PlayerRecord[] players, ArrayList<EnhancedThing> powerUps) { 
-		this.updateInfo(players, powerUps);
+		this.updateListsAndTarget(players);
+		this.powerUps = powerUps;
+		
+		//Safety checks
+		if (this.getCurrentTarget() == null) { //no target, e.g. first round of play
+			this.setCurrentTarget(newTarget(players));
+		}
+		
+		if (powerUps.size() == 0) {
+			noPowerUps = true;
+		}
 		
 		//Debugging statements
 //		printPriorityList();
@@ -70,12 +80,15 @@ public class Attacker extends Player{
 			case STATE_CHASE: 
 				switch(this.currentStrat) {
 					case STRAT_DEFAULT:
+						this.defaultSortPriorityList();
 						this.chaseTarget(players);
 					case STRAT_ALTERNATE: 
-						
+						this.alternativeSortPriorityList();
+						this.chaseTarget(players);
 					case STRAT_SUPPORT: //activate this case if there is at least 2 attackers
 						
 					case STRAT_FOCUS_POWERUP: //activate this case if there are powerups on the field (Condition)
+						this.sortPowerUps(powerUps);
 						this.chasePowerUp();
 				}
 				break;
@@ -83,6 +96,8 @@ public class Attacker extends Player{
 				this.rest();
 				break;
 		}
+		
+		this.previousPriorityList = this.priorityList;
 	}
 	
 	public void chasePowerUp() {
@@ -282,28 +297,6 @@ public class Attacker extends Player{
 		//Learned attributes will be filled up as interactions between various robots start to happen
 	}
 	
-	/**
-	 * Main update method for gathering the latest information from the application class
-	 * @param players players is the PlayerRecord array with the newest information
-	 */
-	private void updateInfo(PlayerRecord[] players, ArrayList<EnhancedThing> powerUps) {
-		this.updateListsAndTarget(players);
-		this.sortPriorityList();
-		this.powerUps = powerUps;
-		this.sortPowerUps(powerUps);
-		//Update the previous priority list
-		this.previousPriorityList = this.priorityList;
-		
-		//Safety checks
-		if (this.getCurrentTarget() == null) { //no target, e.g. first round of play
-			this.setCurrentTarget(newTarget(players));
-		}
-		
-		if (powerUps.size() == 0) {
-			noPowerUps = true;
-		}
-	}
-	
 	private void sortPowerUps(ArrayList<EnhancedThing> powerUps) {
 		//Insertion sort
 		for (int i = 1; i < powerUps.size(); i++) {
@@ -377,7 +370,7 @@ public class Attacker extends Player{
 	/**
 	 * Selection sort algorithm that sorts the players in the current robot's priority list by distance and maximum speed
 	 */
-	private void sortPriorityList() {
+	private void defaultSortPriorityList() {
 		int len = this.priorityList.length;
 		for (int i = 0; i < this.priorityList.length - 1; i++) {
 			for (int j = i + 1; j < this.priorityList.length; j++) {
@@ -385,6 +378,18 @@ public class Attacker extends Player{
 				int speed1 = this.priorityList[j].getSpeed(), speed2 = this.priorityList[i].getSpeed();
 				int priority1 = dist1 * speed1, priority2 = dist2 * speed2;
 				if (priority1 < priority2) {
+					swapPlayerRecord(i, j, this.priorityList);
+				}
+			}
+		}
+	}
+	
+	private void alternativeSortPriorityList() {
+		int len = this.priorityList.length;
+		for (int i = 0; i < this.priorityList.length - 1; i++) {
+			for (int j = i + 1; j < this.priorityList.length; j++) {
+				int defense1 = this.priorityList[j].getDefense(), defense2 = this.priorityList[i].getDefense();
+				if (defense1 < defense2) {
 					swapPlayerRecord(i, j, this.priorityList);
 				}
 			}
