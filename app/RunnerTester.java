@@ -39,7 +39,7 @@ public class RunnerTester {
 		creator.createWallRect(0, 0, AVENUE_SIZE, STREET_SIZE);
 
 		players[0] = new Runner(city, 4, 4, Direction.EAST);
-		players[1] = new Runner(city, 1, 1, Direction.SOUTH);
+		players[1] = new Runner(city, 9, 17, Direction.SOUTH);
 		players[2] = new Attacker(city, 6, 7, Direction.WEST);
 //		players[2] = new Medic(city, 8, 8, Direction.NORTH);
 //		players[3] = new Attacker(city, 6, 9, Direction.SOUTH);
@@ -51,7 +51,7 @@ public class RunnerTester {
 		int idx = 0;
 		// Game loop
 		while (!gameEnd()) {
-//			System.out.println(idx);
+			System.out.println(idx);
 			if (!players[idx].isDefeated()) {
 				players[idx].performAction(playerRecords, powerUps);
 				players[idx].sendSignal();

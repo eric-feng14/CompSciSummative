@@ -443,7 +443,7 @@ public class Runner extends Player{
 	 */
 	public int[][] calculateMoveOptions() {
 		int speed = this.steps;
-//		System.out.println("steps: " + this.steps);
+		System.out.println("steps: " + this.steps);
 		int [][] options = new int[speed*4][2];
 
 		int currentStr = this.getStreet();

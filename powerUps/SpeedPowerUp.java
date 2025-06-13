@@ -16,6 +16,6 @@ public class SpeedPowerUp extends EnhancedThing{
 		this.setColor(Color.MAGENTA);
 	}
 	public void applyTo(Player p) {
-		p.setStamina(p.obtainSpeed() + speedBoost);
+		p.setSpeed(p.obtainSpeed() + speedBoost);
 	}
 }
