@@ -11,7 +11,7 @@ import java.util.*;
  */
 public class RunnerTester {
 
-	final private static int NUM_OF_PLAYERS = 5, NUM_OF_POWERUPS = 6;
+	final private static int NUM_OF_PLAYERS = 3, NUM_OF_POWERUPS = 6;
 	final private static int STREET_SIZE = 13, AVENUE_SIZE = 24;
 	private static Player[] players = new Player[NUM_OF_PLAYERS];
 	private static PlayerRecord[] playerRecords = new PlayerRecord[players.length];
@@ -39,10 +39,10 @@ public class RunnerTester {
 		creator.createWallRect(0, 0, AVENUE_SIZE, STREET_SIZE);
 
 		players[0] = new Runner(city, 4, 4, Direction.EAST);
-		players[1] = new Attacker(city, 6, 7, Direction.WEST);
-		players[2] = new Medic(city, 8, 8, Direction.NORTH);
-		players[3] = new Attacker(city, 6, 9, Direction.SOUTH);
-		players[4] = new Runner(city, 1, 1, Direction.SOUTH);
+		players[1] = new Runner(city, 9, 17, Direction.SOUTH);
+		players[2] = new Attacker(city, 6, 7, Direction.WEST);
+//		players[2] = new Medic(city, 8, 8, Direction.NORTH);
+//		players[3] = new Attacker(city, 6, 9, Direction.SOUTH);
 		updatePlayerRecords();
 		updateTags();
 		initializePlayers();
@@ -51,7 +51,7 @@ public class RunnerTester {
 		int idx = 0;
 		// Game loop
 		while (!gameEnd()) {
-			System.out.println("HP: " + players[idx].getHp());
+			System.out.println(idx);
 			if (!players[idx].isDefeated()) {
 				players[idx].performAction(playerRecords, powerUps);
 				players[idx].sendSignal();
@@ -64,9 +64,8 @@ public class RunnerTester {
 	}
 
 	private static void addPowerUps(City c) {
-		for (int i = 0; i < powerUps.size(); i++) {
+		for (int i = 0; i < NUM_OF_POWERUPS; i++) {
 			int choice = RANDOM.nextInt(3);
-			System.out.println(choice);
 			int newStreet = RANDOM.nextInt(STREET_SIZE), newAvenue = RANDOM.nextInt(AVENUE_SIZE);
 			switch(choice) {
 			case 0: 
@@ -114,13 +113,8 @@ public class RunnerTester {
 		return 1;
 	}
 
-	private static void performAttack(int attackType, int targetID) {
-		switch(attackType) {
-		case 0: break; //in the case that the attacker misses their attack
-		case 1: players[targetID].setHp(players[targetID].getHp() - Player.getNormalHit()); break;
-		case 2: players[targetID].setHp(players[targetID].getHp() - Player.getCriticalHit()); break;
-		case 3: players[targetID].setHp(players[targetID].getHp() - Player.getKnockout()); break;
-		}
+	private static void performAttack(int damageDealt, int targetID) {
+		players[targetID].setHp(players[targetID].getHp() - damageDealt);
 
 		if (players[targetID].getHp() <= 0) {
 			players[targetID].setDefeated(true);
@@ -170,11 +164,21 @@ public class RunnerTester {
 	 */
 	public static void signal(String s, int thisID, int targetID) {
 		if (s.equals("attack")) {
+			System.out.println("this:" + thisID);
 			double[] chances = calculateChances(thisID, targetID);
 			int attackType = chooseType(chances);
-			performAttack(attackType, targetID);
+			int damageDealt;
+			switch(attackType) {
+			case 1: damageDealt = Player.getNormalHit(); break;
+			case 2: damageDealt = Player.getCriticalHit(); break;
+			case 3: damageDealt = Player.getKnockout(); break;
+			default: damageDealt = 0; break; //there is a chance of dodging
+			}
+			performAttack(damageDealt, targetID);
 			updatePlayerRecord(targetID);
 			updateTag(targetID);
+			
+			players[thisID].sendInfo(damageDealt, targetID);
 		}
 		else
 			if (s.equals("heal")) {}

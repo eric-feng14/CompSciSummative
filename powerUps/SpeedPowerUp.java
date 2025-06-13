@@ -26,6 +26,6 @@ public class SpeedPowerUp extends EnhancedThing{
 	 * Overridding the applyTo method to apply a specific effect, tailored to the current type of powerup
 	 */
 	public void applyTo(Player p) {
-		p.setStamina(p.obtainSpeed() + speedBoost);
+		p.setSpeed(p.obtainSpeed() + speedBoost);
 	}
 }
