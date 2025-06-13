@@ -10,10 +10,8 @@ import java.awt.*;
  * Template robot class for the final summative in ICS4U
  * TODO:
  * - implement the other states (e.g. fighting, resting, etc)
- * - work on powerups later
  * - add feature, after engaging in battle with a target, you cannot fight them again
- * - add strategies, e.g. cornering, supporting & coordinating with other attackers
- * - add randomness
+ * - work on strategies
  * - randomize the speed for each player
  * - add stamina to the base class
  * @author Eric Feng
@@ -85,14 +83,14 @@ public class Attacker extends Player{
 	
 	public void tester(EnhancedThing[] powerups) {
 		this.moveTo(powerups[0].getStreet(), powerups[0].getAvenue());
-		this.pickThing(powerups[0]);
+		this.pickPowerUp(powerups[0]);
 	}
 	
-	public void pickThing(EnhancedThing powerup) {
+	public void pickPowerUp(EnhancedThing powerup) {
 		//safety check
 		if (this.canPickThing()) {
 			powerup.applyTo(this);
-			super.pickThing();
+			this.pickThing();
 		}
 	}
 	
@@ -157,7 +155,7 @@ public class Attacker extends Player{
 		int horizontalDiff = this.getAvenue() - this.getCurrentTarget().getAvenue();
 		int speed = this.obtainSpeed();
 
-		if (verticalDiff != 0) {
+		if (verticalDiff != 0 && this.getStamina() > 0) {
 			int verticalSteps = Math.min(Math.abs(verticalDiff), speed);
 			//use of ternary operator to make code more readable -> (condition) ? (true assignment) : (false assignment)
 			Direction dir = (verticalDiff > 0) ? Direction.NORTH : Direction.SOUTH;
@@ -165,7 +163,7 @@ public class Attacker extends Player{
 			speed -= verticalSteps; //solves a lot of problems. e.g. if verticalSteps was the full speed, there would be no more horizontal movements
 		}
 		
-		if (horizontalDiff != 0) {
+		if (horizontalDiff != 0 && this.getStamina() > 0) {
 			int horizontalSteps = Math.min(Math.abs(horizontalDiff), speed);
 			Direction dir  = (horizontalDiff > 0) ? Direction.WEST : Direction.EAST;
 			this.directedMove(dir, horizontalSteps);
@@ -181,8 +179,13 @@ public class Attacker extends Player{
 		this.turnTo(dir);
 		//Safe moving -> prevent walking into a wall
 		for (int i = 0; i < steps; i++) {
-			if (this.frontIsClear()) {
+			if (this.frontIsClear() && this.getStamina() > 0) {
 				this.move();
+				this.setStamina(this.getStamina()-1);
+			} else if (this.getStamina() <= 0) {
+				System.out.println("Attacker " + this.getPLAYER_ID() + " must rest!");
+				this.currentState = STATE_REST;
+				return;
 			} else {
 				System.out.println("Attacker " + this.getPLAYER_ID() + "cannot move!");
 				return;

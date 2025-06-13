@@ -124,7 +124,7 @@ public abstract class Player extends EnhancedBot{
 	 */
 	public abstract void performAction(PlayerRecord[] players, EnhancedThing[] powerUps);
 	
-	public void pickThing() {};
+	public abstract void pickPowerUp(EnhancedThing powerup);
 	
 	/**
 	 * Determines if is defeated
