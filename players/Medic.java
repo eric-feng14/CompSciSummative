@@ -2,6 +2,7 @@ package players;
 import java.util.ArrayList;
 import java.awt.Color;
 import playerMods.*;
+import powerUps.EnhancedThing;
 import becker.robots.*;
 
 /**
@@ -32,7 +33,7 @@ public class Medic extends Player{
 	 * Performs main action
 	 */
 	@Override
-	public void performAction(PlayerRecord[] players) {
+	public void performAction(PlayerRecord[] players, EnhancedThing[] powerUps) {
 		this.stamina = this.obtainSpeed(); // Resets number of turns allowed
 		
 		players = this.getUpdatedSpeeds(players);
@@ -202,6 +203,7 @@ public class Medic extends Player{
 	
 	private AmbiguousMovement getHealMovement(PlayerRecord[] runners, int s, int a) {
 		int[] proximity = this.getProximityValues(runners, s, a);
+		return null;
 		
 	}
 	

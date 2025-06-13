@@ -1,5 +1,7 @@
 package players;
 import java.util.*;
+
+import app.Main;
 import powerUps.*;
 import becker.robots.*;
 import java.awt.*;
@@ -118,6 +120,12 @@ public class Attacker extends Player{
 	
 	public void fight() {//assuming we are at the same position as our target
 		//would we have to send information back to the application class?
+	}
+	
+	public void sendSignal() {
+		if (this.currentState == STATE_FIGHT) {
+			Main.signal("attack", this.getPLAYER_ID(), this.getCurrentTarget().getPLAYER_ID());
+		}
 	}
 	
 	public InfoRecord getThisInfo() {

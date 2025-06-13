@@ -1,6 +1,7 @@
 package players;
 import java.awt.Color;
 import becker.robots.*;
+import powerUps.EnhancedThing;
 
 public class Runner extends Player{
 	private PlayerRecord[] priorityList;
@@ -13,7 +14,7 @@ public class Runner extends Player{
 	}
 
 	@Override
-	public void performAction(PlayerRecord[] players) {
+	public void performAction(PlayerRecord[] players, EnhancedThing[] powerUps) {
 		this.addStamina(1);
 		steps = this.obtainSpeed();
 		if (steps > this.getStamina()) {

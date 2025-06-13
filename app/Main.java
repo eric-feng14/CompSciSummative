@@ -53,27 +53,28 @@ public class Main {
 		while (!gameEnd()) {
 			System.out.println("HP: " + players[idx].getHp());
 			players[idx].performAction(playerRecords, powerUps);
-		    InfoRecord attacker = players[idx].getThisInfo(); 
-		    PlayerRecord victum = players[idx].getRunnerInfo(); 
-		    if (attacker != null && victum != null) {
-		    	double[] chances = calculateChances(attacker, victum);
+			players[idx].sendSignal();
+//		    InfoRecord attacker = players[idx].getThisInfo(); 
+//		    PlayerRecord victum = players[idx].getRunnerInfo(); 
+//		    if (attacker != null && victum != null) {
+		    	//double[] chances = calculateChances(attacker, victum);
 //		    	for (double i : chances) {
 //		    		System.out.println("Chance: " + i);
 //		    	}
-		    	int attackType = chooseType(chances);
-		    	System.out.println("Type: " + attackType);
+		    	//int attackType = chooseType(chances);
+//		    	System.out.println("Type: " + attackType);
 		    	
 		    	
-		    	switch(attackType) {
-		    	case 0: break;
-		    	case 1: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - InfoRecord.getNormalHit()); break;
-		    	case 2: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - InfoRecord.getCriticalHit()); break;
-		    	case 3: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - InfoRecord.getKnockout()); break;
-		    	}
-		    	if (players[victum.getPLAYER_ID()].getHp() <= 0) {
-		    		players[victum.getPLAYER_ID()].setDefeated(true);
-		    	}
-		    }
+//		    	switch(attackType) {
+//		    	case 0: break;
+//		    	case 1: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - InfoRecord.getNormalHit()); break;
+//		    	case 2: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - InfoRecord.getCriticalHit()); break;
+//		    	case 3: players[victum.getPLAYER_ID()].setHp(players[victum.getPLAYER_ID()].getHp() - InfoRecord.getKnockout()); break;
+//		    	}
+//		    	if (players[victum.getPLAYER_ID()].getHp() <= 0) {
+//		    		players[victum.getPLAYER_ID()].setDefeated(true);
+//		    	}
+//		    }
 		    updatePlayerRecord(idx);
 		    updateTags();
 		    
@@ -84,14 +85,18 @@ public class Main {
 	private static void addPowerUps(City c) {
 		for (int i = 0; i < powerUps.length; i++) {
 			int choice = RANDOM.nextInt(3);
+			System.out.println(choice);
 			int newStreet = RANDOM.nextInt(STREET_SIZE), newAvenue = RANDOM.nextInt(AVENUE_SIZE);
 			switch(choice) {
-			case 1: 
+			case 0: 
 				powerUps[i] = new LuckPowerUp(c, newStreet, newAvenue);
-			case 2:
+				break;
+			case 1:
 				powerUps[i] = new SpeedPowerUp(c, newStreet, newAvenue);
-			case 3:
+				break;
+			case 2:
 				powerUps[i] = new StaminaPowerUp(c, newStreet, newAvenue);
+				break;
 			}
 		}
 	}
@@ -100,9 +105,9 @@ public class Main {
 		System.out.println("test");
 	}
 	
-	public static double[] calculateChances(InfoRecord attacker, PlayerRecord victum) {
-		double attackerStrength = attacker.getStrength();
-		double runnerDefense = players[victum.getPLAYER_ID()].getDefense();
+	private static double[] calculateChances(int attacker, int victum) {
+		double attackerStrength = players[attacker].getStrength();
+		double runnerDefense = players[victum].getDefense();
 		
 		double normalHit = attackerStrength + 0.5*runnerDefense;
 		double critHit = attackerStrength;
@@ -119,7 +124,7 @@ public class Main {
 		return new double[] {dodgeChance, normalChance, critChance, knockChance};
 	}
 	
-	public static int chooseType (double[] probabilities) {
+	private static int chooseType (double[] probabilities) {
 		double rand = RANDOM.nextDouble();  // Random double between 0.0 and 1.0
         double cumulative = 0.0;
         
@@ -132,6 +137,20 @@ public class Main {
         }
         return 1;
 	}
+	
+	private static void performAttack(int attackType, int targetID) {
+		switch(attackType) {
+    	case 0: break;
+    	case 1: players[targetID].setHp(players[targetID].getHp() - InfoRecord.getNormalHit()); break;
+    	case 2: players[targetID].setHp(players[targetID].getHp() - InfoRecord.getCriticalHit()); break;
+    	case 3: players[targetID].setHp(players[targetID].getHp() - InfoRecord.getKnockout()); break;
+    	}
+		
+		if (players[targetID].getHp() <= 0) {
+    		players[targetID].setDefeated(true);
+    	}
+	}
+	
 	/**
 	 * still need to decide on what to put on the tags
 	 */
@@ -168,8 +187,12 @@ public class Main {
 	 * Signals main to do action specified in string
 	 * @param s - signal message (string)
 	 */
-	public static void signal(String s, int playerID) {
-		if (s.equals("attack")) {}
+	public static void signal(String s, int thisID, int targetID) {
+		if (s.equals("attack")) {
+			double[] chances = calculateChances(thisID, targetID);
+			int attackType = chooseType(chances);
+			performAttack(attackType, targetID);
+		}
 		else
 		if (s.equals("heal")) {}
 	}
