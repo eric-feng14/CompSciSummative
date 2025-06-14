@@ -527,6 +527,7 @@ public class Medic extends Player{
 	 */
 	@Override
 	public void move() {
+		System.out.println("MEDIC RUNNING");
 		// Ensures enough steps
 		if(this.steps > 0) {
 			// Moves if front is clear

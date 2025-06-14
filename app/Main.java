@@ -188,6 +188,7 @@ public class Main {
 			for (int i = 0; i < Main.powerUps.size(); i ++) {
 				if (Main.powerUps.get(i).getID() == targetID) {
 					Main.powerUps.remove(i);
+					i--;
 				}
 			}
 		}
