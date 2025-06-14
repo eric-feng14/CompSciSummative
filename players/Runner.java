@@ -245,10 +245,13 @@ public class Runner extends Player{
 				System.out.println("medic");
 				this.seekMedic(dangerList);
 			}
-			else {
+			else if (this.powerUps.length != 0) {
 				// Otherwise seek power-ups
 				System.out.println("power");
 				this.seekPowerUps(dangerList);
+			}
+			else {
+				this.rest(dangerList);
 			}
 		}
 	}

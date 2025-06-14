@@ -186,7 +186,11 @@ public class Main {
 		}
 
 		else if (s.equals("remove")) {
-			Main.powerUps.remove(targetID);
+			for (int i = 0; i < Main.powerUps.size(); i ++) {
+				if (Main.powerUps.get(i).getID() == targetID) {
+					Main.powerUps.remove(targetID);
+				}
+			}
 		}
 	}
 }
