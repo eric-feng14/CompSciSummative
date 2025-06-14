@@ -59,4 +59,8 @@ public abstract class EnhancedThing extends Thing{
 	public String getType() {
 		return this.type;
 	}
+
+	public int getID() {
+		return ID;
+	}
 }
