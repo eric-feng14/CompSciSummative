@@ -181,6 +181,8 @@ public class Main {
 			players[thisID].sendInfo(damageDealt, targetID);
 		}
 		else
-			if (s.equals("heal")) {}
+			if (s.equals("heal")) {
+				Main.players[targetID].setHp(
+			}
 	}
 }

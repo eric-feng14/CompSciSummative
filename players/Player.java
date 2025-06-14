@@ -62,7 +62,7 @@ public abstract class Player extends EnhancedBot{
 	 * @param defeated - isDefeated
 	 */
 	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated) {
-		this(city, s, a, d, speed, TYPE, defeated, DEFAULT_HP, null, DEFAULT_DEFENCE, DEFAULT_STRENGTH, DEFAULT_STAMINA);
+		this(city, s, a, d, speed, TYPE, defeated, Player.DEFAULT_HP, null, Player.DEFAULT_DEFENCE, Player.DEFAULT_STRENGTH, Player.DEFAULT_STAMINA);
 	}
 	
 	public abstract void sendSignal();
@@ -70,15 +70,15 @@ public abstract class Player extends EnhancedBot{
 	public void sendInfo(int damageDealt, int victimID) {};
 	
 	public static int getNormalHit() {
-		return NORMAL_HIT;
+		return Player.NORMAL_HIT;
 	}
 
 	public static int getCriticalHit() {
-		return CRITICAL_HIT;
+		return Player.CRITICAL_HIT;
 	}
 
 	public static int getKnockout() {
-		return KNOCKOUT;
+		return Player.KNOCKOUT;
 	}
 	public int getStamina() {
 		return stamina;
@@ -125,6 +125,10 @@ public abstract class Player extends EnhancedBot{
 	 */
 	public void setHp(int hp) {
 		this.hp = hp;
+		// Caps HP at 100
+		if (this.hp > Player.DEFAULT_HP) {
+			hp = 100;
+		}
 	}
 
 	/**
