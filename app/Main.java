@@ -24,7 +24,7 @@ public class Main {
 	 * @return
 	 */
 	public static boolean gameEnd() {
-		for (Player p : players) {
+		for (Player p : Main.players) {
 			if (! p.isDefeated() && p.getTYPE() != "Attacker") { //if there is a player that hasn't been the defeated, the game continues
 				return false;
 			}
@@ -33,16 +33,16 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		City city = new City(STREET_SIZE, AVENUE_SIZE);
+		City city = new City(Main.STREET_SIZE, Main.AVENUE_SIZE);
 
 		WallCreator creator = new WallCreator(city);
-		creator.createWallRect(0, 0, AVENUE_SIZE, STREET_SIZE);
+		creator.createWallRect(0, 0, Main.AVENUE_SIZE, Main.STREET_SIZE);
 
-		players[0] = new Runner(city, 4, 4, Direction.EAST);
-		players[1] = new Attacker(city, 6, 7, Direction.WEST);
-		players[2] = new Medic(city, 8, 8, Direction.NORTH);
-		players[3] = new Attacker(city, 6, 9, Direction.SOUTH);
-		players[4] = new Runner(city, 1, 1, Direction.SOUTH);
+		Main.players[0] = new Runner(city, 4, 4, Direction.EAST);
+		Main.players[1] = new Attacker(city, 6, 7, Direction.WEST);
+		Main.players[2] = new Medic(city, 8, 8, Direction.NORTH);
+		Main.players[3] = new Attacker(city, 6, 9, Direction.SOUTH);
+		Main.players[4] = new Runner(city, 1, 1, Direction.SOUTH);
 		updatePlayerRecords();
 		updateTags();
 		initializePlayers();
@@ -51,40 +51,40 @@ public class Main {
 		int idx = 0;
 		// Game loop
 		while (!gameEnd()) {
-			System.out.println("HP: " + players[idx].getHp());
-			if (!players[idx].isDefeated()) {
-				players[idx].performAction(playerRecords, powerUps);
-				players[idx].sendSignal();
+			System.out.println("HP: " + Main.players[idx].getHp());
+			if (!Main.players[idx].isDefeated()) {
+				Main.players[idx].performAction(Main.playerRecords, Main.powerUps);
+				Main.players[idx].sendSignal();
 			}
 
 			updatePlayerRecord(idx);
 			updateTag(idx);
-			idx = (idx + 1) % players.length;
+			idx = (idx + 1) % Main.players.length;
 		}
 	}
 
 	private static void addPowerUps(City c) {
-		for (int i = 0; i < NUM_OF_POWERUPS; i++) {
-			int choice = RANDOM.nextInt(3);
+		for (int i = 0; i < Main.NUM_OF_POWERUPS; i++) {
+			int choice = Main.RANDOM.nextInt(3);
 			System.out.println(choice);
-			int newStreet = RANDOM.nextInt(STREET_SIZE), newAvenue = RANDOM.nextInt(AVENUE_SIZE);
+			int newStreet = Main.RANDOM.nextInt(Main.STREET_SIZE), newAvenue = RANDOM.nextInt(Main.AVENUE_SIZE);
 			switch(choice) {
 			case 0: 
-				powerUps.add(new LuckPowerUp(c, newStreet, newAvenue));
+				Main.powerUps.add(new LuckPowerUp(c, newStreet, newAvenue));
 				break;
 			case 1:
-				powerUps.add(new SpeedPowerUp(c, newStreet, newAvenue));
+				Main.powerUps.add(new SpeedPowerUp(c, newStreet, newAvenue));
 				break;
 			case 2:
-				powerUps.add(new StaminaPowerUp(c, newStreet, newAvenue));
+				Main.powerUps.add(new StaminaPowerUp(c, newStreet, newAvenue));
 				break;
 			}
 		}
 	}
 
 	private static double[] calculateChances(int attacker, int victum) {
-		double attackerStrength = players[attacker].getStrength();
-		double runnerDefense = players[victum].getDefense();
+		double attackerStrength = Main.players[attacker].getStrength();
+		double runnerDefense = Main.players[victum].getDefense();
 
 		double normalHit = attackerStrength + 0.5*runnerDefense;
 		double critHit = attackerStrength;
@@ -102,7 +102,7 @@ public class Main {
 	}
 
 	private static int chooseType (double[] probabilities) {
-		double rand = RANDOM.nextDouble();  // Random double between 0.0 and 1.0
+		double rand = Main.RANDOM.nextDouble();  // Random double between 0.0 and 1.0
 		double cumulative = 0.0;
 
 		for (int i = 0; i < probabilities.length; i++) {
@@ -115,17 +115,17 @@ public class Main {
 	}
 
 	private static void performAttack(int damageDealt, int targetID) {
-		players[targetID].setHp(players[targetID].getHp() - damageDealt);
+		Main.players[targetID].setHp(players[targetID].getHp() - damageDealt);
 
-		if (players[targetID].getHp() <= 0) {
-			players[targetID].setDefeated(true);
-			players[targetID].destroy();
+		if (Main.players[targetID].getHp() <= 0) {
+			Main.players[targetID].setDefeated(true);
+			Main.players[targetID].destroy();
 		}
 	}
 
 	private static void initializePlayers() {
-		for (Player p : players) {
-			p.initialize(playerRecords);
+		for (Player p : Main.players) {
+			p.initialize(Main.playerRecords);
 		}
 	}
 
@@ -133,7 +133,7 @@ public class Main {
 	 * still need to decide on what to put on the tags
 	 */
 	private static void updateTags() {
-		for (Player p : players) {
+		for (Player p : Main.players) {
 			p.setLabel("" + p.getHp());
 		}
 	}
@@ -142,8 +142,8 @@ public class Main {
 	 * Updates Player records
 	 */
 	private static void updatePlayerRecords() {
-		for (int i = 0; i < players.length; i++) {
-			playerRecords[i] = new PlayerRecord(players[i]);
+		for (int i = 0; i < Main.players.length; i++) {
+			Main.playerRecords[i] = new PlayerRecord(Main.players[i]);
 		}
 	}
 
@@ -152,11 +152,11 @@ public class Main {
 	 * @param index - index of the player
 	 */
 	private static void updatePlayerRecord(int index) {
-		playerRecords[index] = new PlayerRecord(players[index]);
+		Main.playerRecords[index] = new PlayerRecord(Main.players[index]);
 	}
 
 	private static void updateTag(int idx) {
-		players[idx].setLabel("" + players[idx].getHp());
+		Main.players[idx].setLabel("" + Main.players[idx].getHp());
 	}
 
 	/**
@@ -177,10 +177,13 @@ public class Main {
 			performAttack(damageDealt, targetID);
 			updatePlayerRecord(targetID);
 			updateTag(targetID);
-			
-			players[thisID].sendInfo(damageDealt, targetID);
+
+			Main.players[thisID].sendInfo(damageDealt, targetID);
 		}
-		else
-			if (s.equals("heal")) {}
+		else if (s.equals("heal")) {}
+
+		else if (s.equals("remove")) {
+			Main.powerUps.remove(targetID);
+		}
 	}
 }
