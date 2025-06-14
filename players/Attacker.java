@@ -74,6 +74,7 @@ public class Attacker extends Player{
 	 */
 	@Override
 	public void performAction(PlayerRecord[] players, ArrayList<EnhancedThing> powerUps) { 
+		//update instance variables with latest info
 		this.updateListsAndTarget(players);
 		this.powerUps = powerUps;
 		
@@ -103,12 +104,12 @@ public class Attacker extends Player{
 						this.alternativeSortPriorityList();
 						this.chaseTarget(players, false);
 						break;
-					case STRAT_SUPPORT: //activate this case if there is at least 2 attackers 
+					case STRAT_SUPPORT: //activate this case if there is at least 2 attackers -> supports another attacker
 						this.sortAttackersByDistance();
 						this.setCurrentTarget(attackers[0].getCurrentTarget());
 						this.chaseTarget(players, true);
 						break;
-					case STRAT_FOCUS_POWERUP: //activate this case if there are powerups on the field (Condition)
+					case STRAT_FOCUS_POWERUP: //activate this case if there are powerups on the field -> focuses on getting a powerup
 						this.sortPowerUps(powerUps);
 						this.chasePowerUp();
 						break;
@@ -141,7 +142,7 @@ public class Attacker extends Player{
 			}
 			//make a random selection
 			int choice = generator.nextInt(choices.size());
-			this.currentState = choices.get(choice);
+			this.currentStrat = choices.get(choice);
 			this.roundsSpentChasing = 0;
 		}
 	}
@@ -181,11 +182,16 @@ public class Attacker extends Player{
 		int verticalDiff = this.getStreet() - this.getCurrentTarget().getStreet();
 		int horizontalDiff = this.getAvenue() - this.getCurrentTarget().getAvenue();
 		this.chase(verticalDiff, horizontalDiff, reverse);
+		//if attacker is at the target
 		if (this.targetReached()) {
 			this.currentState = STATE_FIGHT; //change to fighting state
 		}
 	}
 	
+	/**
+	 * Checks if the current attacker is at their target
+	 * @return returns a boolean representing the function
+	 */
 	private boolean targetReached() {
 		if (this.getStreet() == this.getCurrentTarget().getStreet() && this.getAvenue() == this.getCurrentTarget().getAvenue()) {
 			System.out.println("Target Reached!");
@@ -194,6 +200,11 @@ public class Attacker extends Player{
 		return false;
 	}
 	
+	/**
+	 * called from the application class to determine if the robot should fight or do anything else 
+	 * can also return info back to application class
+	 */
+	@Override
 	public void sendSignal() {
 		if (this.currentState == STATE_FIGHT) {
 			Main.signal("attack", this.getPLAYER_ID(), this.getCurrentTarget().getPLAYER_ID());
@@ -205,6 +216,9 @@ public class Attacker extends Player{
 		}
 	}
 	
+	/**
+	 * receives information from the application class about the fight
+	 */
 	public void sendInfo(int damageDealt, int victimID) {
 		for (PlayerRecord rec : this.priorityList) {
 			if (rec.getPLAYER_ID() == victimID) {
@@ -215,6 +229,10 @@ public class Attacker extends Player{
 		}
 	}
 	
+	/**
+	 * specialized method to pick the powerup with effect added
+	 */
+	@Override
 	public void pickPowerUp(EnhancedThing powerup) {
 		if (this.canPickThing()) {
 			powerup.applyTo(this);
@@ -223,6 +241,9 @@ public class Attacker extends Player{
 		}
 	}
 	
+	/**
+	 * robots method to rest and recover stamina
+	 */
 	public void rest() {
 		int dist;
 		if (this.currentStrat == STRAT_DEFAULT || this.currentStrat == STRAT_ALTERNATE) {
@@ -240,12 +261,18 @@ public class Attacker extends Player{
 
 	}
 	
-
+	/**
+	 * universal chase method to move somewhere using maximum possible steps
+	 * @param verticalDiff int representing the vertical difference
+	 * @param horizontalDiff int representing the horizontal difference
+	 * @param reversedOrder reversedOrder is a boolean determining whether to go horizontally first or not
+	 */
 	private void chase(int verticalDiff, int horizontalDiff, boolean reversedOrder) {
 	    int speed = this.obtainSpeed();
 
 	    // Movement directions and differences
 	    int[] diffs = reversedOrder ? new int[]{horizontalDiff, verticalDiff} : new int[]{verticalDiff, horizontalDiff};
+	    //Ternary operators are used here for conciseness: (type) (identifier) = (condition) ? (assignment true) : (assignment false)
 	    Direction[] dirs = reversedOrder
 	        ? new Direction[]{(horizontalDiff > 0) ? Direction.WEST : Direction.EAST,
 	                          (verticalDiff > 0) ? Direction.NORTH : Direction.SOUTH}
@@ -308,6 +335,7 @@ public class Attacker extends Player{
 				}
 			}
 			
+			//if no attacker is chasing "record"
 			if (!found) {
 				return record;
 			}
@@ -329,7 +357,7 @@ public class Attacker extends Player{
 				size++;
 			}
 		}
-//		//Edge case -> no other players other than attackers on the field
+		//Edge case -> no other players other than attackers on the field
 		if (size == 0) {
 			System.out.println("No other players!");
 			System.exit(0);
@@ -349,18 +377,27 @@ public class Attacker extends Player{
 		}
 	}
 	
+	/**
+	 * Sort the attackers array by their distance to the current robot
+	 */
 	private void sortAttackersByDistance() {
 		int len = this.attackers.length;
+		//Selection sort;
 		for (int i = 0; i < this.priorityList.length - 1; i++) {
 			for (int j = i + 1; j < this.priorityList.length; j++) {
+				//calculate distances
 				int dist1 = calcDistance(this.attackers[j]), dist2 = calcDistance(this.attackers[i]);
-				if (dist1 < dist2) {
+				if (dist1 < dist2) { //find the smallest distance in the rest of array
 					swapPlayerRecord(i, j, this.priorityList);
 				}
 			}
 		}
 	}
 	
+	/**
+	 * sorts the powerups arraylist in terms of their distance to the current attacker
+	 * @param powerUps powerUps is the arraylist containing all existing powerups
+	 */
 	private void sortPowerUps(ArrayList<EnhancedThing> powerUps) {
 		//Insertion sort
 		for (int i = 1; i < powerUps.size(); i++) {
@@ -376,6 +413,10 @@ public class Attacker extends Player{
 		}
 	}
 	
+	/**
+	 * update current target information for the current attacker
+	 * @param rec rec is the new record with new information
+	 */
 	private void updateCurrentTarget(PlayerRecord rec) {
 		if (this.getCurrentTarget() != null && rec.getPLAYER_ID() == this.getCurrentTarget().getPLAYER_ID()) {
 			this.setCurrentTarget(rec);
@@ -402,6 +443,11 @@ public class Attacker extends Player{
 		}
 	}
 	
+	/**
+	 * performs a linear search over previous priority list to find the record mathching the current record in priorityList
+	 * @param idx idx is the index of the plyaer we want to learn about
+	 * @return returns a playerrecord of representing the previous player record
+	 */
 	private PlayerRecord findRecord(int idx) {
 		for (PlayerRecord record : this.previousPriorityList) {
 			if (record.getPLAYER_ID() == this.priorityList[idx].getPLAYER_ID()) {
@@ -411,6 +457,10 @@ public class Attacker extends Player{
 		return null;
 	}
 	
+	/**
+	 * compare info from the previous priority list to the current and learn the max speed of that player
+	 * @param idx idx is the index of the player who we're learning about (their speed)
+	 */
 	private void learnSpeed(int idx) {
 		//We need to find the previous record because the order of "previousPriorityList" constantly changes,
 		//while the players array from the application class never changes order
@@ -442,12 +492,15 @@ public class Attacker extends Player{
 		}
 	}
 	
+	/**
+	 * sorts based on defense attributes learned over time by fighting using a selection sort
+	 */
 	private void alternativeSortPriorityList() {
 		int len = this.priorityList.length;
 		for (int i = 0; i < this.priorityList.length - 1; i++) {
 			for (int j = i + 1; j < this.priorityList.length; j++) {
 				int defense1 = this.priorityList[j].getDefense(), defense2 = this.priorityList[i].getDefense();
-				if (defense1 < defense2) {
+				if (defense1 < defense2) { //find min defense
 					swapPlayerRecord(i, j, this.priorityList);
 				}
 			}
