@@ -153,6 +153,7 @@ public class EnhancedBot extends RobotSE {
 	public void moveToNext() {
 		// Moves while the front is clear
 		while(this.frontIsClear()) {
+			System.out.println("HENLO");
 			this.move();
 		}
 	}

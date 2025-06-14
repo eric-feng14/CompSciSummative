@@ -60,6 +60,10 @@ public abstract class EnhancedThing extends Thing{
 		return this.type;
 	}
 
+	/**
+	 * Gets ID of powerup
+	 * @return - ID
+	 */
 	public int getID() {
 		return ID;
 	}
