@@ -19,9 +19,9 @@ public class Main {
 	private static final Random RANDOM = new Random();
 
 	/**
-	 * 
+	 * Determines when to end the game
 	 * @param numOfTargets number of runners + number of medics
-	 * @return
+	 * @return true if all players are defeated
 	 */
 	public static boolean gameEnd() {
 		for (Player p : Main.players) {
@@ -32,6 +32,10 @@ public class Main {
 		return true; //all enemies have been defeated, game should end
 	}
 
+	/**
+	 * The main method
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		City city = new City(Main.STREET_SIZE, Main.AVENUE_SIZE);
 
@@ -62,7 +66,11 @@ public class Main {
 			idx = (idx + 1) % Main.players.length;
 		}
 	}
-
+	
+	/**
+	 * Initialize the power-ups
+	 * @param c - the city
+	 */
 	private static void addPowerUps(City c) {
 		for (int i = 0; i < Main.NUM_OF_POWERUPS; i++) {
 			int choice = Main.RANDOM.nextInt(3);
@@ -80,7 +88,13 @@ public class Main {
 			}
 		}
 	}
-
+	
+	/**
+	 * Calculates the chances of each type of hit based on the attacker's strength and the runner/medic's defense
+	 * @param attacker - the playerID of the attacker
+	 * @param victum - the playerID of the target
+	 * @return An array of doubles of the chances of each type of hit
+	 */
 	private static double[] calculateChances(int attacker, int victum) {
 		double attackerStrength = Main.players[attacker].getStrength();
 		double runnerDefense = Main.players[victum].getDefense();
@@ -99,7 +113,12 @@ public class Main {
 
 		return new double[] {dodgeChance, normalChance, critChance, knockChance};
 	}
-
+	
+	/**
+	 * Select a type of hit 
+	 * @param probabilities - the probabilities of each type of hit
+	 * @return the index of the type of hit
+	 */
 	private static int chooseType (double[] probabilities) {
 		double rand = Main.RANDOM.nextDouble();  // Random double between 0.0 and 1.0
 		double cumulative = 0.0;
@@ -112,7 +131,12 @@ public class Main {
 		}
 		return 1;
 	}
-
+	
+	/**
+	 * Subtract HP to target from demageDealt
+	 * @param damageDealt - damage to subtract
+	 * @param targetID - the playerID of target
+	 */
 	private static void performAttack(int damageDealt, int targetID) {
 		Main.players[targetID].setHp(players[targetID].getHp() - damageDealt);
 
@@ -122,6 +146,9 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Initializes the player records
+	 */
 	private static void initializePlayers() {
 		for (Player p : Main.players) {
 			p.initialize(Main.playerRecords);
@@ -129,7 +156,7 @@ public class Main {
 	}
 
 	/**
-	 * still need to decide on what to put on the tags
+	 * Shows the HP of players on player tags
 	 */
 	private static void updateTags() {
 		for (Player p : Main.players) {
@@ -153,7 +180,11 @@ public class Main {
 	private static void updatePlayerRecord(int index) {
 		Main.playerRecords[index] = new PlayerRecord(Main.players[index]);
 	}
-
+	
+	/**
+	 * Updates the tag of player at idx
+	 * @param idx - index of the player to update
+	 */
 	private static void updateTag(int idx) {
 		Main.players[idx].setLabel("" + Main.players[idx].getHp());
 	}
