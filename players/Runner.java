@@ -2,6 +2,7 @@ package players;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import app.Main;
 import becker.robots.*;
 import powerUps.EnhancedThing;
 
@@ -15,6 +16,7 @@ public class Runner extends Player{
 	private EnhancedThing[] powerUps; // Array of available power-ups
 	private int steps; // Number of steps to take in current turn
 	private final int MAX_STAM; // Max stamina of player
+	private boolean pickedPowerUp = false;
 
 	/**
 	 * Constructor for the Runner player
@@ -96,6 +98,7 @@ public class Runner extends Player{
 		if(this.canPickThing()) {
 			thing.applyTo(this);
 			this.pickThing();
+			this.pickedPowerUp = true;
 		}
 	}
 
@@ -104,7 +107,10 @@ public class Runner extends Player{
 	 */
 	@Override
 	public void sendSignal() {
-		// TODO: Implement signal sending if needed
+		if (this.pickedPowerUp) {
+			Main.signal("remove", this.getPLAYER_ID(), this.powerUps[0].getID());
+			this.pickedPowerUp = false;
+		}
 	}
 
 	/**
