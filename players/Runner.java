@@ -175,8 +175,9 @@ public class Runner extends Player{
 			}
 		}
 		else {
-			// Update existing knowledge
+			// Reset priorityList sorted by playerID so it matches the one from Main by index
 			this.resetPriority();
+			// Compare the two lists and update differences
 			for(int i = 0; i < this.priorityList.length; i ++) {
 				PlayerRecord previous = priorityList[i];
 				this.priorityList[i] = players[i];
