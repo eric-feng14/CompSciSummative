@@ -127,7 +127,7 @@ public abstract class Player extends EnhancedBot{
 		this.hp = hp;
 		// Caps HP at 100
 		if (this.hp > Player.DEFAULT_HP) {
-			hp = 100;
+			this.hp = 100;
 		}
 	}
 

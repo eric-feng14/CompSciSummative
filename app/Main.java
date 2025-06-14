@@ -180,7 +180,10 @@ public class Main {
 
 			Main.players[thisID].sendInfo(damageDealt, targetID);
 		}
-		else if (s.equals("heal")) {}
+		else if (s.equals("heal")) {
+			Player targetPlayer = Main.players[targetID];
+			targetPlayer.setHp(targetPlayer.getHp() + 20);
+		}
 
 		else if (s.equals("remove")) {
 			Main.powerUps.remove(targetID);

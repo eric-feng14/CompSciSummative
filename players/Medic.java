@@ -10,7 +10,7 @@ import powerUps.*;
 
 /**
  * The Medic class: Healing Runners
- * @author Richard
+ * @author Richard Tuo
  * @version 6/9/2025
  */
 public class Medic extends Player{
@@ -37,7 +37,12 @@ public class Medic extends Player{
 	 */
 	@Override
 	public void performAction(PlayerRecord[] players, ArrayList<EnhancedThing> powerups) {
-		this.steps = this.obtainSpeed(); // Resets number of turns allowed
+		this.setStamina(this.getStamina()+3);
+		this.steps = this.obtainSpeed(); // Resets number of turns 
+		// Sets steps according to stamina
+		if (this.getStamina() < this.obtainSpeed()) {
+			this.steps = this.getStamina();
+		}
 		
 		players = this.getUpdatedSpeeds(players);
 		this.runnerPriority = this.getTypeArray("Runner", players);
@@ -46,7 +51,6 @@ public class Medic extends Player{
 		
 		// Only moves if is defeated
 		if (!this.isDefeated()) {
-			
 			Movement nextMovement = this.getEscapeMovement(this.attackerPriority);
 			this.escapeMove(nextMovement);
 			if (this.runnerPriority.length != 0 && this.runnerPriority != null)
@@ -69,7 +73,6 @@ public class Medic extends Player{
 		// Moves if has steps
 		while (distanceCovered < m.getDistance() && this.frontIsClear() && this.steps > 0) {
 			this.move();
-			this.steps--;
 			distanceCovered++;
 		}
 		// Moves more if it hits wall
@@ -182,6 +185,7 @@ public class Medic extends Player{
 				}
 			}
 			
+			// Determines optimal directions
 			if (optimalDirections.length != 0) {
 				int randomDirection = (int) (Math.random() * possibleDirections.length);
 				movement = new Movement(possibleDirections[randomDirection], runDistance);
@@ -214,17 +218,12 @@ public class Medic extends Player{
 		return movement;
 	}
 	
-//	private AmbiguousMovement getHealMovement(PlayerRecord[] runners) {
-//		int[] proximity = this.getProximityValues(runners);
-//		
-//	}
-	
 	/**
-	 * 
-	 * @param runners
-	 * @param s
-	 * @param a
-	 * @return
+	 * Gets the movements to heal
+	 * @param runners - list of runners
+	 * @param s - street
+	 * @param a - avenue
+	 * @return - gets the movements to heal each player (sorted)
 	 */
 	private ArrayList<AmbiguousMovement> getHealMovements() {
 		int[] proximity = this.getProximityValues(this.runnerPriority, this.getStreet(), this.getAvenue());
@@ -259,6 +258,12 @@ public class Medic extends Player{
 		return patients;
 	}
 	
+	/**
+	 * Gets an ambiguous heal path
+	 * @param patient - runner targeted
+	 * @param predDist - predicted distance
+	 * @return - ambiguous path
+	 */
 	private AmbiguousMovement getAmbiguousHealPlan(PlayerRecord patient, int predDist) {
 		AmbiguousMovement maneuver = new AmbiguousMovement(3, 3, 0);
 		if (patient == null) {
@@ -299,8 +304,15 @@ public class Medic extends Player{
 		return this.getEscapeMovement(attackers, null);
 	}
 	
+	/**
+	 * Gets all possible escapes from attacker
+	 * @param attacker - the attacker 
+	 * @param predDist - predicted distance of attacker
+	 * @return - the ambiguous movement of escape
+	 */
 	private AmbiguousMovement getPossibleEscapes(PlayerRecord attacker, int predDist) {
 		AmbiguousMovement maneuver = new AmbiguousMovement(3, 3, 0);
+		// Returns generic movement with null
 		if (attacker == null) {
 			return maneuver;
 		}
@@ -378,8 +390,9 @@ public class Medic extends Player{
 	private int[] sortAttackerPriorities(PlayerRecord[] attackers) {
 		int[] predictedProximity = this.getPredictedAttackerProximities(attackers);
 		
-		// Evaluates all attackers and sorts according to immanence of threat
+		// Evaluates all attackers and sorts according to imminent of threat
 		for (int i = 0; i < attackers.length; i++) {
+			// Insertion sort
 			for (int j = i; j > 0; j--) {
 				if (predictedProximity[j] < predictedProximity[j-1]) {
 					int temp = predictedProximity[j-1];
@@ -483,6 +496,11 @@ public class Medic extends Player{
 		return count;
 	}
 	
+	/**
+	 * Remove nulls from direction array
+	 * @param d - directions 
+	 * @return - directions will no nulls in array
+	 */
 	private Direction[] removeNulls(Direction[] d) {
 		int indexNum = 0;
 		// gets array number
@@ -505,15 +523,19 @@ public class Medic extends Player{
 	}
 	
 	/**
-	 * Moves if can move
+	 * Moves if can move and subtracts steps. Heals with each step
 	 */
 	@Override
 	public void move() {
-		// Moves if front is clear
-		if(this.frontIsClear() && this.steps > 0) {
-			super.move();
+		// Ensures enough steps
+		if(this.steps > 0) {
+			// Moves if front is clear
+			if(this.frontIsClear()) {
+				super.move();	
+			}
+			this.sendSignal();
+			this.steps--;
 		}
-		this.sendSignal();
 	}
 	
 	/**
@@ -555,12 +577,18 @@ public class Medic extends Player{
 		return possibleDirections = this.removeNulls(possibleDirections);
 	}
 
+	/**
+	 * Picks up power
+	 */
 	@Override
 	public void pickPowerUp(EnhancedThing powerup) {
 		powerup.applyTo(this);
 		this.pickThing();
 	}
 
+	/**
+	 * Sends a signal to heal
+	 */
 	@Override
 	public void sendSignal() {
 		for (int i = 0; i < this.runnerPriority.length; i++) {
