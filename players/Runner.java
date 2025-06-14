@@ -2,7 +2,7 @@ package players;
 import java.awt.Color;
 import java.util.ArrayList;
 
-import app.Main;
+import app.*;
 import becker.robots.*;
 import powerUps.EnhancedThing;
 
@@ -109,6 +109,9 @@ public class Runner extends Player{
 	public void sendSignal() {
 		if (this.pickedPowerUp) {
 			Main.signal("remove", this.getPLAYER_ID(), this.powerUps[0].getID());
+			AttackerTester.signal("remove", this.getPLAYER_ID(), this.powerUps[0].getID());
+			RunnerTester.signal("remove", this.getPLAYER_ID(), this.powerUps[0].getID());
+			MedicTester.signal("remove", this.getPLAYER_ID(), this.powerUps[0].getID());
 			this.pickedPowerUp = false;
 		}
 	}
