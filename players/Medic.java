@@ -37,6 +37,22 @@ public class Medic extends Player{
 	 */
 	@Override
 	public void performAction(PlayerRecord[] players, ArrayList<EnhancedThing> powerups) {
+		int l = 0;
+		// Gets length of no null players
+		for (int i = 0; i < players.length; i++) {
+			if (players[i] != null) {
+				l++;
+			}
+		}
+		int countx = 0;
+		PlayerRecord[] newPlayers = new PlayerRecord[l];
+		for (int i = 0; i < players.length; i++) {
+			if (players[i] != null) {
+				newPlayers[countx] = players[i];
+				countx++;
+			}
+		}
+		players = newPlayers;
 		this.setStamina(this.getStamina()+3);
 		this.steps = this.obtainSpeed(); // Resets number of turns 
 		// Sets steps according to stamina
@@ -65,15 +81,19 @@ public class Medic extends Player{
 	 * @param m - movement
 	 */
 	private void escapeMove(Movement m) {
+		System.out.println("MEDIC RUNNING");
 		int distanceCovered = 0;
 		// Caps movement at steps
 		if (m.getDistance() > this.steps)
 			m.setDistance(this.steps);
+		System.out.println("MEDIC RUNNING");
 		this.turnTo(m.getDirection());
+		System.out.println("MEDIC RUNNING");
 		// Moves if has steps
 		while (distanceCovered < m.getDistance() && this.frontIsClear() && this.steps > 0) {
 			this.move();
 			distanceCovered++;
+			System.out.println("MEDIC RUNNING PEW PEW");
 		}
 		// Moves more if it hits wall
 		if (distanceCovered < m.getDistance()) {
@@ -88,6 +108,7 @@ public class Medic extends Player{
 	 * @return - the movement to move
 	 */
 	private Movement getEscapeMovement(PlayerRecord[] attackers, Direction[] barredDirections) {
+		System.out.println("MEDIC RUNNING 1");
 		Movement movement = new Movement(Direction.EAST, 0);
 		
 		int[] predicted = this.sortAttackerPriorities(attackers);
@@ -117,6 +138,8 @@ public class Medic extends Player{
 				}
 			}
 			
+			System.out.println("MEDIC RUNNING 2");
+			
 			// MAIN LOOP OF MOVEMENT DETERMINATION
 			
 			int runDistance = 0;			
@@ -141,6 +164,8 @@ public class Medic extends Player{
 					}
 				}
 			}
+			
+			System.out.println("MEDIC RUNNING 3");
 			
 			Direction[] optimalDirections = new Direction[0];
 			
@@ -178,6 +203,7 @@ public class Medic extends Player{
 						}
 					}
 				}
+				System.out.println("MEDIC RUNNING 3");
 				tempDir = this.removeNulls(tempDir);
 				if (tempDir.length > 0) {
 					optimalDirections = tempDir;
@@ -189,12 +215,15 @@ public class Medic extends Player{
 			if (optimalDirections.length != 0) {
 				int randomDirection = (int) (Math.random() * possibleDirections.length);
 				movement = new Movement(possibleDirections[randomDirection], runDistance);
+				System.out.println("MEDIC RUNNING 5");
 			} else {
 				// Moves towards direction options
 				if (possibleDirections.length != 0) {
 					int randomDirection = (int) (Math.random() * possibleDirections.length);
 					movement = new Movement(possibleDirections[randomDirection], runDistance);
+					System.out.println("MEDIC RUNNING 5");
 				} else {
+					System.out.println("MEDIC RUNNING 5");
 					Direction direction;
 					// Gets a random direction
 					switch((int)(Math.random()*4)) {
@@ -215,6 +244,7 @@ public class Medic extends Player{
 				}
 			}
 		}
+		System.out.println("MEDIC RUNNING 5");
 		return movement;
 	}
 	
@@ -250,7 +280,7 @@ public class Medic extends Player{
 		// Gets all possible runner targets
 		for (int i = 0; i < (int)(runnerPriority.length); i++) {
 			// Adds all hurt runners
-			if (this.runnerPriority[i].getHP() < 100) {
+			if (runnerPriority[i] != null && this.runnerPriority[i].getHP() < 100) {
 				patients.add(this.getAmbiguousHealPlan(this.runnerPriority[i], proximity[i]));
 			}
 		}
@@ -446,8 +476,12 @@ public class Medic extends Player{
 		int[] proximity = new int[players.length];
 		// Gets relative distance values of players
 		for (int i = 0; i < players.length; i++) {
-			proximity[i] = Math.abs(players[i].getAvenue() - a) + 
-					Math.abs(players[i].getStreet() - s);
+			if (players[i] != null) {
+				proximity[i] = Math.abs(players[i].getAvenue() - a) + 
+						Math.abs(players[i].getStreet() - s);
+			}else {
+				proximity[i] = 0;
+			}
 		}
 		return proximity;
 	}
@@ -508,6 +542,7 @@ public class Medic extends Player{
 			if(d[i] != null)
 				indexNum++;
 		}
+		System.out.println("MEDIC RUNNING 4");
 		Direction[] directions = new Direction[indexNum];
 		// fills directions
 		int counter = 0;
@@ -518,6 +553,7 @@ public class Medic extends Player{
 				counter++;
 			}
 		}
+		System.out.println("MEDIC RUNNING 5");
 		
 		return directions;
 	}
@@ -527,7 +563,7 @@ public class Medic extends Player{
 	 */
 	@Override
 	public void move() {
-		System.out.println("MEDIC RUNNING");
+		System.out.println("MEDIC RUNNING 2");
 		// Ensures enough steps
 		if(this.steps > 0) {
 			// Moves if front is clear
