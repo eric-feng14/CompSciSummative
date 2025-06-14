@@ -8,11 +8,7 @@ import java.awt.*;
 /**
  * Template robot class for the final summative in ICS4U
  * TODO:
- * - implement the other states (e.g. fighting, resting, etc)
  * - add feature, after engaging in battle with a target, you cannot fight them again
- * - work on strategies
- * - randomize the speed for each player
- * - add stamina to the base class
  * @author Eric Feng
  * @version Due date: June 13 2025
  */
@@ -39,6 +35,9 @@ public class Attacker extends Player{
 		this.setColor(Color.RED); //attackers are red
 	}
 
+	/**
+	 * prints out the information about the priority list
+	 */
 	private void printPriorityList() {
 		System.out.println("\nPriority list of attacker: " + this.getPLAYER_ID());
 		for (PlayerRecord rec : this.priorityList) {
@@ -46,6 +45,9 @@ public class Attacker extends Player{
 		}
 	}
 	
+	/**
+	 * debug method that prints out info about the attackers
+	 */
 	private void printAttackers() {
 		System.out.println("\nAttacker information for attacker" + this.getPLAYER_ID());
 		for (PlayerRecord rec : attackers) {
@@ -53,6 +55,9 @@ public class Attacker extends Player{
 		}
 	}
 	
+	/**
+	 * debug method that prints info about current Target
+	 */
 	private void printCurrentTarget() {
 		PlayerRecord ct = this.getCurrentTarget();
 		if (ct != null) {
@@ -71,29 +76,13 @@ public class Attacker extends Player{
 		this.updateListsAndTarget(players);
 		this.powerUps = powerUps;
 		
-		//Safety checks
+		//if there's no target, find a new one
 		if (this.getCurrentTarget() == null) { //no target, e.g. first round of play
 			this.setCurrentTarget(newTarget(players));
 		}
 		
 		//Switch strategies
-		if (this.roundsSpentChasing == Attacker.MAX_CHASE_TIME) {
-			ArrayList<Integer> choices = new ArrayList<Integer>();
-			choices.add(STRAT_DEFAULT);
-			choices.add(STRAT_ALTERNATE);
-			//Add the suport strategy only if there are more than one attacker
-			if (this.attackers.length >= 2) {
-				choices.add(STRAT_SUPPORT);
-			}
-			//If there are powerups, add the focus power up strategy
-			if (powerUps.size() > 0 ) {
-				choices.add(STRAT_FOCUS_POWERUP);
-			}
-			//make a random selection
-			int choice = generator.nextInt(choices.size());
-			this.currentState = choices.get(choice);
-			this.roundsSpentChasing = 0;
-		}
+		this.switchStrategies();
 		
 		//Debugging statements
 //		printPriorityList();
@@ -129,6 +118,26 @@ public class Attacker extends Player{
 		}
 		
 		this.previousPriorityList = this.priorityList;
+	}
+	
+	private void switchStrategies() {
+		if (this.roundsSpentChasing == Attacker.MAX_CHASE_TIME) {
+			ArrayList<Integer> choices = new ArrayList<Integer>();
+			choices.add(STRAT_DEFAULT);
+			choices.add(STRAT_ALTERNATE);
+			//Add the suport strategy only if there are more than one attacker
+			if (this.attackers.length >= 2) {
+				choices.add(STRAT_SUPPORT);
+			}
+			//If there are powerups, add the focus power up strategy
+			if (powerUps.size() > 0 ) {
+				choices.add(STRAT_FOCUS_POWERUP);
+			}
+			//make a random selection
+			int choice = generator.nextInt(choices.size());
+			this.currentState = choices.get(choice);
+			this.roundsSpentChasing = 0;
+		}
 	}
 	
 	public void chasePowerUp() {
@@ -209,30 +218,7 @@ public class Attacker extends Player{
 
 	}
 	
-//	/**
-//	 * chases the target with a set amount of steps
-//	 */
-//	private void chase(int verticalDiff, int horizontalDiff) {
-//		int speed = this.obtainSpeed();
-//
-//		if (verticalDiff != 0 && this.getStamina() > 0) {
-//			int verticalSteps = Math.min(Math.abs(verticalDiff), speed);
-//			Direction dir = (verticalDiff > 0) ? Direction.NORTH : Direction.SOUTH;//use of ternary operator to make code more readable -> (condition) ? (true assignment) : (false assignment)
-//			this.directedMove(dir, verticalSteps);
-//			speed -= verticalSteps; //solves a lot of problems. e.g. if verticalSteps was the full speed, there would be no more horizontal movements
-//		}
-//		
-//		if (horizontalDiff != 0 && this.getStamina() > 0) {
-//			int horizontalSteps = Math.min(Math.abs(horizontalDiff), speed);
-//			Direction dir  = (horizontalDiff > 0) ? Direction.WEST : Direction.EAST;
-//			this.directedMove(dir, horizontalSteps);
-//		}
-//		
-//		if (this.getStamina() <= 0) {
-//			this.currentState = STATE_REST;
-//		}
-//	}
-//	
+
 	private void chase(int verticalDiff, int horizontalDiff, boolean reversedOrder) {
 	    int speed = this.obtainSpeed();
 
@@ -305,11 +291,8 @@ public class Attacker extends Player{
 			}
 		}
 		
-		int idx;
 		//everyone is already being chased -> return a random target
-		do {
-			idx = generator.nextInt(this.priorityList.length);
-		} while (idx == this.getCurrentTarget().getPLAYER_ID() && this.priorityList.length > 1);
+		int idx = generator.nextInt(this.priorityList.length);
 		return this.priorityList[idx];
 	}
 	
