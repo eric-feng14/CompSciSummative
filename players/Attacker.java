@@ -17,6 +17,7 @@ public class Attacker extends Player{
 	private PlayerRecord[] attackers, priorityList, previousPriorityList;
 	private ArrayList<EnhancedThing> powerUps;
 	private int roundsSpentChasing = 0, currentState = STATE_CHASE, currentStrat = STRAT_DEFAULT;
+	private boolean pickedPowerUp = false;
 	private final static int MAX_CHASE_TIME = 10;
 	private final static int STATE_CHASE = 1, STATE_FIGHT = 2, STATE_REST = 3;
 	//no need for cornering since support state logic overlaps with it
@@ -89,18 +90,20 @@ public class Attacker extends Player{
 //		printAttackers();
 //		printCurrentTarget();
 		
+		//check which state the robot is in
 		switch(this.currentState) { //fighting state is controlled between the application class
 			case STATE_CHASE: 
+				//check which strategy the robot is taking
 				switch(this.currentStrat) {
-					case STRAT_DEFAULT:
+					case STRAT_DEFAULT: //default strategy -> target robots based on distance and speed (learned over time)
 						this.defaultSortPriorityList();
 						this.chaseTarget(players, false);
 						break;
-					case STRAT_ALTERNATE: 
+					case STRAT_ALTERNATE: //alternate strategy -> targets robots based on fights (e.g. estimated defense)
 						this.alternativeSortPriorityList();
 						this.chaseTarget(players, false);
 						break;
-					case STRAT_SUPPORT: //activate this case if there is at least 2 attackers
+					case STRAT_SUPPORT: //activate this case if there is at least 2 attackers 
 						this.sortAttackersByDistance();
 						this.setCurrentTarget(attackers[0].getCurrentTarget());
 						this.chaseTarget(players, true);
@@ -120,6 +123,9 @@ public class Attacker extends Player{
 		this.previousPriorityList = this.priorityList;
 	}
 	
+	/**
+	 * switch strategies depending on how long the robot has been doing one strategy
+	 */
 	private void switchStrategies() {
 		if (this.roundsSpentChasing == Attacker.MAX_CHASE_TIME) {
 			ArrayList<Integer> choices = new ArrayList<Integer>();
@@ -140,6 +146,9 @@ public class Attacker extends Player{
 		}
 	}
 	
+	/**
+	 * chase method to go after a powerup
+	 */
 	public void chasePowerUp() {
 		EnhancedThing targetPowerUp = this.powerUps.get(0);
 		//Safety check
@@ -150,12 +159,18 @@ public class Attacker extends Player{
 		
 		int verticalDiff = this.getStreet() - targetPowerUp.getStreet();
 		int horizontalDiff = this.getAvenue() - targetPowerUp.getAvenue();
-		this.chase(verticalDiff, horizontalDiff, false);
+		this.chase(verticalDiff, horizontalDiff, false); //perform the actual movements
+		//pick up the powerup -> specially handled
 		if (this.canPickThing()) {
 			this.pickPowerUp(targetPowerUp);
 		}
 	}
 	
+	/**
+	 * chase the current Target
+	 * @param players players is the players array
+	 * @param reverse
+	 */
 	public void chaseTarget(PlayerRecord[] players, boolean reverse) {	
 		//Safety check
 		if (this.getCurrentTarget() == null) {
@@ -184,6 +199,10 @@ public class Attacker extends Player{
 			Main.signal("attack", this.getPLAYER_ID(), this.getCurrentTarget().getPLAYER_ID());
 			this.currentState = STATE_CHASE;
 		}
+		if (this.pickedPowerUp) {
+			Main.signal("remove", this.getPLAYER_ID(), this.powerUps.get(0).getID());
+			this.pickedPowerUp = false;
+		}
 	}
 	
 	public void sendInfo(int damageDealt, int victimID) {
@@ -197,8 +216,11 @@ public class Attacker extends Player{
 	}
 	
 	public void pickPowerUp(EnhancedThing powerup) {
-		powerup.applyTo(this);
-		this.pickThing();
+		if (this.canPickThing()) {
+			powerup.applyTo(this);
+			this.pickThing();
+			this.pickedPowerUp = true;
+		}
 	}
 	
 	public void rest() {
