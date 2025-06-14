@@ -153,6 +153,7 @@ public class Attacker extends Player{
 	public void chasePowerUp() {
 		if (this.powerUps.size() == 0) {
 			this.currentStrat = STRAT_DEFAULT;
+			return;
 		}
 		EnhancedThing targetPowerUp = this.powerUps.get(0);
 		//Safety check
