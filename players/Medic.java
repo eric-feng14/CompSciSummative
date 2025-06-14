@@ -81,23 +81,15 @@ public class Medic extends Player{
 	 * @param m - movement
 	 */
 	private void escapeMove(Movement m) {
-		System.out.println("MEDIC RUNNING");
 		int distanceCovered = 0;
 		// Caps movement at steps
 		if (m.getDistance() > this.steps)
 			m.setDistance(this.steps);
-		System.out.println("MEDIC RUNNING");
 		this.turnTo(m.getDirection());
-		System.out.println("MEDIC RUNNING");
 		// Moves if has steps
 		while (distanceCovered < m.getDistance() && this.frontIsClear() && this.steps > 0) {
 			this.move();
 			distanceCovered++;
-			System.out.println("MEDIC RUNNING PEW PEW");
-		}
-		// Moves more if it hits wall
-		if (distanceCovered < m.getDistance()) {
-			this.escapeMove(this.getEscapeMovement(this.attackerPriority, new Direction[] {this.getDirection()}));
 		}
 	}
 	
@@ -108,7 +100,6 @@ public class Medic extends Player{
 	 * @return - the movement to move
 	 */
 	private Movement getEscapeMovement(PlayerRecord[] attackers, Direction[] barredDirections) {
-		System.out.println("MEDIC RUNNING 1");
 		Movement movement = new Movement(Direction.EAST, 0);
 		
 		int[] predicted = this.sortAttackerPriorities(attackers);
@@ -138,8 +129,7 @@ public class Medic extends Player{
 				}
 			}
 			
-			System.out.println("MEDIC RUNNING 2");
-			
+		
 			// MAIN LOOP OF MOVEMENT DETERMINATION
 			
 			int runDistance = 0;			
@@ -164,9 +154,7 @@ public class Medic extends Player{
 					}
 				}
 			}
-			
-			System.out.println("MEDIC RUNNING 3");
-			
+		
 			Direction[] optimalDirections = new Direction[0];
 			
 			ArrayList<AmbiguousMovement> healPaths = this.getHealMovements();
@@ -203,7 +191,7 @@ public class Medic extends Player{
 						}
 					}
 				}
-				System.out.println("MEDIC RUNNING 3");
+	
 				tempDir = this.removeNulls(tempDir);
 				if (tempDir.length > 0) {
 					optimalDirections = tempDir;
@@ -215,15 +203,11 @@ public class Medic extends Player{
 			if (optimalDirections.length != 0) {
 				int randomDirection = (int) (Math.random() * possibleDirections.length);
 				movement = new Movement(possibleDirections[randomDirection], runDistance);
-				System.out.println("MEDIC RUNNING 5");
 			} else {
 				// Moves towards direction options
 				if (possibleDirections.length != 0) {
 					int randomDirection = (int) (Math.random() * possibleDirections.length);
-					movement = new Movement(possibleDirections[randomDirection], runDistance);
-					System.out.println("MEDIC RUNNING 5");
 				} else {
-					System.out.println("MEDIC RUNNING 5");
 					Direction direction;
 					// Gets a random direction
 					switch((int)(Math.random()*4)) {
@@ -244,7 +228,6 @@ public class Medic extends Player{
 				}
 			}
 		}
-		System.out.println("MEDIC RUNNING 5");
 		return movement;
 	}
 	
@@ -542,7 +525,6 @@ public class Medic extends Player{
 			if(d[i] != null)
 				indexNum++;
 		}
-		System.out.println("MEDIC RUNNING 4");
 		Direction[] directions = new Direction[indexNum];
 		// fills directions
 		int counter = 0;
@@ -553,8 +535,7 @@ public class Medic extends Player{
 				counter++;
 			}
 		}
-		System.out.println("MEDIC RUNNING 5");
-		
+
 		return directions;
 	}
 	
@@ -563,7 +544,6 @@ public class Medic extends Player{
 	 */
 	@Override
 	public void move() {
-		System.out.println("MEDIC RUNNING 2");
 		// Ensures enough steps
 		if(this.steps > 0) {
 			// Moves if front is clear
