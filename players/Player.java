@@ -64,42 +64,86 @@ public abstract class Player extends EnhancedBot{
 	public Player(City city, int s, int a, Direction d, int speed, String TYPE, boolean defeated) {
 		this(city, s, a, d, speed, TYPE, defeated, Player.DEFAULT_HP, null, Player.DEFAULT_DEFENCE, Player.DEFAULT_STRENGTH, Player.DEFAULT_STAMINA);
 	}
-	
+	/**
+	 * Sends signal to main using main signal
+	 */
 	public abstract void sendSignal();
 	
+	/**
+	 * Sends info
+	 * @param damageDealt - damage dealt
+	 * @param victimID - victim robot's id
+	 */
 	public void sendInfo(int damageDealt, int victimID) {};
 	
+	/**
+	 * Gets the value of a normal hit
+	 * @return - normal hit value
+	 */
 	public static int getNormalHit() {
 		return Player.NORMAL_HIT;
 	}
 
+	/**
+	 * Gets the value of a critical hit
+	 * @return - critical hit value
+	 */
 	public static int getCriticalHit() {
 		return Player.CRITICAL_HIT;
 	}
 
+	/**
+	 * Gets knockout value
+	 * @return - knockout value
+	 */
 	public static int getKnockout() {
 		return Player.KNOCKOUT;
 	}
+	
+	/**
+	 * Gets stamina 
+	 * @return - stamina
+	 */
 	public int getStamina() {
 		return stamina;
 	}
 
+	/**
+	 * sets stamina
+	 * @param stamina - the stamina of robot
+	 */
 	public void setStamina(int stamina) {
 		this.stamina = stamina;
 	}
 
+	/**
+	 * Sets defense
+	 * @param defense - defense of robot
+	 */
 	public void setDefense(int defense) {
 		this.defense = defense;
 	}
 
+	/**
+	 * set strength
+	 * @param strength - strength
+	 */
 	public void setStrength(int strength) {
 		this.strength = strength;
 	}
 
+	/**
+	 * Current target record
+	 * @return - record of current target
+	 */
 	public PlayerRecord getCurrentTarget() {
 		return currentTarget;
 	}
 
+	/**
+	 * Sets the current target
+	 * @param currentTarget - current target record
+	 */
 	public void setCurrentTarget(PlayerRecord currentTarget) {
 		this.currentTarget = currentTarget;
 	}

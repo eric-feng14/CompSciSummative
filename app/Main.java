@@ -212,7 +212,9 @@ public class Main {
 		}
 		else if (s.equals("heal")) {
 			Player targetPlayer = Main.players[targetID];
-			targetPlayer.setHp(targetPlayer.getHp() + 20);
+			if (targetPlayer != null) {
+				targetPlayer.setHp(targetPlayer.getHp() + 20);
+			}
 		}
 
 		else if (s.equals("remove")) {
