@@ -51,7 +51,7 @@ public class Main {
 		int idx = 0;
 		// Game loop
 		while (!gameEnd()) {
-			System.out.println("HP: " + Main.players[idx].getHp());
+			System.out.println("index: " + idx + ", HP: " + Main.players[idx].getHp());
 			if (!Main.players[idx].isDefeated()) {
 				Main.players[idx].performAction(Main.playerRecords, Main.powerUps);
 				Main.players[idx].sendSignal();
@@ -66,7 +66,6 @@ public class Main {
 	private static void addPowerUps(City c) {
 		for (int i = 0; i < Main.NUM_OF_POWERUPS; i++) {
 			int choice = Main.RANDOM.nextInt(3);
-			System.out.println(choice);
 			int newStreet = Main.RANDOM.nextInt(Main.STREET_SIZE), newAvenue = RANDOM.nextInt(Main.AVENUE_SIZE);
 			switch(choice) {
 			case 0: 
@@ -188,7 +187,7 @@ public class Main {
 		else if (s.equals("remove")) {
 			for (int i = 0; i < Main.powerUps.size(); i ++) {
 				if (Main.powerUps.get(i).getID() == targetID) {
-					Main.powerUps.remove(targetID);
+					Main.powerUps.remove(i);
 				}
 			}
 		}

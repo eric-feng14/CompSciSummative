@@ -230,24 +230,24 @@ public class Runner extends Player{
 				this.rest(dangerList);
 			}
 			else {
-				System.out.println("run");
+//				System.out.println("run");
 				this.runAway(dangerList);
 			}
 		}
 		else {
 			// If low stamina, rest near power-up
 			if (this.getStamina() <= 5) {
-				System.out.println("rest");
+//				System.out.println("rest");
 				this.rest(dangerList);
 			}
 			// If low health, seek medics
 			else if (this.getHp() <= 50) {
-				System.out.println("medic");
+//				System.out.println("medic");
 				this.seekMedic(dangerList);
 			}
 			else if (this.powerUps.length != 0) {
 				// Otherwise seek power-ups
-				System.out.println("power");
+//				System.out.println("power");
 				this.seekPowerUps(dangerList);
 			}
 			else {
@@ -452,7 +452,7 @@ public class Runner extends Player{
 	 */
 	public int[][] calculateMoveOptions() {
 		int speed = this.steps;
-		System.out.println("steps: " + this.steps);
+//		System.out.println("steps: " + this.steps);
 		int [][] options = new int[speed*4][2];
 
 		int currentStr = this.getStreet();
