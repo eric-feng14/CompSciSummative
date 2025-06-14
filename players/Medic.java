@@ -2,6 +2,7 @@ package players;
 import java.util.ArrayList;
 
 import app.Main;
+import app.*;
 
 import java.awt.Color;
 import playerMods.*;
@@ -612,6 +613,9 @@ public class Medic extends Player{
 			PlayerRecord target = this.runnerPriority[i];
 			if (target.getStreet() == this.getStreet() && target.getAvenue() == this.getAvenue()) {
 				Main.signal("heal", this.getPLAYER_ID(), target.getPLAYER_ID());
+				MedicTester.signal("heal", this.getPLAYER_ID(), target.getPLAYER_ID());
+				RunnerTester.signal("heal", this.getPLAYER_ID(), target.getPLAYER_ID());
+				AttackerTester.signal("heal", this.getPLAYER_ID(), target.getPLAYER_ID());
 			}
 		}
 	}
