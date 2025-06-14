@@ -43,8 +43,8 @@ public class Runner extends Player{
 		this.addStamina(1);
 
 		// Determine how many steps can be taken based on speed and stamina
-		steps = this.obtainSpeed();
-		if (steps > this.getStamina()) {
+		this.steps = this.obtainSpeed();
+		if (this.steps > this.getStamina()) {
 			this.steps = this.getStamina();
 		}
 		//System.out.println("Stam: " + this.getStamina());
@@ -103,7 +103,7 @@ public class Runner extends Player{
 	}
 
 	/**
-	 * Placeholder for signal sending functionality
+	 * Sends signal to Main to remove the picked power-up
 	 */
 	@Override
 	public void sendSignal() {
@@ -118,11 +118,11 @@ public class Runner extends Player{
 	 * @param num - Amount to increase stamina by
 	 */
 	private void addStamina(int num) {
-		if (this.getStamina() + num <= MAX_STAM) {
+		if (this.getStamina() + num <= this.MAX_STAM) {
 			this.setStamina(this.getStamina() + num);
 		}
 		else {
-			this.setStamina(MAX_STAM);
+			this.setStamina(this.MAX_STAM);
 		}
 	}
 
@@ -131,22 +131,22 @@ public class Runner extends Player{
 	 */
 	private void sortPriority() {
 		// Move self to end of priority list
-		PlayerRecord thisRecord = priorityList[this.getPLAYER_ID()];
-		priorityList[this.getPLAYER_ID()] = priorityList[priorityList.length - 1];
-		priorityList[priorityList.length - 1] = thisRecord;
+		PlayerRecord thisRecord = this.priorityList[this.getPLAYER_ID()];
+		this.priorityList[this.getPLAYER_ID()] = this.priorityList[this.priorityList.length - 1];
+		this.priorityList[this.priorityList.length - 1] = thisRecord;
 		
 		// Insertion sort for priority list
-		for (int i = 1; i < priorityList.length - 1; i ++) {
+		for (int i = 1; i < this.priorityList.length - 1; i ++) {
 			for (int j = i; j > 0; j--) {
 				// Compare by type (attackers first) and distance
-				if (((priorityList[j].getTYPE().compareTo(priorityList[j - 1].getTYPE()) < 0) 
-						|| ((priorityList[j].getTYPE().equals(priorityList[j - 1].getTYPE()) && 
-								this.calcDistance(priorityList[j]) < this.calcDistance(priorityList[j-1]))))
-						&& (!priorityList[j].isDefeated())) {
+				if (((this.priorityList[j].getTYPE().compareTo(this.priorityList[j - 1].getTYPE()) < 0) 
+						|| ((this.priorityList[j].getTYPE().equals(this.priorityList[j - 1].getTYPE()) && 
+								this.calcDistance(this.priorityList[j]) < this.calcDistance(this.priorityList[j-1]))))
+						&& (!this.priorityList[j].isDefeated())) {
 					// Swap if current should come before previous
-					PlayerRecord record = priorityList[j];
-					priorityList[j] = priorityList[j - 1];
-					priorityList[j - 1] = record;
+					PlayerRecord record = this.priorityList[j];
+					this.priorityList[j] = this.priorityList[j - 1];
+					this.priorityList[j - 1] = record;
 				}
 				else {
 					break;
@@ -257,11 +257,12 @@ public class Runner extends Player{
 	}
 
 	/**
-	 * Seeks nearby power-ups (to be implemented)
+	 * Seeks nearby power-ups 
 	 */
 	private void seekPowerUps(PlayerRecord[] dangerList) {
 		int[] bestLocation = findBestLocation(dangerList);
 		this.moveTo(bestLocation[0], bestLocation[1], true);
+		// Safety check in case there are no more power-ups
 		if (this.powerUps.length != 0) {
 			this.pickPowerUp(this.powerUps[0]);
 		}
@@ -270,15 +271,17 @@ public class Runner extends Player{
 
 
 	/**
-	 * Seeks nearby medics for healing (to be implemented)
+	 * Seeks nearby medics for healing 
 	 */
 	private void seekMedic(PlayerRecord[] dangerList) {
 		PlayerRecord[] medicList = this.findMedics();
+		// If it can reach the nearest medic within its steps
 		if (this.calcDistance(medicList[0]) <= this.steps) {
 			this.steps = this.calcDistance(medicList[0]);
 			this.moveTo(medicList[0].getStreet(), medicList[0].getAvenue(), true);
 			this.setStamina(this.getStamina() - this.steps);
 		}
+		// Otherwise just rest
 		else {
 			this.rest(dangerList);
 		}
@@ -292,6 +295,7 @@ public class Runner extends Player{
 		this.steps = 1; // Only move 1 step when resting
 		int[] bestLocation = findBestLocation(dangerList);
 		this.moveTo(bestLocation[0], bestLocation[1], true);
+		// Safety check in case there are no more power-ups
 		if (this.powerUps.length != 0) {
 			this.pickPowerUp(this.powerUps[0]);
 		}
@@ -319,7 +323,7 @@ public class Runner extends Player{
 	private PlayerRecord[] findAttackers() {
 		int numAttacker = 0;
 		// Count number of attackers
-		for (int i = 0; i < priorityList.length; i ++) {
+		for (int i = 0; i < this.priorityList.length; i ++) {
 			if(this.priorityList[i].getTYPE().equals("Attacker")) {
 				numAttacker ++;
 			}
@@ -341,7 +345,7 @@ public class Runner extends Player{
 		int firstIndex = 0;
 
 		// Count number of medics and find first index
-		for (int i = 0; i < priorityList.length; i ++) {
+		for (int i = 0; i < this.priorityList.length; i ++) {
 			if(this.priorityList[i].getTYPE().equals("Medic")) {
 				if (numMedic == 0) {
 					firstIndex = i;
@@ -353,6 +357,9 @@ public class Runner extends Player{
 		PlayerRecord[] medicList = new PlayerRecord[numMedic];
 		for (int i = 0; i < medicList.length; i ++) {
 			medicList[i] = this.priorityList[firstIndex++];
+			// Same as:
+			// medicList[i] = this.priorityList[firstIndex];
+			// firstIndex++;
 		}
 		return medicList;
 	}
@@ -362,7 +369,7 @@ public class Runner extends Player{
 	 * @param dangerList - Array of attackers
 	 */
 	private void runAway(PlayerRecord[] dangerList) {        
-		int[] bestLocation = findBestLocation(dangerList);
+		int[] bestLocation = this.findBestLocation(dangerList);
 		this.moveTo(bestLocation[0], bestLocation[1], true);
 		if (this.powerUps.length != 0) {
 			this.pickPowerUp(this.powerUps[0]);
@@ -406,8 +413,9 @@ public class Runner extends Player{
 			}
 
 			// Calculate danger at new position
-			int dangerScore = calculateDangerAt(newStr, newAve, dangers);
+			int dangerScore = this.calculateDangerAt(newStr, newAve, dangers);
 
+			// If there are more power-ups, go closer to power-ups
 			if (this.powerUps.length > 0) {
 				int distanceP = Math.abs(this.powerUps[0].getAvenue() - newAve) + 
 						Math.abs(this.powerUps[0].getStreet() - newStr);
@@ -421,12 +429,15 @@ public class Runner extends Player{
 					safestLocation[1] = newAve;
 				}
 			}
+			
+			// Otherwise, stay as far away from attackers as possible
 			else {
 				int distance = Math.abs(dangers[0].getAvenue() - newAve) + 
 						Math.abs(dangers[0].getStreet() - newStr);
 
 				int distance1 = Math.abs(dangers[0].getAvenue() - safestLocation[1]) + 
 						Math.abs(dangers[0].getStreet() - safestLocation[0]);
+				// Choose location with least danger or farthest from the nearest attacker if equal danger
 				if (dangerScore < lowestScore || (dangerScore == lowestScore && distance > distance1)) {
 					lowestScore = dangerScore;
 					safestLocation[0] = newStr;
@@ -463,7 +474,11 @@ public class Runner extends Player{
 		// Generate move options in all directions
 		for (int s = speed; s > 0; s--) {
 			// North
-			options[optionIndex++] = new int[]{currentStr + i, currentAve - s};
+			options[optionIndex++] = new int[]{currentStr + i, currentAve - s}; 
+			// Same as:
+			// options[optionIndex] = new int[]{currentStr + i, currentAve - s}; 
+			// optionIndex++;
+			
 			// East
 			options[optionIndex++] = new int[]{currentStr + s, currentAve + i};
 			// South
@@ -508,6 +523,7 @@ public class Runner extends Player{
 		if (street == 0 || street == 12) {
 			totalDanger += 300;
 		}
+		
 		// Add less danger for being near but not at edges
 		if (avenue == 1 || avenue == 22) {
 			totalDanger += 150;
@@ -522,7 +538,7 @@ public class Runner extends Player{
 	 * Resets priority list by sorting players by ID
 	 */
 	private void resetPriority() {
-		mergeSort(this.priorityList, 0, priorityList.length - 1);
+		this.mergeSort(this.priorityList, 0, this.priorityList.length - 1);
 	}
 
 	/**
@@ -531,12 +547,12 @@ public class Runner extends Player{
 	 * @param start - Starting index
 	 * @param end - Ending index
 	 */
-	private static void mergeSort(PlayerRecord[] r, int start, int end) {
+	private void mergeSort(PlayerRecord[] r, int start, int end) {
 		if (start < end) {
 			int mid = (start + end)/2;
-			mergeSort(r, start, mid);
-			mergeSort(r, mid + 1, end);
-			merge(r, start, mid, end);
+			this.mergeSort(r, start, mid);
+			this.mergeSort(r, mid + 1, end);
+			this.merge(r, start, mid, end);
 		}
 	}
 
@@ -547,7 +563,7 @@ public class Runner extends Player{
 	 * @param mid - Middle index
 	 * @param end - Ending index
 	 */
-	private static void merge(PlayerRecord[] r, int start, int mid, int end) {
+	private void merge(PlayerRecord[] r, int start, int mid, int end) {
 		PlayerRecord[] temp = new PlayerRecord[r.length];
 		int pos1 = start;
 		int pos2 = mid + 1;
@@ -576,6 +592,7 @@ public class Runner extends Player{
 	 * Only moves if the path is clear to prevent crashing
 	 */
 	public void move() {
+		// If the front is clear
 		if(this.frontIsClear()) {
 			super.move();
 		}
