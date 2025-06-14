@@ -339,7 +339,7 @@ public class Attacker extends Player{
 			}
 			
 			//if no attacker is chasing "record"
-			if (!found) {
+			if (!found && !record.isDefeated()) {
 				return record;
 			}
 		}
