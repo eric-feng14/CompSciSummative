@@ -252,7 +252,7 @@ public class Attacker extends Player{
 		int dist;
 		if (this.currentStrat == STRAT_DEFAULT || this.currentStrat == STRAT_ALTERNATE) {
 			dist = calcDistance(this.getCurrentTarget());
-		} else if (this.currentStrat == STRAT_FOCUS_POWERUP){
+		} else if (this.currentStrat == STRAT_FOCUS_POWERUP && this.powerUps.size() != 0){
 			dist = calcDistance(this.powerUps.get(0)); 
 		} else {
 			dist = 0;
