@@ -1,5 +1,8 @@
 package players;
 import java.util.ArrayList;
+
+import app.Main;
+
 import java.awt.Color;
 import playerMods.*;
 import becker.robots.*;
@@ -11,6 +14,7 @@ import powerUps.*;
  * @version 6/9/2025
  */
 public class Medic extends Player{
+	private static final int BASE_HEAL = 20, BLESSED_HEAL = 40, DIVINE_HEAL = 60, HOLY_RESSURECTION = 100;
 	private PlayerRecord[] prevPlayers;
 	private PlayerRecord[] runnerPriority, attackerPriority, medicPriority;
 	
@@ -45,6 +49,8 @@ public class Medic extends Player{
 			
 			Movement nextMovement = this.getEscapeMovement(this.attackerPriority);
 			this.escapeMove(nextMovement);
+			if (this.runnerPriority.length != 0 && this.runnerPriority != null)
+				this.moveTo(this.runnerPriority[0].getStreet(), this.runnerPriority[0].getAvenue());
 		}
 		
 		this.prevPlayers = players;
@@ -448,8 +454,10 @@ public class Medic extends Player{
 		for (int i = 0; i < players.length; i++) {
 			// Adds players to priority list
 			if (players[i].getTYPE().equals(type)) {
-				playerPriority[index] = players[i];
-				index++;
+				if (type == "Attacker" || !players[i].isDefeated()) {
+					playerPriority[index] = players[i];
+					index++;
+				}
 			}
 		}
 		
@@ -502,9 +510,10 @@ public class Medic extends Player{
 	@Override
 	public void move() {
 		// Moves if front is clear
-		if(this.frontIsClear()) {
+		if(this.frontIsClear() && this.steps > 0) {
 			super.move();
 		}
+		this.sendSignal();
 	}
 	
 	/**
@@ -547,14 +556,18 @@ public class Medic extends Player{
 	}
 
 	@Override
-	public void sendSignal() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void pickPowerUp(EnhancedThing powerup) {
 		powerup.applyTo(this);
 		this.pickThing();
+	}
+
+	@Override
+	public void sendSignal() {
+		for (int i = 0; i < this.runnerPriority.length; i++) {
+			PlayerRecord target = this.runnerPriority[i];
+			if (target.getStreet() == this.getStreet() && target.getAvenue() == this.getAvenue()) {
+				Main.signal("heal", this.getPLAYER_ID(), target.getPLAYER_ID());
+			}
+		}
 	}
 }

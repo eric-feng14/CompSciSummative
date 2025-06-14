@@ -129,6 +129,9 @@ public class EnhancedBot extends RobotSE {
 	 * @return - returns a number from 0-3 depending on the direction
 	 */
 	private int directionToInt(Direction direction) {
+		if (direction == null) {
+			return (int)(Math.random()*4);
+		}
 		// Determines number from direction
 		switch(direction) {
 		case EAST: 
