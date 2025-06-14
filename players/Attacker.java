@@ -1,6 +1,6 @@
 package players;
 import java.util.*;
-import app.Main;
+import app.*;
 import powerUps.*;
 import becker.robots.*;
 import java.awt.*;
@@ -212,10 +212,17 @@ public class Attacker extends Player{
 	public void sendSignal() {
 		if (this.currentState == STATE_FIGHT) {
 			Main.signal("attack", this.getPLAYER_ID(), this.getCurrentTarget().getPLAYER_ID());
+			AttackerTester.signal("attack", this.getPLAYER_ID(), this.getCurrentTarget().getPLAYER_ID());
+			MedicTester.signal("attack", this.getPLAYER_ID(), this.getCurrentTarget().getPLAYER_ID());
+			RunnerTester.signal("attack", this.getPLAYER_ID(), this.getCurrentTarget().getPLAYER_ID());
+			
 			this.currentState = STATE_CHASE;
 		}
 		if (this.pickedPowerUp) {
 			Main.signal("remove", this.getPLAYER_ID(), this.powerUps.get(0).getID());
+			AttackerTester.signal("remove", this.getPLAYER_ID(), this.powerUps.get(0).getID());
+			MedicTester.signal("remove", this.getPLAYER_ID(), this.powerUps.get(0).getID());
+			RunnerTester.signal("remove", this.getPLAYER_ID(), this.powerUps.get(0).getID());
 			this.pickedPowerUp = false;
 		}
 	}
