@@ -151,6 +151,9 @@ public class Attacker extends Player{
 	 * chase method to go after a powerup
 	 */
 	public void chasePowerUp() {
+		if (this.powerUps.size() == 0) {
+			this.currentStrat = STRAT_DEFAULT;
+		}
 		EnhancedThing targetPowerUp = this.powerUps.get(0);
 		//Safety check
 		if (targetPowerUp == null) {
@@ -383,12 +386,12 @@ public class Attacker extends Player{
 	private void sortAttackersByDistance() {
 		int len = this.attackers.length;
 		//Selection sort;
-		for (int i = 0; i < this.priorityList.length - 1; i++) {
-			for (int j = i + 1; j < this.priorityList.length; j++) {
+		for (int i = 0; i < len - 1; i++) {
+			for (int j = i + 1; j < len; j++) {
 				//calculate distances
 				int dist1 = calcDistance(this.attackers[j]), dist2 = calcDistance(this.attackers[i]);
 				if (dist1 < dist2) { //find the smallest distance in the rest of array
-					swapPlayerRecord(i, j, this.priorityList);
+					swapPlayerRecord(i, j, this.attackers);
 				}
 			}
 		}
