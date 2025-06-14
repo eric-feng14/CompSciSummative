@@ -11,7 +11,7 @@ import java.util.*;
  */
 public class Main {
 
-	final private static int NUM_OF_PLAYERS = 4, NUM_OF_POWERUPS = 6;
+	final private static int NUM_OF_PLAYERS = 5, NUM_OF_POWERUPS = 6;
 	final private static int STREET_SIZE = 13, AVENUE_SIZE = 24;
 	private static Player[] players = new Player[NUM_OF_PLAYERS];
 	private static PlayerRecord[] playerRecords = new PlayerRecord[players.length];
@@ -40,9 +40,9 @@ public class Main {
 
 		players[0] = new Runner(city, 4, 4, Direction.EAST);
 		players[1] = new Attacker(city, 6, 7, Direction.WEST);
-//		players[2] = new Medic(city, 8, 8, Direction.NORTH);
-		players[2] = new Attacker(city, 6, 9, Direction.SOUTH);
-		players[3] = new Runner(city, 1, 1, Direction.SOUTH);
+		players[2] = new Medic(city, 8, 8, Direction.NORTH);
+		players[3] = new Attacker(city, 6, 9, Direction.SOUTH);
+		players[4] = new Runner(city, 1, 1, Direction.SOUTH);
 		updatePlayerRecords();
 		updateTags();
 		initializePlayers();
