@@ -28,7 +28,7 @@ public class Medic extends Player{
 	 * @param d - direction
 	 */
 	public Medic (City c, int s, int a, Direction d) {
-		super(c, s, a, d, 4, "Medic", false);
+		super(c, s, a, d, 6, "Medic", false);
 		this.setColor(Color.GREEN);
 	}
 	
